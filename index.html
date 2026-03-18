@@ -389,35 +389,66 @@
       gap: 1.5rem;
     }
 
+    /* ── CREW GRID WRAPPER needs overflow visible ── */
+    .crew-grid {
+      position: relative;
+    }
+
     .glow-card {
       position: relative;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 4px;
       padding: 2px;
-      overflow: hidden;
+      overflow: visible; /* allow glow to bleed outside */
       cursor: default;
-      transition: transform 0.3s;
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+      isolation: isolate;
     }
 
-    .glow-card:hover { transform: translateY(-4px); }
+    .glow-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(201,168,76,0.4);
+      box-shadow:
+        0 0 30px rgba(201,168,76,0.15),
+        0 0 60px rgba(201,168,76,0.08),
+        0 20px 40px rgba(0,0,0,0.5);
+    }
 
+    /* inner glow that follows mouse */
     .glow-card::before {
       content: '';
       position: absolute;
-      width: 250px;
-      height: 250px;
-      background: radial-gradient(circle, rgba(201,168,76,0.12), transparent 70%);
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(201,168,76,0.18) 0%, rgba(201,168,76,0.06) 40%, transparent 70%);
       border-radius: 50%;
       pointer-events: none;
       transform: translate(-50%, -50%);
       left: var(--mx, 50%);
       top:  var(--my, 50%);
       opacity: 0;
-      transition: opacity 0.4s;
+      transition: opacity 0.3s;
+      z-index: -1;
+    }
+
+    /* outer ambient glow around entire card */
+    .glow-card::after {
+      content: '';
+      position: absolute;
+      inset: -20px;
+      background: radial-gradient(ellipse at var(--mx, 50%) var(--my, 50%),
+        rgba(201,168,76,0.12) 0%,
+        transparent 60%);
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: -2;
     }
 
     .glow-card:hover::before { opacity: 1; }
+    .glow-card:hover::after  { opacity: 1; }
 
     .glow-card__inner {
       background: var(--deep);
@@ -426,6 +457,7 @@
       position: relative;
       z-index: 1;
       text-align: center;
+      overflow: hidden; /* clip inner content only */
     }
 
     .crew-icon {
@@ -955,8 +987,8 @@
         <h2 class="section-title" style="font-family:'Cinzel Decorative',serif;font-size:2.2rem;">Set Sail Together</h2>
         <div class="section-rule"></div>
         <p class="contact-note">Collaborations, commissions, questions, or just a good conversation — the captain's door is open.</p>
-        <a href="mailto:gabe@dreadpiratestudio.com" class="contact-email">
-          gabe@dreadpiratestudio.com
+        <a href="/cdn-cgi/l/email-protection#e88f898a8da88c9a8d898c98819a899c8d9b9c9d8c8187c68b8785" class="contact-email">
+          <span class="__cf_email__" data-cfemail="93f4f2f1f6d3f7e1f6f2f7e3fae1f2e7f6e0e7e6f7fafcbdf0fcfe">[email&#160;protected]</span>
         </a>
         <p class="contact-note" style="font-size:0.85rem;">Response time: usually within 24 hours</p>
       </div>
@@ -969,13 +1001,19 @@
     <p class="footer-text">© 2026 Dread Pirate Studio &nbsp;·&nbsp; dreadpiratestudio.com &nbsp;·&nbsp; All Rights Reserved</p>
   </footer>
 
-  <script>
-    // Glow card mouse tracking
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    // Glow card mouse tracking — bleeds outside card
     document.querySelectorAll('.glow-card').forEach(card => {
       card.addEventListener('mousemove', e => {
         const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
-        card.style.setProperty('--my', ((e.clientY - r.top)  / r.height * 100) + '%');
+        const x = ((e.clientX - r.left) / r.width  * 100).toFixed(1) + '%';
+        const y = ((e.clientY - r.top)  / r.height * 100).toFixed(1) + '%';
+        card.style.setProperty('--mx', x);
+        card.style.setProperty('--my', y);
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.setProperty('--mx', '50%');
+        card.style.setProperty('--my', '50%');
       });
     });
 
@@ -984,16 +1022,4 @@
       entries.forEach(e => {
         if (e.isIntersecting) {
           e.target.style.animation = 'fadeUp 0.7s ease both';
-          observer.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.glow-card, .hold-card, .sc-card, .captain-grid').forEach(el => {
-      el.style.opacity = '0';
-      observer.observe(el);
-    });
-  </script>
-
-</body>
-</html>
+          observer.unobs
