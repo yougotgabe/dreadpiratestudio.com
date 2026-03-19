@@ -18,522 +18,128 @@
       --muted:     #6b6355;
       --border:    rgba(201,168,76,0.15);
     }
-
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--black);
-      color: var(--white);
-      font-family: 'Crimson Text', Georgia, serif;
-      font-size: 18px;
-      overflow-x: hidden;
-    }
-
-    /* ── NAV ── */
-    nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 900;
-      padding: 0 2rem;
-      height: 72px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: linear-gradient(to bottom, rgba(8,8,8,0.95), rgba(8,8,8,0.7));
-      border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(12px);
-    }
-
-    .nav-logo img { height: 44px; width: auto; }
-    .nav-logo { text-decoration: none; }
-
-    .nav-links {
-      display: flex;
-      gap: 2rem;
-      list-style: none;
-    }
-
-    .nav-links a {
-      color: var(--muted);
-      text-decoration: none;
-      font-family: 'Cinzel', serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      transition: color 0.3s;
-    }
-
-    .nav-links a:hover { color: var(--gold); }
-
-    /* ── HERO ──
-       CRITICAL: NO overflow:hidden here.
-       overflow:hidden kills the parallax movement.
-    */
-    #hero {
-      position: relative;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 80px 2rem 4rem;
-    }
-
-    .hero-bg {
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 50% 40%, rgba(201,168,76,0.06) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 40% at 50% 80%, rgba(139,26,26,0.08) 0%, transparent 60%),
-        linear-gradient(180deg, #080808 0%, #0a0c10 50%, #080808 100%);
-      z-index: 0;
-    }
-
-    .hero-vignette {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse 100% 100% at 50% 50%, transparent 30%, rgba(8,8,8,0.6) 100%);
-      z-index: 0;
-    }
-
-    /* ── PARALLAX OBJECTS ──
-       Exactly the same structure as parallax-test2.html which confirmed working.
-       .obj class = position:absolute, will-change:transform
-       JS writes transform via window.addEventListener('mousemove')
-       NO overflow:hidden anywhere near these elements.
-    */
-    .parallax-layer {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .obj {
-      position: absolute;
-      will-change: transform;
-    }
-
-    @media (max-width: 768px) { .obj { display: none; } }
-
-    /* ── HERO CONTENT ── */
-    .hero-content {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.5rem;
-      animation: fadeUp 1.2s ease both;
-    }
-
-    @keyframes fadeUp {
-      from { opacity:0; transform: translateY(30px); }
-      to   { opacity:1; transform: translateY(0); }
-    }
-
-    .hero-logo {
-      width: min(340px, 70vw);
-      filter: drop-shadow(0 0 40px rgba(201,168,76,0.3)) brightness(1.1);
-      animation: logoPulse 4s ease-in-out infinite;
-    }
-
-    @keyframes logoPulse {
-      0%,100% { filter: drop-shadow(0 0 30px rgba(201,168,76,0.25)) brightness(1.0); }
-      50%      { filter: drop-shadow(0 0 55px rgba(201,168,76,0.45)) brightness(1.2); }
-    }
-
-    .hero-tagline {
-      font-family: 'Cinzel', serif;
-      font-size: clamp(0.65rem, 2vw, 0.85rem);
-      letter-spacing: 0.4em;
-      text-transform: uppercase;
-      color: var(--gold);
-      opacity: 0.8;
-      animation: fadeUp 1.2s 0.3s ease both;
-    }
-
-    .hero-divider {
-      width: 200px;
-      height: 1px;
-      background: linear-gradient(to right, transparent, var(--gold-dim), transparent);
-      animation: fadeUp 1.2s 0.5s ease both;
-    }
-
-    .hero-desc {
-      max-width: 540px;
-      color: var(--muted);
-      font-size: 1.1rem;
-      line-height: 1.7;
-      font-style: italic;
-      animation: fadeUp 1.2s 0.6s ease both;
-    }
-
-    .hero-cta-group {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      animation: fadeUp 1.2s 0.8s ease both;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 0.7rem 2rem;
-      font-family: 'Cinzel', serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      text-decoration: none;
-      border-radius: 2px;
-      transition: all 0.3s;
-    }
-
-    .btn-gold {
-      background: var(--gold);
-      color: var(--black);
-      border: 1px solid var(--gold);
-    }
-    .btn-gold:hover { background: transparent; color: var(--gold); box-shadow: 0 0 20px var(--gold-glow); }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--gold);
-      border: 1px solid var(--gold-dim);
-    }
-    .btn-outline:hover { border-color: var(--gold); box-shadow: 0 0 20px var(--gold-glow); }
-
-    .scroll-hint {
-      position: absolute;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--muted);
-      font-family: 'Cinzel', serif;
-      font-size: 0.6rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      z-index: 2;
-      animation: fadeUp 2s 1.5s ease both;
-    }
-
-    .scroll-hint span {
-      display: block;
-      width: 1px;
-      height: 40px;
-      background: linear-gradient(to bottom, var(--gold-dim), transparent);
-      animation: scrollLine 2s ease-in-out infinite;
-    }
-
-    @keyframes scrollLine {
-      0%,100% { opacity: 0.3; }
-      50%      { opacity: 0.8; }
-    }
-
-    /* ── SECTIONS ── */
-    section { padding: 6rem 2rem; position: relative; }
-    .section-inner { max-width: 1100px; margin: 0 auto; }
-
-    .section-header { text-align: center; margin-bottom: 4rem; }
-
-    .section-label {
-      font-family: 'Cinzel', serif;
-      font-size: 0.65rem;
-      letter-spacing: 0.5em;
-      text-transform: uppercase;
-      color: var(--gold);
-      opacity: 0.7;
-      margin-bottom: 0.75rem;
-    }
-
-    .section-title {
-      font-family: 'Cinzel Decorative', serif;
-      font-size: clamp(1.6rem, 4vw, 2.8rem);
-      color: var(--white);
-      line-height: 1.2;
-    }
-
-    .section-rule {
-      width: 80px;
-      height: 1px;
-      background: linear-gradient(to right, transparent, var(--gold), transparent);
-      margin: 1rem auto;
-    }
-
-    .section-sub { color: var(--muted); font-style: italic; max-width: 500px; margin: 0 auto; }
-
-    /* ── CAPTAIN ── */
-    #captain { background: linear-gradient(180deg, var(--black) 0%, var(--deep) 50%, var(--black) 100%); }
-
-    .captain-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4rem;
-      align-items: center;
-    }
-
-    .captain-img-wrap {
-      position: relative;
-      display: flex;
-      justify-content: center;
-    }
-
-    .captain-img-wrap img {
-      width: min(260px, 100%);
-      filter: drop-shadow(0 0 40px rgba(201,168,76,0.2));
-    }
-
-    .captain-text h3 {
-      font-family: 'Cinzel Decorative', serif;
-      font-size: 1.8rem;
-      color: var(--gold);
-      margin-bottom: 0.25rem;
-    }
-
-    .captain-text .rank {
-      font-family: 'Cinzel', serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.3em;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-bottom: 1.5rem;
-    }
-
-    .captain-text p { color: var(--muted); line-height: 1.8; margin-bottom: 1rem; font-size: 1rem; }
-
-    .skills-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
-
-    .skill-tag {
-      padding: 0.3rem 0.9rem;
-      border: 1px solid var(--border);
-      font-family: 'Cinzel', serif;
-      font-size: 0.6rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--gold-dim);
-      background: rgba(201,168,76,0.04);
-      transition: all 0.3s;
-    }
-
-    .skill-tag:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-glow); }
-
-    /* ── CREW ── */
-    #crew { background: var(--black); }
-
-    .crew-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .glow-card {
-      position: relative;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 2px;
-      cursor: default;
-      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
-      isolation: isolate;
-    }
-
-    .glow-card:hover {
-      transform: translateY(-6px);
-      border-color: rgba(201,168,76,0.4);
-      box-shadow: 0 0 30px rgba(201,168,76,0.12), 0 20px 40px rgba(0,0,0,0.5);
-    }
-
-    .glow-card::before {
-      content: '';
-      position: absolute;
-      width: 300px;
-      height: 300px;
-      background: radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%);
-      border-radius: 50%;
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-      left: var(--mx, 50%);
-      top: var(--my, 50%);
-      opacity: 0;
-      transition: opacity 0.3s;
-      z-index: -1;
-    }
-
-    .glow-card:hover::before { opacity: 1; }
-
-    .glow-card__inner {
-      background: var(--deep);
-      border-radius: 2px;
-      padding: 1.5rem;
-      position: relative;
-      z-index: 1;
-      text-align: center;
-    }
-
-    .crew-icon { font-size: 1.8rem; margin-bottom: 1rem; }
-    .crew-name { font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 0.25rem; }
-    .crew-role { font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
-
-    .crew-links { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
-
-    .crew-link {
-      padding: 0.25rem 0.7rem;
-      border: 1px solid var(--border);
-      font-family: 'Cinzel', serif;
-      font-size: 0.55rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-decoration: none;
-      transition: all 0.3s;
-    }
-
-    .crew-link:hover { border-color: var(--gold); color: var(--gold); }
-
-    /* ── HOLD ── */
-    #hold { background: linear-gradient(180deg, var(--black) 0%, var(--deep) 100%); }
-
-    .hold-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
-
-    .hold-card {
-      border: 1px solid var(--border);
-      background: var(--surface);
-      border-radius: 4px;
-      overflow: hidden;
-      transition: all 0.3s;
-      text-decoration: none;
-      display: block;
-    }
-
-    .hold-card:hover { border-color: var(--gold-dim); transform: translateY(-3px); box-shadow: 0 10px 40px rgba(0,0,0,0.4); }
-
-    .hold-card-header { padding: 1.25rem 1.5rem 0; display: flex; align-items: center; gap: 0.75rem; }
-    .hold-icon { font-size: 1.5rem; }
-    .hold-label { font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); opacity: 0.7; }
-    .hold-card-body { padding: 0.75rem 1.5rem 1.5rem; }
-    .hold-card-title { font-family: 'Cinzel', serif; font-size: 1rem; color: var(--white); margin-bottom: 0.5rem; }
-    .hold-card-desc { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
-
-    /* ── VIDEO ── */
-    #video { background: linear-gradient(180deg, var(--deep) 0%, var(--black) 100%); }
-
-    .video-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
-      gap: 2rem;
-    }
-
-    @media (max-width: 600px) {
-      .video-grid { grid-template-columns: 1fr; }
-    }
-
-    .video-card {
-      border: 1px solid var(--border);
-      background: var(--surface);
-      border-radius: 4px;
-      overflow: hidden;
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-
-    .video-card:hover {
-      border-color: var(--gold-dim);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-    }
-
-    .video-embed {
-      position: relative;
-      width: 100%;
-      padding-top: 56.25%; /* 16:9 */
-    }
-
-    .video-embed iframe {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    .video-card-body {
-      padding: 1.25rem 1.5rem;
-      border-top: 1px solid var(--border);
-    }
-
-    .video-card-title {
-      font-family: 'Cinzel', serif;
-      font-size: 0.85rem;
-      color: var(--white);
-      letter-spacing: 0.05em;
-      margin-bottom: 0.4rem;
-    }
-
-    .video-card-meta {
-      font-size: 0.85rem;
-      color: var(--muted);
-      font-style: italic;
-    }
-
-    /* ── MUSIC ── */
-    #music { background: var(--black); border-top: 1px solid var(--border); }
-
-    .music-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
-
-    .sc-card { border: 1px solid var(--border); background: var(--deep); border-radius: 4px; overflow: hidden; transition: border-color 0.3s; }
-    .sc-card:hover { border-color: var(--gold-dim); }
-
-    .sc-card-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
-    .sc-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
-    .sc-title { font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.15em; color: var(--gold); text-transform: uppercase; }
-    .sc-embed iframe { display: block; width: 100%; border: none; }
-
-    /* ── CONTACT ── */
-    #contact { background: linear-gradient(180deg, var(--deep) 0%, var(--black) 100%); text-align: center; }
-
-    .contact-inner { max-width: 600px; margin: 0 auto; }
-
-    .contact-email {
-      display: inline-block;
-      margin: 2rem 0;
-      padding: 1rem 2.5rem;
-      border: 1px solid var(--gold-dim);
-      font-family: 'Cinzel', serif;
-      font-size: 0.8rem;
-      letter-spacing: 0.2em;
-      color: var(--gold);
-      text-decoration: none;
-      transition: all 0.3s;
-    }
-
-    .contact-email:hover { background: var(--gold-glow); border-color: var(--gold); box-shadow: 0 0 30px var(--gold-glow); }
-    .contact-note { color: var(--muted); font-style: italic; font-size: 1rem; }
-
-    /* ── FOOTER ── */
-    footer { border-top: 1px solid var(--border); padding: 2rem; text-align: center; background: var(--black); }
-    .footer-logo { height: 40px; margin-bottom: 1rem; filter: brightness(0.6); }
-    .footer-text { font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 768px) {
-      .captain-grid { grid-template-columns: 1fr; text-align: center; }
-      .captain-img-wrap { margin-bottom: 2rem; }
-      .skills-list { justify-content: center; }
-      .nav-links { display: none; }
+    body { background:var(--black); color:var(--white); font-family:'Crimson Text',Georgia,serif; font-size:18px; overflow-x:hidden; }
+
+    nav { position:fixed; top:0; left:0; right:0; z-index:900; padding:0 2rem; height:72px; display:flex; align-items:center; justify-content:space-between; background:linear-gradient(to bottom,rgba(8,8,8,0.95),rgba(8,8,8,0.7)); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); }
+    .nav-logo { text-decoration:none; }
+    .nav-logo img { height:44px; width:auto; }
+    .nav-links { display:flex; gap:2rem; list-style:none; }
+    .nav-links a { color:var(--muted); text-decoration:none; font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; transition:color 0.3s; }
+    .nav-links a:hover { color:var(--gold); }
+
+    #hero { position:relative; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:80px 2rem 4rem; }
+    .hero-bg { position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(201,168,76,0.06) 0%,transparent 70%),radial-gradient(ellipse 60% 40% at 50% 80%,rgba(139,26,26,0.08) 0%,transparent 60%),linear-gradient(180deg,#080808 0%,#0a0c10 50%,#080808 100%); z-index:0; }
+    .hero-vignette { position:absolute; inset:0; background:radial-gradient(ellipse 100% 100% at 50% 50%,transparent 30%,rgba(8,8,8,0.6) 100%); z-index:0; }
+
+    .parallax-layer { position:absolute; inset:0; pointer-events:none; z-index:1; }
+    .obj { position:absolute; will-change:transform; }
+    @media (max-width:768px) { .obj { display:none; } }
+
+    .hero-content { position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:1.5rem; animation:fadeUp 1.2s ease both; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+    .hero-logo { width:min(340px,70vw); filter:drop-shadow(0 0 40px rgba(201,168,76,0.3)) brightness(1.1); animation:logoPulse 4s ease-in-out infinite; }
+    @keyframes logoPulse { 0%,100% { filter:drop-shadow(0 0 30px rgba(201,168,76,0.25)) brightness(1.0); } 50% { filter:drop-shadow(0 0 55px rgba(201,168,76,0.45)) brightness(1.2); } }
+    .hero-tagline { font-family:'Cinzel',serif; font-size:clamp(0.65rem,2vw,0.85rem); letter-spacing:0.4em; text-transform:uppercase; color:var(--gold); opacity:0.8; animation:fadeUp 1.2s 0.3s ease both; }
+    .hero-divider { width:200px; height:1px; background:linear-gradient(to right,transparent,var(--gold-dim),transparent); animation:fadeUp 1.2s 0.5s ease both; }
+    .hero-desc { max-width:540px; color:var(--muted); font-size:1.1rem; line-height:1.7; font-style:italic; animation:fadeUp 1.2s 0.6s ease both; }
+    .hero-cta-group { display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; animation:fadeUp 1.2s 0.8s ease both; }
+    .btn { display:inline-block; padding:0.7rem 2rem; font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; text-decoration:none; border-radius:2px; transition:all 0.3s; }
+    .btn-gold { background:var(--gold); color:var(--black); border:1px solid var(--gold); }
+    .btn-gold:hover { background:transparent; color:var(--gold); box-shadow:0 0 20px var(--gold-glow); }
+    .btn-outline { background:transparent; color:var(--gold); border:1px solid var(--gold-dim); }
+    .btn-outline:hover { border-color:var(--gold); box-shadow:0 0 20px var(--gold-glow); }
+    .scroll-hint { position:absolute; bottom:2rem; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:0.5rem; color:var(--muted); font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; z-index:2; animation:fadeUp 2s 1.5s ease both; }
+    .scroll-hint span { display:block; width:1px; height:40px; background:linear-gradient(to bottom,var(--gold-dim),transparent); animation:scrollLine 2s ease-in-out infinite; }
+    @keyframes scrollLine { 0%,100% { opacity:0.3; } 50% { opacity:0.8; } }
+
+    section { padding:6rem 2rem; position:relative; }
+    .section-inner { max-width:1100px; margin:0 auto; }
+    .section-header { text-align:center; margin-bottom:4rem; }
+    .section-label { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.5em; text-transform:uppercase; color:var(--gold); opacity:0.7; margin-bottom:0.75rem; }
+    .section-title { font-family:'Cinzel Decorative',serif; font-size:clamp(1.6rem,4vw,2.8rem); color:var(--white); line-height:1.2; }
+    .section-rule { width:80px; height:1px; background:linear-gradient(to right,transparent,var(--gold),transparent); margin:1rem auto; }
+    .section-sub { color:var(--muted); font-style:italic; max-width:500px; margin:0 auto; }
+
+    #captain { background:linear-gradient(180deg,var(--black) 0%,var(--deep) 50%,var(--black) 100%); }
+    .captain-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; }
+    .captain-img-wrap { position:relative; display:flex; justify-content:center; }
+    .captain-img-wrap img { width:min(260px,100%); filter:drop-shadow(0 0 40px rgba(201,168,76,0.2)); }
+    .captain-text h3 { font-family:'Cinzel Decorative',serif; font-size:1.8rem; color:var(--gold); margin-bottom:0.25rem; }
+    .captain-text .rank { font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.3em; color:var(--muted); text-transform:uppercase; margin-bottom:1.5rem; }
+    .captain-text p { color:var(--muted); line-height:1.8; margin-bottom:1rem; font-size:1rem; }
+    .skills-list { display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:1.5rem; }
+    .skill-tag { padding:0.3rem 0.9rem; border:1px solid var(--border); font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--gold-dim); background:rgba(201,168,76,0.04); transition:all 0.3s; }
+    .skill-tag:hover { border-color:var(--gold); color:var(--gold); background:var(--gold-glow); }
+
+    #crew { background:var(--black); }
+    .crew-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1.5rem; }
+    .glow-card { position:relative; background:var(--surface); border:1px solid var(--border); border-radius:4px; padding:2px; cursor:default; transition:transform 0.3s,border-color 0.3s,box-shadow 0.3s; isolation:isolate; }
+    .glow-card:hover { transform:translateY(-6px); border-color:rgba(201,168,76,0.4); box-shadow:0 0 30px rgba(201,168,76,0.12),0 20px 40px rgba(0,0,0,0.5); }
+    .glow-card::before { content:''; position:absolute; width:300px; height:300px; background:radial-gradient(circle,rgba(201,168,76,0.15) 0%,transparent 70%); border-radius:50%; pointer-events:none; transform:translate(-50%,-50%); left:var(--mx,50%); top:var(--my,50%); opacity:0; transition:opacity 0.3s; z-index:-1; }
+    .glow-card:hover::before { opacity:1; }
+    .glow-card__inner { background:var(--deep); border-radius:2px; padding:1.5rem; position:relative; z-index:1; text-align:center; }
+    .crew-icon { font-size:1.8rem; margin-bottom:1rem; }
+    .crew-name { font-family:'Cinzel',serif; font-size:0.85rem; color:var(--gold); letter-spacing:0.1em; margin-bottom:0.25rem; }
+    .crew-role { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:1rem; }
+    .crew-links { display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; }
+    .crew-link { padding:0.25rem 0.7rem; border:1px solid var(--border); font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); text-decoration:none; transition:all 0.3s; }
+    .crew-link:hover { border-color:var(--gold); color:var(--gold); }
+
+    #hold { background:linear-gradient(180deg,var(--black) 0%,var(--deep) 100%); }
+    .hold-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.5rem; }
+    .hold-card { border:1px solid var(--border); background:var(--surface); border-radius:4px; overflow:hidden; transition:all 0.3s; text-decoration:none; display:block; }
+    .hold-card:hover { border-color:var(--gold-dim); transform:translateY(-3px); box-shadow:0 10px 40px rgba(0,0,0,0.4); }
+    .hold-card-header { padding:1.25rem 1.5rem 0; display:flex; align-items:center; gap:0.75rem; }
+    .hold-icon { font-size:1.5rem; }
+    .hold-label { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--gold); opacity:0.7; }
+    .hold-card-body { padding:0.75rem 1.5rem 1.5rem; }
+    .hold-card-title { font-family:'Cinzel',serif; font-size:1rem; color:var(--white); margin-bottom:0.5rem; }
+    .hold-card-desc { font-size:0.9rem; color:var(--muted); line-height:1.6; }
+
+    #video { background:linear-gradient(180deg,var(--deep) 0%,var(--black) 100%); }
+    .video-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(480px,1fr)); gap:2rem; }
+    @media (max-width:600px) { .video-grid { grid-template-columns:1fr; } }
+    .video-card { border:1px solid var(--border); background:var(--surface); border-radius:4px; overflow:hidden; transition:border-color 0.3s,box-shadow 0.3s; }
+    .video-card:hover { border-color:var(--gold-dim); box-shadow:0 10px 40px rgba(0,0,0,0.5); }
+    .video-embed { position:relative; width:100%; padding-top:56.25%; }
+    .video-embed iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:none; }
+    .video-card-body { padding:1.25rem 1.5rem; border-top:1px solid var(--border); }
+    .video-card-title { font-family:'Cinzel',serif; font-size:0.85rem; color:var(--white); letter-spacing:0.05em; margin-bottom:0.4rem; }
+    .video-card-meta { font-size:0.85rem; color:var(--muted); font-style:italic; }
+
+    #music { background:var(--black); border-top:1px solid var(--border); }
+    .music-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:1.5rem; }
+    .sc-card { border:1px solid var(--border); background:var(--deep); border-radius:4px; overflow:hidden; transition:border-color 0.3s; }
+    .sc-card:hover { border-color:var(--gold-dim); }
+    .sc-card-header { padding:1rem 1.25rem; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:0.75rem; }
+    .sc-dot { width:8px; height:8px; border-radius:50%; background:var(--gold); flex-shrink:0; }
+    .sc-title { font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.15em; color:var(--gold); text-transform:uppercase; }
+    .sc-embed iframe { display:block; width:100%; border:none; }
+
+    #contact { background:linear-gradient(180deg,var(--deep) 0%,var(--black) 100%); text-align:center; }
+    .contact-inner { max-width:600px; margin:0 auto; }
+    .contact-email { display:inline-block; margin:2rem 0; padding:1rem 2.5rem; border:1px solid var(--gold-dim); font-family:'Cinzel',serif; font-size:0.8rem; letter-spacing:0.2em; color:var(--gold); text-decoration:none; transition:all 0.3s; }
+    .contact-email:hover { background:var(--gold-glow); border-color:var(--gold); box-shadow:0 0 30px var(--gold-glow); }
+    .contact-note { color:var(--muted); font-style:italic; font-size:1rem; }
+
+    footer { border-top:1px solid var(--border); padding:2rem; text-align:center; background:var(--black); }
+    .footer-logo { height:40px; margin-bottom:1rem; filter:brightness(0.6); }
+    .footer-text { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; color:var(--muted); text-transform:uppercase; }
+
+    @media (max-width:768px) {
+      .captain-grid { grid-template-columns:1fr; text-align:center; }
+      .captain-img-wrap { margin-bottom:2rem; }
+      .skills-list { justify-content:center; }
+      .nav-links { display:none; }
     }
   </style>
 </head>
 <body>
 
-  <!-- NAV -->
   <nav>
-    <a href="#hero" class="nav-logo">
-      <img src="logo-horizontal.png" alt="Dread Pirate Studio">
-    </a>
+    <a href="#hero" class="nav-logo"><img src="logo-horizontal.png" alt="Dread Pirate Studio"></a>
     <ul class="nav-links">
       <li><a href="#captain">The Captain</a></li>
       <li><a href="#crew">The Crew</a></li>
@@ -544,22 +150,12 @@
     </ul>
   </nav>
 
-  <!-- HERO -->
   <section id="hero">
     <div class="hero-bg"></div>
     <div class="hero-vignette"></div>
 
-    <!--
-      PARALLAX LAYER
-      Identical structure to parallax-test2.html which confirmed working.
-      .obj elements use inline style for position.
-      data-speed = travel distance in px
-      data-dir = 1 (follows mouse) or -1 (opposes mouse)
-    -->
-    <div class="parallax-layer">
-
-      <!-- Skull — top left — opposes mouse slowly -->
-      <div class="obj" style="top:10%; left:4%;" data-speed="40" data-dir="-1">
+    <div class="parallax-layer" id="px">
+      <div class="obj" style="top:10%;left:4%;" data-speed="40" data-dir="-1">
         <svg width="110" height="110" viewBox="0 0 100 100">
           <ellipse cx="50" cy="42" rx="30" ry="28" fill="#c9a84c" opacity="0.2"/>
           <ellipse cx="38" cy="44" rx="7" ry="8" fill="#080808"/>
@@ -569,9 +165,7 @@
           <rect x="57" y="62" width="8" height="6" rx="1" fill="#c9a84c" opacity="0.2"/>
         </svg>
       </div>
-
-      <!-- Crossed swords — top right — follows mouse fast -->
-      <div class="obj" style="top:8%; right:5%;" data-speed="60" data-dir="1">
+      <div class="obj" style="top:8%;right:5%;" data-speed="60" data-dir="1">
         <svg width="100" height="100" viewBox="0 0 100 100">
           <line x1="10" y1="10" x2="90" y2="90" stroke="#c9a84c" stroke-width="4" opacity="0.25" stroke-linecap="round"/>
           <line x1="90" y1="10" x2="10" y2="90" stroke="#c9a84c" stroke-width="4" opacity="0.25" stroke-linecap="round"/>
@@ -579,9 +173,7 @@
           <polygon points="90,10 82,5 95,18" fill="#c9a84c" opacity="0.3"/>
         </svg>
       </div>
-
-      <!-- Compass — mid right — opposes mouse -->
-      <div class="obj" style="top:42%; right:3%;" data-speed="30" data-dir="-1">
+      <div class="obj" style="top:42%;right:3%;" data-speed="30" data-dir="-1">
         <svg width="80" height="80" viewBox="0 0 100 100">
           <circle cx="50" cy="50" r="44" stroke="#c9a84c" stroke-width="1.5" fill="none" opacity="0.2"/>
           <polygon points="50,10 54,46 50,42 46,46" fill="#c9a84c" opacity="0.3"/>
@@ -591,9 +183,7 @@
           <circle cx="50" cy="50" r="5" fill="#c9a84c" opacity="0.35"/>
         </svg>
       </div>
-
-      <!-- Anchor — bottom left — follows mouse -->
-      <div class="obj" style="bottom:14%; left:5%;" data-speed="50" data-dir="1">
+      <div class="obj" style="bottom:14%;left:5%;" data-speed="50" data-dir="1">
         <svg width="70" height="85" viewBox="0 0 70 85">
           <circle cx="35" cy="14" r="10" stroke="#c9a84c" stroke-width="2.5" fill="none" opacity="0.25"/>
           <line x1="35" y1="24" x2="35" y2="70" stroke="#c9a84c" stroke-width="2.5" opacity="0.25" stroke-linecap="round"/>
@@ -604,9 +194,7 @@
           <path d="M54 62 Q60 72 66 62" stroke="#c9a84c" stroke-width="2" fill="none" opacity="0.25"/>
         </svg>
       </div>
-
-      <!-- Ship wheel — bottom right — opposes mouse fast -->
-      <div class="obj" style="bottom:8%; right:4%;" data-speed="70" data-dir="-1">
+      <div class="obj" style="bottom:8%;right:4%;" data-speed="70" data-dir="-1">
         <svg width="100" height="100" viewBox="0 0 100 100">
           <circle cx="50" cy="50" r="44" stroke="#c9a84c" stroke-width="2" fill="none" opacity="0.2"/>
           <circle cx="50" cy="50" r="12" stroke="#c9a84c" stroke-width="2.5" fill="none" opacity="0.3"/>
@@ -620,9 +208,7 @@
           <line x1="41" y1="59" x2="19" y2="81" stroke="#c9a84c" stroke-width="2" opacity="0.2"/>
         </svg>
       </div>
-
-      <!-- Dot cluster — mid — follows mouse very fast -->
-      <div class="obj" style="top:35%; left:35%;" data-speed="80" data-dir="1">
+      <div class="obj" style="top:35%;left:35%;" data-speed="80" data-dir="1">
         <svg width="50" height="30" viewBox="0 0 50 30">
           <circle cx="5"  cy="15" r="3.5" fill="#c9a84c" opacity="0.35"/>
           <circle cx="18" cy="8"  r="2.5" fill="#c9a84c" opacity="0.25"/>
@@ -630,23 +216,18 @@
           <circle cx="42" cy="10" r="2"   fill="#c9a84c" opacity="0.3"/>
         </svg>
       </div>
-
-      <!-- Wave lines — bottom mid — opposes slowly -->
-      <div class="obj" style="bottom:20%; left:22%;" data-speed="20" data-dir="-1">
+      <div class="obj" style="bottom:20%;left:22%;" data-speed="20" data-dir="-1">
         <svg width="200" height="25" viewBox="0 0 200 25">
-          <path d="M0 12 Q25 4 50 12 Q75 20 100 12 Q125 4 150 12 Q175 20 200 12"
-            stroke="#c9a84c" stroke-width="1.5" fill="none" opacity="0.18"/>
+          <path d="M0 12 Q25 4 50 12 Q75 20 100 12 Q125 4 150 12 Q175 20 200 12" stroke="#c9a84c" stroke-width="1.5" fill="none" opacity="0.18"/>
         </svg>
       </div>
-
     </div>
-    <!-- END PARALLAX LAYER -->
 
     <div class="hero-content">
       <img src="logo.png" alt="Dread Pirate Studio" class="hero-logo">
-      <p class="hero-tagline">Music &nbsp;·&nbsp; Technology &nbsp;·&nbsp; Creation</p>
+      <p class="hero-tagline">Music &nbsp;&middot;&nbsp; Technology &nbsp;&middot;&nbsp; Creation</p>
       <div class="hero-divider"></div>
-      <p class="hero-desc">A creative collective built at the intersection of craft and technology. Music, maker projects, gaming, content — all sailing under one flag.</p>
+      <p class="hero-desc">A creative collective built at the intersection of craft and technology. Music, maker projects, gaming, content &mdash; all sailing under one flag.</p>
       <div class="hero-cta-group">
         <a href="#hold" class="btn btn-gold">Explore the Hold</a>
         <a href="#crew" class="btn btn-outline">Meet the Crew</a>
@@ -659,7 +240,6 @@
     </div>
   </section>
 
-  <!-- CAPTAIN -->
   <section id="captain">
     <div class="section-inner">
       <div class="section-header">
@@ -674,8 +254,8 @@
         <div class="captain-text">
           <h3>Gabe Nelson</h3>
           <p class="rank">Captain &nbsp;/&nbsp; YouGotGabe</p>
-          <p>Builder, musician, maker, and technologist based in Willmar, Minnesota. The creative force behind Dread Pirate Studio — a brand that refuses to be defined by a single discipline.</p>
-          <p>From electronics and 3D printing to music production, video creation, automation systems, and content — if it can be built, it gets built.</p>
+          <p>Builder, musician, maker, and technologist based in Willmar, Minnesota. The creative force behind Dread Pirate Studio &mdash; a brand that refuses to be defined by a single discipline.</p>
+          <p>From electronics and 3D printing to music production, video creation, automation systems, and content &mdash; if it can be built, it gets built.</p>
           <div class="skills-list">
             <span class="skill-tag">Music Production</span>
             <span class="skill-tag">Electronics</span>
@@ -691,7 +271,6 @@
     </div>
   </section>
 
-  <!-- CREW -->
   <section id="crew">
     <div class="section-inner">
       <div class="section-header">
@@ -701,56 +280,50 @@
         <p class="section-sub">Every great voyage needs a worthy crew.</p>
       </div>
       <div class="crew-grid">
-
         <div class="glow-card">
           <div class="glow-card__inner">
-            <div class="crew-icon">🎸</div>
+            <div class="crew-icon">&#127928;</div>
             <p class="crew-name">OT</p>
-            <p class="crew-role">Music &nbsp;·&nbsp; Performance</p>
+            <p class="crew-role">Music &nbsp;&middot;&nbsp; Performance</p>
             <div class="crew-links">
               <a href="https://soundcloud.com/maderightband" target="_blank" class="crew-link">Made Right</a>
             </div>
           </div>
         </div>
-
         <div class="glow-card">
           <div class="glow-card__inner">
-            <div class="crew-icon">🎬</div>
+            <div class="crew-icon">&#127916;</div>
             <p class="crew-name">Zach</p>
-            <p class="crew-role">Video &nbsp;·&nbsp; Drone</p>
+            <p class="crew-role">Video &nbsp;&middot;&nbsp; Drone</p>
             <div class="crew-links">
               <span class="crew-link" style="opacity:0.4;cursor:default;">Coming Soon</span>
             </div>
           </div>
         </div>
-
         <div class="glow-card">
           <div class="glow-card__inner">
-            <div class="crew-icon">🎤</div>
+            <div class="crew-icon">&#127908;</div>
             <p class="crew-name">Abram</p>
-            <p class="crew-role">Original Music &nbsp;·&nbsp; Vocals</p>
+            <p class="crew-role">Original Music &nbsp;&middot;&nbsp; Vocals</p>
             <div class="crew-links">
               <span class="crew-link" style="opacity:0.4;cursor:default;">Coming Soon</span>
             </div>
           </div>
         </div>
-
         <div class="glow-card">
           <div class="glow-card__inner">
-            <div class="crew-icon">🎨</div>
+            <div class="crew-icon">&#127912;</div>
             <p class="crew-name">Jade</p>
-            <p class="crew-role">Creative &nbsp;·&nbsp; Collab</p>
+            <p class="crew-role">Creative &nbsp;&middot;&nbsp; Collab</p>
             <div class="crew-links">
               <span class="crew-link" style="opacity:0.4;cursor:default;">Coming Soon</span>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </section>
 
-  <!-- THE HOLD -->
   <section id="hold">
     <div class="section-inner">
       <div class="section-header">
@@ -760,60 +333,52 @@
         <p class="section-sub">Content, projects, and things we've made.</p>
       </div>
       <div class="hold-grid">
-
         <a href="https://www.youtube.com/@DreadPirateStudio" target="_blank" class="hold-card">
-          <div class="hold-card-header"><span class="hold-icon">🎬</span><span class="hold-label">Video</span></div>
+          <div class="hold-card-header"><span class="hold-icon">&#127916;</span><span class="hold-label">Video</span></div>
           <div class="hold-card-body">
             <h3 class="hold-card-title">YouTube Channel</h3>
             <p class="hold-card-desc">Live sessions, gaming footage, travel videos, and creative projects.</p>
           </div>
         </a>
-
         <a href="https://soundcloud.com/yougotgabe" target="_blank" class="hold-card">
-          <div class="hold-card-header"><span class="hold-icon">🎵</span><span class="hold-label">Music</span></div>
+          <div class="hold-card-header"><span class="hold-icon">&#127925;</span><span class="hold-label">Music</span></div>
           <div class="hold-card-body">
             <h3 class="hold-card-title">YouGotGabe on SoundCloud</h3>
             <p class="hold-card-desc">Original tracks, covers, and audio experiments.</p>
           </div>
         </a>
-
         <a href="https://soundcloud.com/maderightband" target="_blank" class="hold-card">
-          <div class="hold-card-header"><span class="hold-icon">🎸</span><span class="hold-label">Band</span></div>
+          <div class="hold-card-header"><span class="hold-icon">&#127928;</span><span class="hold-label">Band</span></div>
           <div class="hold-card-body">
             <h3 class="hold-card-title">Made Right</h3>
             <p class="hold-card-desc">Band recordings and live performance content from Gabe &amp; OT.</p>
           </div>
         </a>
-
         <a href="https://soundcloud.com/asabovesobelowmusic" target="_blank" class="hold-card">
-          <div class="hold-card-header"><span class="hold-icon">🌊</span><span class="hold-label">Music</span></div>
+          <div class="hold-card-header"><span class="hold-icon">&#127754;</span><span class="hold-label">Music</span></div>
           <div class="hold-card-body">
             <h3 class="hold-card-title">As Above So Below</h3>
             <p class="hold-card-desc">Deeper waters. Ambient and experimental audio works.</p>
           </div>
         </a>
-
         <div class="hold-card" style="cursor:default;">
-          <div class="hold-card-header"><span class="hold-icon">⚙️</span><span class="hold-label">Tech</span></div>
+          <div class="hold-card-header"><span class="hold-icon">&#9881;&#65039;</span><span class="hold-label">Tech</span></div>
           <div class="hold-card-body">
             <h3 class="hold-card-title">Maker Projects</h3>
             <p class="hold-card-desc">Electronics, 3D printing, WLED builds, and automation work. Coming soon.</p>
           </div>
         </div>
-
         <div class="hold-card" style="cursor:default;">
-          <div class="hold-card-header"><span class="hold-icon">🔌</span><span class="hold-label">Services</span></div>
+          <div class="hold-card-header"><span class="hold-icon">&#128268;</span><span class="hold-label">Services</span></div>
           <div class="hold-card-body">
             <h3 class="hold-card-title">Integrations &amp; Automation</h3>
             <p class="hold-card-desc">Technology solutions with a pirate's sense of adventure. Coming soon.</p>
           </div>
         </div>
-
       </div>
     </div>
   </section>
 
-  <!-- VIDEO -->
   <section id="video">
     <div class="section-inner">
       <div class="section-header">
@@ -822,44 +387,29 @@
         <div class="section-rule"></div>
         <p class="section-sub">Live recordings and original performances from the crew.</p>
       </div>
-
       <div class="video-grid">
-
         <div class="video-card">
           <div class="video-embed">
-            <iframe
-              src="https://www.youtube.com/embed/aXe3K5saepk"
-              title="Born to Do This — Dan Reeb"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen>
-            </iframe>
+            <iframe src="https://www.youtube.com/embed/aXe3K5saepk" title="Born to Do This - Dan Reeb" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
           </div>
           <div class="video-card-body">
             <p class="video-card-title">Born to Do This</p>
-            <p class="video-card-meta">Dan Reeb &nbsp;·&nbsp; Recorded by Dread Pirate Studio</p>
+            <p class="video-card-meta">Dan Reeb &nbsp;&middot;&nbsp; Recorded by Dread Pirate Studio</p>
           </div>
         </div>
-
         <div class="video-card">
           <div class="video-embed">
-            <iframe
-              src="https://www.youtube.com/embed/CEwUJDqtFWw"
-              title="New Old Friend — Sam Murphy"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen>
-            </iframe>
+            <iframe src="https://www.youtube.com/embed/CEwUJDqtFWw" title="New Old Friend - Sam Murphy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
           </div>
           <div class="video-card-body">
             <p class="video-card-title">New Old Friend</p>
-            <p class="video-card-meta">Sam Murphy &nbsp;·&nbsp; Recorded by Dread Pirate Studio</p>
+            <p class="video-card-meta">Sam Murphy &nbsp;&middot;&nbsp; Recorded by Dread Pirate Studio</p>
           </div>
         </div>
-
       </div>
     </div>
   </section>
 
-  <!-- MUSIC -->
   <section id="music">
     <div class="section-inner">
       <div class="section-header">
@@ -868,98 +418,103 @@
         <div class="section-rule"></div>
       </div>
       <div class="music-grid">
-
         <div class="sc-card">
           <div class="sc-card-header"><div class="sc-dot"></div><span class="sc-title">YouGotGabe</span></div>
           <div class="sc-embed">
-            <iframe height="166" scrolling="no" allow="autoplay"
-              src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/yougotgabe&color=%23c9a84c&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
-            </iframe>
+            <iframe height="166" scrolling="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/yougotgabe&color=%23c9a84c&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false"></iframe>
           </div>
         </div>
-
         <div class="sc-card">
           <div class="sc-card-header"><div class="sc-dot"></div><span class="sc-title">Made Right</span></div>
           <div class="sc-embed">
-            <iframe height="166" scrolling="no" allow="autoplay"
-              src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/maderightband&color=%23c9a84c&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
-            </iframe>
+            <iframe height="166" scrolling="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/maderightband&color=%23c9a84c&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false"></iframe>
           </div>
         </div>
-
         <div class="sc-card">
           <div class="sc-card-header"><div class="sc-dot"></div><span class="sc-title">As Above So Below</span></div>
           <div class="sc-embed">
-            <iframe height="166" scrolling="no" allow="autoplay"
-              src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/asabovesobelowmusic&color=%23c9a84c&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
-            </iframe>
+            <iframe height="166" scrolling="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/asabovesobelowmusic&color=%23c9a84c&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false"></iframe>
           </div>
         </div>
-
       </div>
     </div>
   </section>
 
-  <!-- CONTACT -->
   <section id="contact">
     <div class="section-inner">
       <div class="contact-inner">
         <p class="section-label">Join the Crew</p>
         <h2 class="section-title">Set Sail Together</h2>
         <div class="section-rule"></div>
-        <p class="contact-note">Collaborations, commissions, questions, or just a good conversation — the captain's door is open.</p>
+        <p class="contact-note">Collaborations, commissions, questions, or just a good conversation &mdash; the captain's door is open.</p>
         <a href="mailto:gabe@dreadpiratestudio.com" class="contact-email">gabe@dreadpiratestudio.com</a>
         <p class="contact-note" style="font-size:0.85rem;">Response time: usually within 24 hours</p>
       </div>
     </div>
   </section>
 
-  <!-- FOOTER -->
   <footer>
     <img src="icon.png" alt="DPS" class="footer-logo">
-    <p class="footer-text">© 2026 Dread Pirate Studio &nbsp;·&nbsp; dreadpiratestudio.com &nbsp;·&nbsp; All Rights Reserved</p>
+    <p class="footer-text">&copy; 2026 Dread Pirate Studio &nbsp;&middot;&nbsp; dreadpiratestudio.com &nbsp;&middot;&nbsp; All Rights Reserved</p>
   </footer>
 
-  <script data-cfasync="false">
-    // ── PARALLAX ──
-    // Exact same logic as parallax-test2.html which confirmed working.
-    // Key: window.addEventListener (not element), NO overflow:hidden on hero.
-    const objs = document.querySelectorAll('.obj');
-    let tX = 0, tY = 0, cX = 0, cY = 0;
+  <script>
+    // PARALLAX - no backticks, no arrow functions, no const/let
+    // Plain ES5 to survive any Cloudflare transformation
+    var pObjs = document.querySelectorAll('.obj');
+    var tX = 0, tY = 0, cX = 0, cY = 0;
 
-    window.addEventListener('mousemove', e => {
+    window.addEventListener('mousemove', function(e) {
       tX = (e.clientX - window.innerWidth  / 2) / (window.innerWidth  / 2);
       tY = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
     });
 
-    (function tick() {
+    function tick() {
       cX += (tX - cX) * 0.08;
       cY += (tY - cY) * 0.08;
-      objs.forEach(el => {
-        const spd = parseFloat(el.dataset.speed);
-        const dir = parseFloat(el.dataset.dir);
-        el.style.transform = `translate(${cX * spd * dir}px, ${cY * spd * dir}px)`;
-      });
+      for (var i = 0; i < pObjs.length; i++) {
+        var spd = parseFloat(pObjs[i].getAttribute('data-speed'));
+        var dir = parseFloat(pObjs[i].getAttribute('data-dir'));
+        pObjs[i].style.transform = 'translate(' + (cX * spd * dir) + 'px, ' + (cY * spd * dir) + 'px)';
+      }
       requestAnimationFrame(tick);
-    })();
+    }
+    requestAnimationFrame(tick);
 
-    // ── GLOW CARDS ──
-    document.querySelectorAll('.glow-card').forEach(card => {
-      card.addEventListener('mousemove', e => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', ((e.clientX - r.left) / r.width  * 100).toFixed(1) + '%');
-        card.style.setProperty('--my', ((e.clientY - r.top)  / r.height * 100).toFixed(1) + '%');
-      });
-      card.addEventListener('mouseleave', () => {
-        card.style.setProperty('--mx', '50%');
-        card.style.setProperty('--my', '50%');
-      });
-    });
+    // GLOW CARDS
+    var cards = document.querySelectorAll('.glow-card');
+    for (var c = 0; c < cards.length; c++) {
+      (function(card) {
+        card.addEventListener('mousemove', function(e) {
+          var r = card.getBoundingClientRect();
+          card.style.setProperty('--mx', ((e.clientX - r.left) / r.width  * 100).toFixed(1) + '%');
+          card.style.setProperty('--my', ((e.clientY - r.top)  / r.height * 100).toFixed(1) + '%');
+        });
+        card.addEventListener('mouseleave', function() {
+          card.style.setProperty('--mx', '50%');
+          card.style.setProperty('--my', '50%');
+        });
+      })(cards[c]);
+    }
 
-    // ── SCROLL REVEAL ──
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.style.opacity = '1';
-          e.target.style.animation = 'fadeUp 0.7s ease both';
-         
+    // SCROLL REVEAL
+    if ('IntersectionObserver' in window) {
+      var revealEls = document.querySelectorAll('.glow-card, .hold-card, .sc-card, .video-card');
+      var obs = new IntersectionObserver(function(entries) {
+        for (var e = 0; e < entries.length; e++) {
+          if (entries[e].isIntersecting) {
+            entries[e].target.style.opacity = '1';
+            entries[e].target.style.animation = 'fadeUp 0.7s ease both';
+            obs.unobserve(entries[e].target);
+          }
+        }
+      }, { threshold: 0.1 });
+      for (var r = 0; r < revealEls.length; r++) {
+        revealEls[r].style.opacity = '0';
+        obs.observe(revealEls[r]);
+      }
+    }
+  </script>
+
+</body>
+</html>
