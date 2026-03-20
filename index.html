@@ -1280,6 +1280,11 @@
     <iframe id="sap-widget-frame" class="sap-hidden-frame" title="Hidden site audio player" allow="autoplay"></iframe>
   </div>
 
+
+<script>
+  window.SITE_AUDIO_PLAYLIST_URL = 'https://soundcloud.com/yougotgabe/sets/dread-pirate-studio';
+</script>
+
 <script src="https://w.soundcloud.com/player/api.js"></script>
 <script>
 (function() {
@@ -1292,33 +1297,15 @@
     var nextBtn = document.getElementById('sap-next');
     var dragHandle = document.getElementById('sap-drag-handle');
     var frame = document.getElementById('sap-widget-frame');
-    var cards = document.querySelectorAll('#music .sc-card');
-    if (!playerEl || !titleEl || !prevBtn || !playBtn || !nextBtn || !dragHandle || !frame || !cards.length) { return; }
+    if (!playerEl || !titleEl || !prevBtn || !playBtn || !nextBtn || !dragHandle || !frame) { return; }
 
-    var queue = [];
-    for (var i = 0; i < cards.length; i++) {
-      var iframe = cards[i].querySelector('.sc-embed iframe');
-      var titleNode = cards[i].querySelector('.sc-title');
-      var src = iframe ? (iframe.getAttribute('src') || '') : '';
-      var trackUrl = '';
-      try {
-        trackUrl = decodeURIComponent((src.split('url=')[1] || '').split('&')[0] || '');
-      } catch (err) {
-        trackUrl = '';
-      }
-      if (trackUrl) {
-        queue.push({ url: trackUrl, title: titleNode ? titleNode.textContent.replace(/\s+/g, ' ').trim() : 'SoundCloud' });
-      }
-    }
-    if (!queue.length) { return; }
+    var PLAYLIST_URL = window.SITE_AUDIO_PLAYLIST_URL || 'https://soundcloud.com/yougotgabe/sets/dread-pirate-studio';
+    var widget = null;
+    var isPlaying = false;
 
     function buildSrc(url, autoPlay) {
       return 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) + '&color=%23c9a84c&auto_play=' + (autoPlay ? 'true' : 'false') + '&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false';
     }
-
-    var index = 0;
-    var isPlaying = false;
-    var widget = null;
 
     function refreshButton() {
       playBtn.textContent = isPlaying ? '❚❚' : '▶';
@@ -1326,67 +1313,92 @@
     }
 
     function refreshTitle(fallback) {
-      if (!widget) { titleEl.textContent = fallback || queue[index].title; return; }
+      if (!widget) {
+        titleEl.textContent = fallback || 'Dread Pirate Studio Playlist';
+        return;
+      }
       widget.getCurrentSound(function(sound) {
-        var out = fallback || queue[index].title;
-        if (sound && sound.title) { out = sound.title; }
+        var out = fallback || 'Dread Pirate Studio Playlist';
+        if (sound && sound.title) {
+          out = sound.user && sound.user.username ? (sound.title + ' — ' + sound.user.username) : sound.title;
+        }
         titleEl.textContent = out;
+      });
+    }
+
+    function syncPausedState() {
+      if (!widget) { return; }
+      widget.isPaused(function(paused) {
+        isPlaying = !paused;
+        refreshButton();
       });
     }
 
     function bindWidgetEvents() {
       if (!widget) { return; }
       widget.bind(SC.Widget.Events.READY, function() {
-        refreshTitle(queue[index].title);
+        syncPausedState();
+        refreshTitle('Dread Pirate Studio Playlist');
       });
       widget.bind(SC.Widget.Events.PLAY, function() {
         isPlaying = true;
         refreshButton();
-        refreshTitle(queue[index].title);
+        refreshTitle();
       });
       widget.bind(SC.Widget.Events.PAUSE, function() {
         isPlaying = false;
         refreshButton();
+        refreshTitle();
       });
       widget.bind(SC.Widget.Events.FINISH, function() {
-        goTo(index + 1, true);
+        setTimeout(function() {
+          syncPausedState();
+          refreshTitle();
+        }, 120);
+      });
+      widget.bind(SC.Widget.Events.PLAY_PROGRESS, function() {
+        refreshTitle();
       });
     }
 
-    function loadWidget(idx, autoplay) {
-      index = (idx + queue.length) % queue.length;
-      titleEl.textContent = queue[index].title;
-      if (!widget) {
-        frame.src = buildSrc(queue[index].url, autoplay);
-        widget = SC.Widget(frame);
-        bindWidgetEvents();
-        isPlaying = !!autoplay;
-        refreshButton();
-        return;
-      }
-      widget.load(queue[index].url, {
-        auto_play: !!autoplay,
-        color: '#c9a84c',
-        hide_related: true,
-        show_comments: false,
-        show_user: true,
-        show_reposts: false,
-        show_teaser: false,
-        visual: false
-      });
-      isPlaying = !!autoplay;
+    function initWidget() {
+      frame.src = buildSrc(PLAYLIST_URL, false);
+      widget = SC.Widget(frame);
+      bindWidgetEvents();
+      titleEl.textContent = 'Dread Pirate Studio Playlist';
       refreshButton();
-      setTimeout(function() { refreshTitle(queue[index].title); }, 350);
     }
 
-    function goTo(idx, autoplay) { loadWidget(idx, autoplay); }
+    prevBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (!widget) { return; }
+      widget.prev();
+      setTimeout(function() {
+        if (isPlaying) { widget.play(); }
+        refreshTitle();
+      }, 180);
+    });
 
-    prevBtn.addEventListener('click', function(e) { e.stopPropagation(); goTo(index - 1, isPlaying); });
-    nextBtn.addEventListener('click', function(e) { e.stopPropagation(); goTo(index + 1, isPlaying); });
+    nextBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (!widget) { return; }
+      widget.next();
+      setTimeout(function() {
+        if (isPlaying) { widget.play(); }
+        refreshTitle();
+      }, 180);
+    });
+
     playBtn.addEventListener('click', function(e) {
       e.stopPropagation();
-      if (!widget) { loadWidget(index, true); return; }
-      if (isPlaying) { widget.pause(); } else { widget.play(); }
+      if (!widget) { return; }
+      widget.isPaused(function(paused) {
+        if (paused) {
+          widget.play();
+        } else {
+          widget.pause();
+        }
+      });
     });
 
     var drag = { active: false, startX: 0, startY: 0, originX: 0, originY: 0 };
@@ -1433,8 +1445,7 @@
       if (playerEl.style.left) { pinToViewport(rect.left, rect.top); }
     });
 
-    loadWidget(0, false);
-    refreshButton();
+    initWidget();
   }
 
   if (document.readyState === 'loading') {
