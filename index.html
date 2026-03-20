@@ -256,14 +256,6 @@
       z-index: 2;
       pointer-events: none;
     }
-    .mobile-cannon-kicker {
-      font-family: 'Cinzel', serif;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      font-size: 0.66rem;
-      color: rgba(201,168,76,0.92);
-      margin-bottom: 0.85rem;
-    }
     .mobile-cannon-title {
       font-family: 'Cinzel Decorative', serif;
       font-size: clamp(1.45rem, 7vw, 2.4rem);
@@ -518,9 +510,8 @@
   <section id="mobile-cannon-section" aria-label="Cinematic introduction">
     <div class="mobile-cannon-wrap">
       <div class="mobile-cannon-copy">
-        <p class="mobile-cannon-kicker">Cinematic</p>
-        <h2 class="mobile-cannon-title"></h2>
-        <p class="mobile-cannon-sub"></p>
+        <h2 class="mobile-cannon-title">Fire Into the Crowd</h2>
+        <p class="mobile-cannon-sub">On smaller screens, the intro shifts to a full-frame cinematic so the scene reads clearly instead of sitting tiny at the bottom edge.</p>
       </div>
       <div class="mobile-cannon-stage" id="mobile-cannon-stage">
         <div class="mcs-layer" id="mcs-crowd"><img src="crowd.png" alt=""></div>
@@ -829,6 +820,7 @@
     var duration = 2400;
     var rafId = 0;
     var fired = false;
+    var loopPause = 380;
 
     Math.clamp = Math.clamp || function(v, a, b) {
       return Math.max(a, Math.min(b, v));
@@ -906,11 +898,17 @@
     function animate(ts) {
       if (!mobileActive) return;
       if (!startTime) startTime = ts;
-      var p = Math.clamp((ts - startTime) / duration, 0, 1);
-      applyFrame(p);
-      if (p < 1) {
-        rafId = requestAnimationFrame(animate);
+      var elapsed = ts - startTime;
+      var cycle = duration + loopPause;
+      var cyclePos = elapsed % cycle;
+      var p = cyclePos >= duration ? 1 : Math.clamp(cyclePos / duration, 0, 1);
+
+      if (cyclePos < 80 && elapsed >= cycle) {
+        fired = false;
       }
+
+      applyFrame(p);
+      rafId = requestAnimationFrame(animate);
     }
 
     function resetMobileScene() {
@@ -940,6 +938,7 @@
           } else {
             mobileActive = false;
             cancelAnimationFrame(rafId);
+            resetMobileScene();
           }
         }
       }, { threshold: 0.55 });
