@@ -62,7 +62,7 @@
     .section-rule { width:80px; height:1px; background:linear-gradient(to right,transparent,var(--gold),transparent); margin:1rem auto; }
     .section-sub { color:var(--muted); font-style:italic; max-width:500px; margin:0 auto; }
 
-    #captain { background:linear-gradient(180deg,var(--black) 0%,var(--deep) 50%,var(--black) 100%); }
+    #captain { background:linear-gradient(180deg,var(--black) 0%,var(--deep) 50%,var(--black) 100%); scroll-margin-top:10vh; padding-top:5vh; }
     .captain-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; }
     .captain-img-wrap { position:relative; display:flex; justify-content:center; }
     .captain-img-wrap img { width:min(260px,100%); filter:drop-shadow(0 0 40px rgba(201,168,76,0.2)); }
@@ -134,6 +134,155 @@
       .skills-list { justify-content:center; }
       .nav-links { display:none; }
     }
+
+    /* ============================================================
+       CANNON SCENE — integrated scroll-jacked section
+       ============================================================ */
+
+
+
+    #cannon-section {
+      position: relative;
+      /* Height set by JS to match TOTAL scroll distance */
+      height: 250vh;
+      background: #080808;
+    }
+
+    .cannon-handoff {
+      position: relative;
+      height: 50vh;
+      background:
+        linear-gradient(180deg, rgba(8,8,8,0) 0%, rgba(8,8,8,0.78) 20%, rgba(8,8,8,1) 48%, rgba(7,12,18,1) 100%);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0 1.5rem 10vh;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .cannon-handoff::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 18%, rgba(201,168,76,0.18), transparent 40%);
+      pointer-events: none;
+    }
+
+    .cannon-handoff-copy {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+    }
+
+    .cannon-handoff-kicker {
+      margin: 0 0 0.8rem;
+      font-family: 'Cinzel', serif;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      color: rgba(201,168,76,0.92);
+    }
+
+    .cannon-handoff-title {
+      margin: 0;
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(2rem, 4.5vw, 4rem);
+      color: #f5f0de;
+      text-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    .cannon-handoff-copy p {
+      margin: 1rem auto 0;
+      max-width: 56ch;
+      color: rgba(245,240,222,0.72);
+      line-height: 1.75;
+    }
+
+    @media (max-width:768px) {
+      .cannon-handoff { height: 42vh; padding-bottom: 8vh; }
+      .cannon-handoff-kicker { letter-spacing: 0.26em; font-size: 0.72rem; }
+    }
+
+    /* Fixed overlay — visible only when cannon is active */
+    #cannon-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s;
+      background: #080808;
+      overflow: hidden;
+    }
+    #cannon-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Scene sits inside overlay */
+    #cannon-stage {
+      position: absolute;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 80vw; height: 50vh;
+      pointer-events: none;
+    }
+    .cs-layer { position: absolute; pointer-events: none; }
+
+    #cs-cannon {
+      bottom: 0; left: 0; width: 22vw;
+      opacity: 0; transform: translateX(-120px);
+      z-index: 4;
+    }
+    #cs-cannon img { width: 100%; display: block; mix-blend-mode: screen; }
+
+    #cs-crowd {
+      bottom: 0; right: 0; width: 22vw;
+      opacity: 0; transform: translateX(120px);
+      z-index: 3;
+    }
+    #cs-crowd img { width: 100%; display: block; mix-blend-mode: screen; }
+
+    #cs-media {
+      position: fixed;
+      left: 14.6vw; bottom: 1.1vw; width: 50vw;
+      opacity: 0; transform: scale(0.35);
+      transform-origin: 15% 75%;
+      z-index: 203;
+    }
+    #cs-media img { width: 100%; display: block; mix-blend-mode: screen; }
+
+    #cs-flash {
+      position: fixed;
+      width: 70px; height: 70px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,230,80,1) 0%, rgba(255,100,0,0.8) 50%, transparent 70%);
+      z-index: 204; opacity: 0; pointer-events: none;
+      left: 0; bottom: 0;
+      transform: translate(-50%, 50%);
+    }
+
+    #cs-progress {
+      position: fixed; bottom: 0; left: 0; height: 2px;
+      width: 0%; background: rgba(201,168,76,0.6);
+      z-index: 210; pointer-events: none;
+    }
+    #cs-hint {
+      position: fixed; bottom: 2.5rem; left: 50%;
+      transform: translateX(-50%); z-index: 210;
+      color: rgba(201,168,76,0.7); text-align: center;
+      letter-spacing: 0.3em; font-size: 0.7rem;
+      text-transform: uppercase; pointer-events: none;
+      transition: opacity 0.5s; font-family: 'Cinzel', serif;
+    }
+    #cs-hint span {
+      display: block; width: 1px; height: 32px;
+      background: linear-gradient(to bottom, rgba(201,168,76,0.7), transparent);
+      margin: 0.4rem auto 0;
+      animation: csBlink 1.5s ease-in-out infinite;
+    }
+    @keyframes csBlink { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
   </style>
 </head>
 <body>
@@ -237,6 +386,38 @@
     <div class="scroll-hint">
       <p>Sail Down</p>
       <span></span>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       CANNON SCENE SECTION
+       Scroll-jacked cinematic. Activates on entry, releases on complete.
+       ============================================================ -->
+  <section id="cannon-section"></section>
+
+  <!-- Fixed overlay — activated by JS when cannon section is in view -->
+  <div id="cannon-overlay">
+    <div id="cannon-stage">
+      <div class="cs-layer" id="cs-crowd">
+        <img src="crowd.png" alt="">
+      </div>
+      <div class="cs-layer" id="cs-cannon">
+        <img src="cannon.png" alt="">
+      </div>
+    </div>
+    <div id="cs-media"><img src="media.png" alt=""></div>
+    <div id="cs-flash"></div>
+  </div>
+
+  <div id="cs-progress"></div>
+  <div id="cs-hint">Scroll to begin<span></span></div>
+
+  <section class="cannon-handoff scroll-snap-section" aria-hidden="true">
+    <div class="cannon-handoff-copy">
+      <p class="cannon-handoff-kicker"></p>
+      <h2 class="cannon-handoff-title">&#8593Scroll Animation&#8593</h2>
+      <p>&#8593 Crows Nest &#8593</p>
     </div>
   </section>
 
@@ -514,6 +695,197 @@
         obs.observe(revealEls[r]);
       }
     }
+  
+  /* ============================================================
+     CANNON SCENE JAVASCRIPT
+     ============================================================ */
+  (function() {
+    var TOTAL      = Math.round(2.2 * window.innerHeight);
+    var section    = document.getElementById('cannon-section');
+    var overlay    = document.getElementById('cannon-overlay');
+    var csFlash    = document.getElementById('cs-flash');
+    var csCannon   = document.getElementById('cs-cannon');
+    var csCrowd    = document.getElementById('cs-crowd');
+    var csMedia    = document.getElementById('cs-media');
+    var csProgress = document.getElementById('cs-progress');
+    var csHint     = document.getElementById('cs-hint');
+
+    section.style.height = TOTAL + 'px';
+
+    var csFiredAt = -1;
+    var csSmokes  = [];
+    var csLastST  = 0;
+
+    Math.clamp = Math.clamp || function(v, a, b) {
+      return Math.max(a, Math.min(b, v));
+    };
+
+    function csEase(t) { t = Math.clamp(t, 0, 1); return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+    function csEaseOut(t) { t = Math.clamp(t, 0, 1); return 1 - Math.pow(1 - t, 3); }
+    function csRng(val, a, b) { return Math.clamp((val - a) / (b - a), 0, 1); }
+    function csLerp(a, b, t) { return a + (b - a) * t; }
+
+    function csSpawnSmoke() {
+      var vw = window.innerWidth / 100;
+      for (var i = 0; i < 10; i++) {
+        var el = document.createElement('div');
+        el.style.cssText = 'position:fixed;border-radius:50%;background:rgba(220,220,220,0.5);pointer-events:none;z-index:209;';
+        var sz = 6 + Math.random() * 18;
+        el.style.width = sz + 'px';
+        el.style.height = sz + 'px';
+        el.style.left = (22.1 * vw + (Math.random() - 0.5) * 10) + 'px';
+        el.style.bottom = (6.1 * vw + (Math.random() - 0.5) * 8) + 'px';
+        el._vx = (Math.random() * 3 + 0.5);
+        el._vy = -(Math.random() * 2.5 + 0.3);
+        el._life = 0;
+        el._max = 0.5 + Math.random() * 0.5;
+        el.style.opacity = 0;
+        document.body.appendChild(el);
+        csSmokes.push(el);
+      }
+    }
+
+    function csTickSmoke(t) {
+      var dt = Math.min((t - csLastST) / 1000, 0.05);
+      csLastST = t;
+
+      for (var i = csSmokes.length - 1; i >= 0; i--) {
+        var s = csSmokes[i];
+        s._life += dt;
+
+        if (s._life >= s._max) {
+          if (s.parentNode) s.parentNode.removeChild(s);
+          csSmokes.splice(i, 1);
+        } else {
+          var p = s._life / s._max;
+          s.style.opacity = p < 0.2 ? (p / 0.2) * 0.5 : (1 - p) * 0.5;
+          s.style.left = (parseFloat(s.style.left) + s._vx * dt * 30) + 'px';
+          s.style.bottom = (parseFloat(s.style.bottom) + s._vy * dt * 30) + 'px';
+          s.style.transform = 'scale(' + (0.4 + p * 2.2) + ')';
+        }
+      }
+
+      if (csSmokes.length > 0) requestAnimationFrame(csTickSmoke);
+    }
+
+    function csDoFlash() {
+      csFlash.style.opacity = '1';
+      csSpawnSmoke();
+      requestAnimationFrame(function(t) {
+        csLastST = t;
+        csTickSmoke(t);
+      });
+      setTimeout(function() {
+        csFlash.style.transition = 'opacity 0.1s';
+        csFlash.style.opacity = '0';
+        setTimeout(function() { csFlash.style.transition = ''; }, 130);
+      }, 70);
+    }
+
+    function csApplyState(p) {
+      var kf = [[0.00,0.00],[0.06,0.04],[0.36,0.34],[0.44,0.36],[0.50,0.40],[0.66,0.66],[0.74,0.72],[0.80,0.74],[1.00,0.90]];
+      var ap = kf[kf.length - 1][1];
+
+      for (var k = 0; k < kf.length - 1; k++) {
+        if (p >= kf[k][0] && p <= kf[k + 1][0]) {
+          ap = csLerp(kf[k][1], kf[k + 1][1], csRng(p, kf[k][0], kf[k + 1][0]));
+          break;
+        }
+      }
+
+      csProgress.style.width = (p * 100) + '%';
+      csHint.style.opacity = (1 - Math.clamp(p / 0.04, 0, 1));
+
+      if (p > 0 && p < 1) {
+        overlay.classList.add('active');
+        csProgress.style.opacity = '1';
+        csHint.style.display = 'block';
+      } else {
+        overlay.classList.remove('active');
+        csProgress.style.opacity = '0';
+        csHint.style.display = p <= 0 ? 'block' : 'none';
+      }
+
+      var ct = csEase(csRng(ap, 0.04, 0.22));
+      csCannon.style.opacity = csRng(ap, 0.04, 0.18);
+      if (ap < 0.40) {
+        csCannon.style.transform = 'translateX(' + csLerp(-120, 0, ct) + 'px)';
+      }
+
+      if (ap < 0.40) {
+        var crt = csEase(csRng(ap, 0.10, 0.32));
+        csCrowd.style.opacity = csRng(ap, 0.10, 0.26);
+        csCrowd.style.transform = 'translateX(' + csLerp(120, 0, crt) + 'px)';
+      }
+
+      if (ap >= 0.40 && csFiredAt < 0) {
+        csFiredAt = ap;
+        csDoFlash();
+      }
+      if (ap < 0.36) {
+        csFiredAt = -1;
+      }
+
+      if (ap < 0.40) {
+        csMedia.style.opacity = 0;
+        csMedia.style.transform = 'scale(0.35)';
+      } else {
+        var bp = csRng(ap, 0.40, 1.00);
+        var sc = bp < 0.25 ? csLerp(0.35, 1.0, csEaseOut(csRng(bp, 0, 0.25))) : 1.0;
+        var tx = bp * window.innerWidth * 1.2;
+        var op = bp < 0.45 ? 1.0 : csLerp(1, 0, csRng(bp, 0.45, 0.52));
+        csMedia.style.opacity = op;
+        csMedia.style.transform = 'scale(' + sc + ') translateX(' + tx + 'px)';
+
+        var impactBp = 0.25;
+        var txAtImpact = 0.30 * window.innerWidth;
+        if (bp >= impactBp) {
+          var crowdTx = tx - txAtImpact;
+          var crowdOp = bp < 0.45 ? 1.0 : csLerp(1, 0, csRng(bp, 0.45, 0.52));
+          csCrowd.style.opacity = crowdOp;
+          csCrowd.style.transform = 'translateX(' + crowdTx + 'px)';
+        }
+      }
+
+      if (ap >= 0.40 && ap <= 0.48) {
+        var rt = ap < 0.44 ? csLerp(0, -14, csRng(ap, 0.40, 0.44)) : csLerp(-14, 0, csRng(ap, 0.44, 0.48));
+        csCannon.style.transform = 'translateX(' + rt + 'px)';
+      } else if (ap > 0.48 && ap < 0.74) {
+        csCannon.style.transform = 'translateX(0px)';
+      }
+
+      var cannonImg = csCannon.querySelector('img');
+      if (cannonImg) {
+        var cr = cannonImg.getBoundingClientRect();
+        csFlash.style.left = (cr.left + cr.width * 0.89) + 'px';
+        csFlash.style.bottom = (window.innerHeight - (cr.top + cr.height * 0.52)) + 'px';
+      }
+
+      if (ap >= 0.74) {
+        var ct2 = csEase(csRng(ap, 0.74, 0.88));
+        csCannon.style.opacity = csLerp(1, 0, csRng(ap, 0.76, 0.88));
+        csCannon.style.transform = 'translateX(' + csLerp(0, -200, ct2) + 'px)';
+      }
+    }
+
+    function updateFromScroll() {
+      var rect = section.getBoundingClientRect();
+      var traveled = Math.clamp(-rect.top, 0, TOTAL);
+      var p = Math.clamp(traveled / TOTAL, 0, 1);
+      csApplyState(p);
+    }
+
+    window.addEventListener('scroll', updateFromScroll, { passive: true });
+
+    window.addEventListener('resize', function() {
+      TOTAL = Math.round(2.2 * window.innerHeight);
+      section.style.height = TOTAL + 'px';
+      updateFromScroll();
+    });
+
+    updateFromScroll();
+  })();
+
   </script>
 
 </body>
