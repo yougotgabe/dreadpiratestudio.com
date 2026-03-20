@@ -119,139 +119,6 @@
     .sc-embed iframe { display:block; width:100%; border:none; }
 
     #contact { background:linear-gradient(180deg,var(--deep) 0%,var(--black) 100%); text-align:center; }
-
-    /* FLOATING SOUND PLAYER */
-    #site-audio-player {
-      position: fixed;
-      right: 1rem;
-      bottom: 1rem;
-      left: auto;
-      top: auto;
-      z-index: 950;
-      width: min(380px, calc(100vw - 2rem));
-      display: flex;
-      align-items: center;
-      gap: 0.85rem;
-      padding: 0.85rem 1rem;
-      border: 1px solid rgba(201,168,76,0.24);
-      border-radius: 999px;
-      background: linear-gradient(180deg, rgba(19,22,32,0.96), rgba(8,8,8,0.94));
-      box-shadow: 0 18px 50px rgba(0,0,0,0.45), 0 0 24px rgba(201,168,76,0.08);
-      backdrop-filter: blur(12px);
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
-      cursor: grab;
-    }
-    #site-audio-player.is-dragging {
-      cursor: grabbing;
-      transition: none;
-    }
-    #site-audio-player.is-loading { opacity: 0.88; }
-    .sap-disc {
-      width: 42px;
-      height: 42px;
-      flex: 0 0 42px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid rgba(201,168,76,0.28);
-      background: radial-gradient(circle at 35% 35%, rgba(201,168,76,0.24), rgba(201,168,76,0.05) 55%, rgba(8,8,8,0.65) 56%, rgba(8,8,8,0.95) 100%);
-      color: var(--gold);
-      font-size: 1rem;
-      box-shadow: inset 0 0 14px rgba(201,168,76,0.08);
-    }
-    #site-audio-player.is-playing .sap-disc {
-      animation: sapSpin 3s linear infinite;
-    }
-    @keyframes sapSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    .sap-meta {
-      min-width: 0;
-      flex: 1 1 auto;
-    }
-    .sap-kicker {
-      font-family: 'Cinzel', serif;
-      font-size: 0.55rem;
-      letter-spacing: 0.24em;
-      text-transform: uppercase;
-      color: rgba(201,168,76,0.72);
-      margin-bottom: 0.16rem;
-    }
-    .sap-title {
-      font-family: 'Cinzel', serif;
-      font-size: 0.8rem;
-      line-height: 1.15;
-      color: var(--white);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .sap-controls {
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
-      flex: 0 0 auto;
-    }
-    .sap-btn {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      border: 1px solid rgba(201,168,76,0.22);
-      background: rgba(201,168,76,0.04);
-      color: var(--white);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: transform 0.2s, border-color 0.2s, background 0.2s, color 0.2s;
-    }
-    .sap-btn:hover {
-      transform: translateY(-1px);
-      border-color: rgba(201,168,76,0.55);
-      background: rgba(201,168,76,0.12);
-      color: var(--gold);
-    }
-    .sap-btn:focus-visible {
-      outline: 2px solid rgba(201,168,76,0.65);
-      outline-offset: 2px;
-    }
-    .sap-btn svg {
-      width: 15px;
-      height: 15px;
-      fill: currentColor;
-      display: block;
-    }
-    .sap-btn.play-toggle svg {
-      width: 17px;
-      height: 17px;
-    }
-    #site-audio-player.is-playing .sap-btn.play-toggle .icon-play { display: none; }
-    #site-audio-player:not(.is-playing) .sap-btn.play-toggle .icon-pause { display: none; }
-    .sap-hidden-engine {
-      position: fixed;
-      width: 1px;
-      height: 1px;
-      opacity: 0;
-      pointer-events: none;
-      left: -9999px;
-      top: -9999px;
-    }
-    @media (max-width: 768px) {
-      #site-audio-player {
-        right: 0.75rem;
-        left: auto;
-        bottom: 0.75rem;
-        width: min(380px, calc(100vw - 1.5rem));
-        padding: 0.8rem 0.9rem;
-        gap: 0.65rem;
-      }
-      .sap-kicker { font-size: 0.5rem; letter-spacing: 0.18em; }
-      .sap-title { font-size: 0.72rem; }
-      .sap-btn { width: 36px; height: 36px; }
-      .sap-disc { width: 38px; height: 38px; flex-basis: 38px; }
-    }
-
     .contact-inner { max-width:600px; margin:0 auto; }
     .contact-email { display:inline-block; margin:2rem 0; padding:1rem 2.5rem; border:1px solid var(--gold-dim); font-family:'Cinzel',serif; font-size:0.8rem; letter-spacing:0.2em; color:var(--gold); text-decoration:none; transition:all 0.3s; }
     .contact-email:hover { background:var(--gold-glow); border-color:var(--gold); box-shadow:0 0 30px var(--gold-glow); }
@@ -357,6 +224,266 @@
       animation: csBlink 1.5s ease-in-out infinite;
     }
     @keyframes csBlink { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+  
+
+    /* Mobile-only cannon presentation */
+    #mobile-cannon-section {
+      display: none;
+      position: relative;
+      min-height: 72vh;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(201,168,76,0.16), transparent 38%),
+        linear-gradient(180deg, #080808 0%, #0b0f16 62%, #080808 100%);
+      overflow: hidden;
+      padding: 84px 0 0;
+    }
+    .mobile-cannon-wrap {
+      position: relative;
+      min-height: calc(72vh - 84px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem 5rem;
+    }
+    .mobile-cannon-copy {
+      position: absolute;
+      top: 1.4rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(92vw, 34rem);
+      text-align: center;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .mobile-cannon-kicker {
+      font-family: 'Cinzel', serif;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      font-size: 0.66rem;
+      color: rgba(201,168,76,0.92);
+      margin-bottom: 0.85rem;
+    }
+    .mobile-cannon-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.45rem, 7vw, 2.4rem);
+      line-height: 1.15;
+      color: #f5f0de;
+      margin: 0;
+      text-shadow: 0 10px 28px rgba(0,0,0,0.38);
+    }
+    .mobile-cannon-sub {
+      margin: 0.85rem auto 0;
+      max-width: 30ch;
+      color: rgba(245,240,222,0.74);
+      line-height: 1.55;
+      font-size: 0.98rem;
+    }
+    .mobile-cannon-stage {
+      position: relative;
+      width: min(96vw, 42rem);
+      aspect-ratio: 16 / 10;
+      margin-top: 3.5rem;
+    }
+    .mcs-layer {
+      position: absolute;
+      will-change: transform, opacity;
+    }
+    #mcs-cannon {
+      left: 0;
+      bottom: 4%;
+      width: 36%;
+      opacity: 0;
+      transform: translateX(-18%) scale(1.08);
+      z-index: 3;
+    }
+    #mcs-crowd {
+      right: 0;
+      bottom: 4%;
+      width: 38%;
+      opacity: 0;
+      transform: translateX(18%) scale(1.04);
+      z-index: 2;
+    }
+    #mcs-media {
+      left: 20%;
+      bottom: 14%;
+      width: 54%;
+      opacity: 0;
+      transform: scale(0.34) translateX(0);
+      transform-origin: 14% 75%;
+      z-index: 4;
+    }
+    #mcs-cannon img, #mcs-crowd img, #mcs-media img {
+      width: 100%;
+      display: block;
+      mix-blend-mode: screen;
+    }
+    #mcs-flash {
+      position: absolute;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,230,80,1) 0%, rgba(255,100,0,0.82) 48%, transparent 72%);
+      left: 28%;
+      bottom: 24%;
+      transform: translate(-50%, 50%) scale(0.3);
+      opacity: 0;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .mobile-cannon-progress {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      background: rgba(201,168,76,0.12);
+    }
+    .mobile-cannon-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: rgba(201,168,76,0.62);
+      transition: width 0.12s linear;
+    }
+    .mobile-cannon-scrollcue {
+      position: absolute;
+      left: 50%;
+      bottom: 1rem;
+      transform: translateX(-50%);
+      text-align: center;
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: rgba(201,168,76,0.72);
+      z-index: 2;
+    }
+    .mobile-cannon-scrollcue span {
+      display: block;
+      width: 1px;
+      height: 26px;
+      margin: 0.45rem auto 0;
+      background: linear-gradient(to bottom, rgba(201,168,76,0.72), transparent);
+      animation: csBlink 1.5s ease-in-out infinite;
+    }
+
+    @media (max-width: 768px) {
+      #cannon-section,
+      #cannon-overlay,
+      #cs-progress,
+      #cs-hint {
+        display: none !important;
+      }
+      #mobile-cannon-section {
+        display: block;
+      }
+      #captain {
+        scroll-margin-top: 88px;
+      }
+    }
+
+  
+
+    /* Floating site audio player */
+    #site-audio-player {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 1400;
+      width: min(360px, calc(100vw - 24px));
+      background: rgba(13,15,20,0.92);
+      border: 1px solid rgba(201,168,76,0.28);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.45), 0 0 24px rgba(201,168,76,0.08);
+      backdrop-filter: blur(12px);
+      border-radius: 18px;
+      overflow: hidden;
+      user-select: none;
+      touch-action: none;
+    }
+    #site-audio-player.is-dragging { cursor: grabbing; }
+    .sap-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.8rem 0.9rem;
+      cursor: grab;
+    }
+    .sap-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      color: var(--black);
+      background: linear-gradient(135deg, var(--gold), #e0c36a);
+      font-size: 1rem;
+      box-shadow: 0 0 16px rgba(201,168,76,0.22);
+    }
+    .sap-meta { min-width: 0; flex: 1 1 auto; }
+    .sap-kicker {
+      font-family: 'Cinzel', serif;
+      font-size: 0.52rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.18rem;
+    }
+    .sap-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      color: var(--white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sap-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex: 0 0 auto;
+    }
+    .sap-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid rgba(201,168,76,0.22);
+      background: rgba(201,168,76,0.08);
+      color: var(--gold);
+      font-size: 0.95rem;
+      line-height: 1;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+    .sap-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(201,168,76,0.45);
+      background: rgba(201,168,76,0.14);
+    }
+    .sap-btn:active { transform: translateY(0); }
+    .sap-hidden-frame {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      left: -9999px;
+      top: -9999px;
+      opacity: 0;
+      pointer-events: none;
+    }
+    @media (max-width: 768px) {
+      #site-audio-player {
+        width: min(340px, calc(100vw - 16px));
+        right: 8px;
+        bottom: 8px;
+        z-index: 1600;
+      }
+      .sap-bar { padding: 0.75rem 0.8rem; }
+      .sap-title { font-size: 0.72rem; }
+    }
 
   </style>
 </head>
@@ -487,6 +614,26 @@
 
   <div id="cs-progress"></div>
   <div id="cs-hint">Scroll to begin<span></span></div>
+
+
+
+  <section id="mobile-cannon-section" aria-label="Cinematic introduction">
+    <div class="mobile-cannon-wrap">
+      <div class="mobile-cannon-copy">
+        <p class="mobile-cannon-kicker">Mobile Cinematic</p>
+        <h2 class="mobile-cannon-title">Fire Into the Crowd</h2>
+        <p class="mobile-cannon-sub">On smaller screens, the intro shifts to a full-frame cinematic so the scene reads clearly instead of sitting tiny at the bottom edge.</p>
+      </div>
+      <div class="mobile-cannon-stage" id="mobile-cannon-stage">
+        <div class="mcs-layer" id="mcs-crowd"><img src="crowd.png" alt=""></div>
+        <div class="mcs-layer" id="mcs-cannon"><img src="cannon.png" alt=""></div>
+        <div class="mcs-layer" id="mcs-media"><img src="media.png" alt=""></div>
+        <div id="mcs-flash"></div>
+        <div class="mobile-cannon-progress"><div class="mobile-cannon-progress-bar" id="mcs-progress-bar"></div></div>
+      </div>
+      <div class="mobile-cannon-scrollcue">Continue below<span></span></div>
+    </div>
+  </section>
 
   <section id="captain">
     <div class="section-inner">
@@ -701,32 +848,6 @@
     </div>
   </section>
 
-
-
-  <div id="site-audio-player" class="is-loading" aria-label="Site audio player" title="Drag to move audio player">
-    <div class="sap-disc" aria-hidden="true">&#9835;</div>
-    <div class="sap-meta">
-      <div class="sap-kicker">Audio on Deck</div>
-      <div class="sap-title" id="sap-title">Ready to play</div>
-    </div>
-    <div class="sap-controls">
-      <button type="button" class="sap-btn" id="sap-prev" aria-label="Previous audio source">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12l10 7V5l-10 7zm-2 7h2V5H6v14z"></path></svg>
-      </button>
-      <button type="button" class="sap-btn play-toggle" id="sap-play" aria-label="Play or pause audio">
-        <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg>
-        <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"></path></svg>
-      </button>
-      <button type="button" class="sap-btn" id="sap-next" aria-label="Next audio source">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19l10-7L6 5v14zm10-14v14h2V5h-2z"></path></svg>
-      </button>
-    </div>
-  </div>
-
-  <div class="sap-hidden-engine" aria-hidden="true">
-    <iframe id="sap-widget-frame" scrolling="no" allow="autoplay"></iframe>
-  </div>
-
   <footer>
     <img src="icon.png" alt="DPS" class="footer-logo">
     <p class="footer-text">&copy; 2026 Dread Pirate Studio &nbsp;&middot;&nbsp; dreadpiratestudio.com &nbsp;&middot;&nbsp; All Rights Reserved</p>
@@ -789,11 +910,152 @@
       }
     }
   
+
+
+  /* ============================================================
+     MOBILE CANNON SCENE
+     ============================================================ */
+  (function() {
+    if (!window.matchMedia || !window.matchMedia('(max-width: 768px)').matches) return;
+
+    var mobileSection = document.getElementById('mobile-cannon-section');
+    var cannon = document.getElementById('mcs-cannon');
+    var crowd = document.getElementById('mcs-crowd');
+    var media = document.getElementById('mcs-media');
+    var flash = document.getElementById('mcs-flash');
+    var progress = document.getElementById('mcs-progress-bar');
+    if (!mobileSection || !cannon || !crowd || !media || !flash || !progress) return;
+
+    var mobileActive = false;
+    var startTime = 0;
+    var duration = 2400;
+    var rafId = 0;
+    var fired = false;
+
+    Math.clamp = Math.clamp || function(v, a, b) {
+      return Math.max(a, Math.min(b, v));
+    };
+
+    function ease(t) {
+      t = Math.clamp(t, 0, 1);
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+    function easeOut(t) {
+      t = Math.clamp(t, 0, 1);
+      return 1 - Math.pow(1 - t, 3);
+    }
+    function rng(val, a, b) {
+      return Math.clamp((val - a) / (b - a), 0, 1);
+    }
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    function applyFrame(p) {
+      progress.style.width = (p * 100) + '%';
+      cannon.style.opacity = rng(p, 0.02, 0.16);
+      crowd.style.opacity = rng(p, 0.10, 0.24);
+
+      if (p < 0.38) {
+        cannon.style.transform = 'translateX(' + lerp(-18, 0, ease(rng(p, 0.02, 0.24))) + '%) scale(' + lerp(1.08, 1, rng(p, 0.02, 0.24)) + ')';
+        crowd.style.transform = 'translateX(' + lerp(18, 0, ease(rng(p, 0.10, 0.30))) + '%) scale(' + lerp(1.04, 1, rng(p, 0.10, 0.30)) + ')';
+      }
+
+      if (p < 0.40) {
+        media.style.opacity = 0;
+        media.style.transform = 'scale(0.34) translateX(0)';
+      } else {
+        var bp = rng(p, 0.40, 1.00);
+        var sc = bp < 0.24 ? lerp(0.34, 1.0, easeOut(rng(bp, 0, 0.24))) : 1.0;
+        var tx = lerp(0, 112, bp);
+        var op = bp < 0.54 ? 1 : lerp(1, 0, rng(bp, 0.54, 0.70));
+        media.style.opacity = op;
+        media.style.transform = 'scale(' + sc + ') translateX(' + tx + '%)';
+
+        if (bp >= 0.25) {
+          var crowdTx = lerp(0, 48, rng(bp, 0.25, 0.72));
+          var crowdOp = bp < 0.58 ? 1 : lerp(1, 0, rng(bp, 0.58, 0.74));
+          crowd.style.opacity = crowdOp;
+          crowd.style.transform = 'translateX(' + crowdTx + '%) scale(1)';
+        }
+      }
+
+      if (p >= 0.40 && p <= 0.49) {
+        var recoil = p < 0.445 ? lerp(0, -8, rng(p, 0.40, 0.445)) : lerp(-8, 0, rng(p, 0.445, 0.49));
+        cannon.style.transform = 'translateX(' + recoil + '%) scale(1)';
+      }
+
+      if (!fired && p >= 0.40) {
+        fired = true;
+        flash.style.transition = 'none';
+        flash.style.opacity = '1';
+        flash.style.transform = 'translate(-50%, 50%) scale(1.15)';
+        setTimeout(function() {
+          flash.style.transition = 'opacity 0.18s, transform 0.22s';
+          flash.style.opacity = '0';
+          flash.style.transform = 'translate(-50%, 50%) scale(0.3)';
+        }, 70);
+      }
+
+      if (p < 0.34) fired = false;
+
+      if (p >= 0.76) {
+        cannon.style.opacity = lerp(1, 0, rng(p, 0.76, 0.92));
+        cannon.style.transform = 'translateX(' + lerp(0, -24, ease(rng(p, 0.76, 0.92))) + '%) scale(1)';
+      }
+    }
+
+    function animate(ts) {
+      if (!mobileActive) return;
+      if (!startTime) startTime = ts;
+      var p = Math.clamp((ts - startTime) / duration, 0, 1);
+      applyFrame(p);
+      if (p < 1) {
+        rafId = requestAnimationFrame(animate);
+      }
+    }
+
+    function resetMobileScene() {
+      startTime = 0;
+      fired = false;
+      progress.style.width = '0%';
+      cannon.style.opacity = '0';
+      crowd.style.opacity = '0';
+      media.style.opacity = '0';
+      cannon.style.transform = 'translateX(-18%) scale(1.08)';
+      crowd.style.transform = 'translateX(18%) scale(1.04)';
+      media.style.transform = 'scale(0.34) translateX(0)';
+      flash.style.opacity = '0';
+      flash.style.transform = 'translate(-50%, 50%) scale(0.3)';
+    }
+
+    resetMobileScene();
+
+    if ('IntersectionObserver' in window) {
+      var mobObs = new IntersectionObserver(function(entries) {
+        for (var i = 0; i < entries.length; i++) {
+          if (entries[i].isIntersecting) {
+            mobileActive = true;
+            cancelAnimationFrame(rafId);
+            resetMobileScene();
+            rafId = requestAnimationFrame(animate);
+          } else {
+            mobileActive = false;
+            cancelAnimationFrame(rafId);
+          }
+        }
+      }, { threshold: 0.55 });
+      mobObs.observe(mobileSection);
+    }
+  })();
+
   /* ============================================================
      CANNON SCENE JAVASCRIPT
      ============================================================ */
   (function() {
-    var TOTAL      = Math.round(2.2 * window.innerHeight);
+    if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return;
+
+    var TOTAL      = Math.round(2.25 * window.innerHeight);
     var section    = document.getElementById('cannon-section');
     var overlay    = document.getElementById('cannon-overlay');
     var csFlash    = document.getElementById('cs-flash');
@@ -802,6 +1064,8 @@
     var csMedia    = document.getElementById('cs-media');
     var csProgress = document.getElementById('cs-progress');
     var csHint     = document.getElementById('cs-hint');
+
+    if (!section || !overlay || !csFlash || !csCannon || !csCrowd || !csMedia || !csProgress || !csHint) return;
 
     section.style.height = TOTAL + 'px';
 
@@ -813,10 +1077,20 @@
       return Math.max(a, Math.min(b, v));
     };
 
-    function csEase(t) { t = Math.clamp(t, 0, 1); return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
-    function csEaseOut(t) { t = Math.clamp(t, 0, 1); return 1 - Math.pow(1 - t, 3); }
-    function csRng(val, a, b) { return Math.clamp((val - a) / (b - a), 0, 1); }
-    function csLerp(a, b, t) { return a + (b - a) * t; }
+    function csEase(t) {
+      t = Math.clamp(t, 0, 1);
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+    function csEaseOut(t) {
+      t = Math.clamp(t, 0, 1);
+      return 1 - Math.pow(1 - t, 3);
+    }
+    function csRng(val, a, b) {
+      return Math.clamp((val - a) / (b - a), 0, 1);
+    }
+    function csLerp(a, b, t) {
+      return a + (b - a) * t;
+    }
 
     function csSpawnSmoke() {
       var vw = window.innerWidth / 100;
@@ -861,11 +1135,16 @@
     function csDoFlash() {
       csFlash.style.opacity = '1';
       csSpawnSmoke();
-      requestAnimationFrame(function(t) { csLastST = t; csTickSmoke(t); });
+      requestAnimationFrame(function(t) {
+        csLastST = t;
+        csTickSmoke(t);
+      });
       setTimeout(function() {
         csFlash.style.transition = 'opacity 0.1s';
         csFlash.style.opacity = '0';
-        setTimeout(function() { csFlash.style.transition = ''; }, 130);
+        setTimeout(function() {
+          csFlash.style.transition = '';
+        }, 130);
       }, 70);
     }
 
@@ -885,8 +1164,7 @@
       var ap = kf[kf.length - 1][1];
       for (var k = 0; k < kf.length - 1; k++) {
         if (p >= kf[k][0] && p <= kf[k + 1][0]) {
-          var seg = csRng(p, kf[k][0], kf[k + 1][0]);
-          ap = csLerp(kf[k][1], kf[k + 1][1], seg);
+          ap = csLerp(kf[k][1], kf[k + 1][1], csRng(p, kf[k][0], kf[k + 1][0]));
           break;
         }
       }
@@ -932,14 +1210,11 @@
         var sc = bp < 0.25 ? csLerp(0.35, 1.0, csEaseOut(csRng(bp, 0, 0.25))) : 1.0;
         var tx = bp * window.innerWidth * 1.2;
         var op = bp < 0.45 ? 1.0 : csLerp(1, 0, csRng(bp, 0.45, 0.52));
-
         csMedia.style.opacity = op;
         csMedia.style.transform = 'scale(' + sc + ') translateX(' + tx + 'px)';
 
-        var impactBp = 0.25;
-        var txAtImpact = 0.30 * window.innerWidth;
-        if (bp >= impactBp) {
-          var crowdTx = tx - txAtImpact;
+        if (bp >= 0.25) {
+          var crowdTx = tx - (0.30 * window.innerWidth);
           var crowdOp = bp < 0.45 ? 1.0 : csLerp(1, 0, csRng(bp, 0.45, 0.52));
           csCrowd.style.opacity = crowdOp;
           csCrowd.style.transform = 'translateX(' + crowdTx + 'px)';
@@ -947,9 +1222,7 @@
       }
 
       if (ap >= 0.40 && ap <= 0.48) {
-        var rt = ap < 0.44
-          ? csLerp(0, -14, csRng(ap, 0.40, 0.44))
-          : csLerp(-14, 0, csRng(ap, 0.44, 0.48));
+        var rt = ap < 0.44 ? csLerp(0, -14, csRng(ap, 0.40, 0.44)) : csLerp(-14, 0, csRng(ap, 0.44, 0.48));
         csCannon.style.transform = 'translateX(' + rt + 'px)';
       } else if (ap > 0.48 && ap < 0.74) {
         csCannon.style.transform = 'translateX(0px)';
@@ -978,255 +1251,199 @@
 
     window.addEventListener('scroll', updateFromScroll, { passive: true });
     window.addEventListener('resize', function() {
-      TOTAL = Math.round(2.2 * window.innerHeight);
+      TOTAL = Math.round(2.25 * window.innerHeight);
       section.style.height = TOTAL + 'px';
       updateFromScroll();
     });
 
+    csApplyState(0);
     updateFromScroll();
   })();
 
-  </script>
+</script>
 
 
-  <script src="https://w.soundcloud.com/player/api.js"></script>
-  <script>
-    (function() {
-      if (!window.SC || !SC.Widget) { return; }
 
-      var playerEl = document.getElementById('site-audio-player');
-      var titleEl = document.getElementById('sap-title');
-      var prevBtn = document.getElementById('sap-prev');
-      var playBtn = document.getElementById('sap-play');
-      var nextBtn = document.getElementById('sap-next');
-      var frame = document.getElementById('sap-widget-frame');
-      var musicIframes = document.querySelectorAll('#music .sc-embed iframe');
-      if (!playerEl || !titleEl || !prevBtn || !playBtn || !nextBtn || !frame || !musicIframes.length) { return; }
+  <div id="site-audio-player" aria-label="Site audio player">
+    <div class="sap-bar" id="sap-drag-handle">
+      <div class="sap-badge">♫</div>
+      <div class="sap-meta">
+        <div class="sap-kicker">Now Playing</div>
+        <div class="sap-title" id="sap-title">Ready to set sail</div>
+      </div>
+      <div class="sap-controls">
+        <button class="sap-btn" id="sap-prev" type="button" aria-label="Previous track">⏮</button>
+        <button class="sap-btn" id="sap-play" type="button" aria-label="Play or pause">▶</button>
+        <button class="sap-btn" id="sap-next" type="button" aria-label="Next track">⏭</button>
+      </div>
+    </div>
+    <iframe id="sap-widget-frame" class="sap-hidden-frame" title="Hidden site audio player" allow="autoplay"></iframe>
+  </div>
 
-      var queue = [];
-      for (var i = 0; i < musicIframes.length; i++) {
-        var node = musicIframes[i];
-        var src = node.getAttribute('src') || '';
-        var trackUrl = '';
-        try {
-          trackUrl = decodeURIComponent((src.split('url=')[1] || '').split('&')[0] || '');
-        } catch (err) {
-          trackUrl = '';
-        }
-        var card = node.closest ? node.closest('.sc-card') : null;
-        var labelNode = card ? card.querySelector('.sc-title') : null;
-        queue.push({
-          label: labelNode ? labelNode.textContent.replace(/\s+/g, ' ').trim() : ('Source ' + (i + 1)),
-          url: trackUrl || src
-        });
+<script src="https://w.soundcloud.com/player/api.js"></script>
+<script>
+(function() {
+  function boot() {
+    if (!window.SC || !SC.Widget) { return; }
+    var playerEl = document.getElementById('site-audio-player');
+    var titleEl = document.getElementById('sap-title');
+    var prevBtn = document.getElementById('sap-prev');
+    var playBtn = document.getElementById('sap-play');
+    var nextBtn = document.getElementById('sap-next');
+    var dragHandle = document.getElementById('sap-drag-handle');
+    var frame = document.getElementById('sap-widget-frame');
+    var cards = document.querySelectorAll('#music .sc-card');
+    if (!playerEl || !titleEl || !prevBtn || !playBtn || !nextBtn || !dragHandle || !frame || !cards.length) { return; }
+
+    var queue = [];
+    for (var i = 0; i < cards.length; i++) {
+      var iframe = cards[i].querySelector('.sc-embed iframe');
+      var titleNode = cards[i].querySelector('.sc-title');
+      var src = iframe ? (iframe.getAttribute('src') || '') : '';
+      var trackUrl = '';
+      try {
+        trackUrl = decodeURIComponent((src.split('url=')[1] || '').split('&')[0] || '');
+      } catch (err) {
+        trackUrl = '';
       }
-      if (!queue.length) { return; }
-
-      var currentIndex = 0;
-      var isReady = false;
-      var isPlaying = false;
-      var pendingPlay = false;
-      var widget = null;
-      var dragState = {
-        active: false,
-        pointerId: null,
-        startX: 0,
-        startY: 0,
-        originLeft: 0,
-        originTop: 0,
-        moved: false
-      };
-      var dragThreshold = 6;
-
-      function clamp(value, min, max) {
-        return Math.max(min, Math.min(max, value));
+      if (trackUrl) {
+        queue.push({ url: trackUrl, title: titleNode ? titleNode.textContent.replace(/\s+/g, ' ').trim() : 'SoundCloud' });
       }
+    }
+    if (!queue.length) { return; }
 
-      function setPlayerPosition(left, top) {
-        var maxLeft = Math.max(0, window.innerWidth - playerEl.offsetWidth);
-        var maxTop = Math.max(0, window.innerHeight - playerEl.offsetHeight);
-        playerEl.style.left = clamp(left, 0, maxLeft) + 'px';
-        playerEl.style.top = clamp(top, 0, maxTop) + 'px';
-        playerEl.style.right = 'auto';
-        playerEl.style.bottom = 'auto';
-      }
+    function buildSrc(url, autoPlay) {
+      return 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) + '&color=%23c9a84c&auto_play=' + (autoPlay ? 'true' : 'false') + '&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false';
+    }
 
-      function placePlayerDefault() {
-        var margin = window.innerWidth <= 768 ? 12 : 16;
-        setPlayerPosition(window.innerWidth - playerEl.offsetWidth - margin, window.innerHeight - playerEl.offsetHeight - margin);
-      }
+    var index = 0;
+    var isPlaying = false;
+    var widget = null;
 
-      function startDrag(e) {
-        if (e.button !== undefined && e.button !== 0) { return; }
-        if (e.target && e.target.closest && e.target.closest('button')) { return; }
+    function refreshButton() {
+      playBtn.textContent = isPlaying ? '❚❚' : '▶';
+      playBtn.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play');
+    }
 
-        var rect = playerEl.getBoundingClientRect();
-        dragState.active = true;
-        dragState.pointerId = e.pointerId;
-        dragState.startX = e.clientX;
-        dragState.startY = e.clientY;
-        dragState.originLeft = rect.left;
-        dragState.originTop = rect.top;
-        dragState.moved = false;
-
-        playerEl.classList.add('is-dragging');
-        if (playerEl.setPointerCapture) {
-          try { playerEl.setPointerCapture(e.pointerId); } catch (err) {}
-        }
-      }
-
-      function moveDrag(e) {
-        if (!dragState.active) { return; }
-        if (dragState.pointerId !== null && e.pointerId !== undefined && e.pointerId !== dragState.pointerId) { return; }
-
-        var dx = e.clientX - dragState.startX;
-        var dy = e.clientY - dragState.startY;
-        if (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold) {
-          dragState.moved = true;
-        }
-        setPlayerPosition(dragState.originLeft + dx, dragState.originTop + dy);
-      }
-
-      function endDrag(e) {
-        if (!dragState.active) { return; }
-        if (dragState.pointerId !== null && e.pointerId !== undefined && e.pointerId !== dragState.pointerId) { return; }
-
-        playerEl.classList.remove('is-dragging');
-        if (playerEl.releasePointerCapture && dragState.pointerId !== null) {
-          try { playerEl.releasePointerCapture(dragState.pointerId); } catch (err) {}
-        }
-        if (dragState.moved && e && typeof e.preventDefault === 'function') {
-          e.preventDefault();
-        }
-        dragState.active = false;
-        dragState.pointerId = null;
-      }
-
-      playerEl.addEventListener('pointerdown', startDrag);
-      window.addEventListener('pointermove', moveDrag);
-      window.addEventListener('pointerup', endDrag);
-      window.addEventListener('pointercancel', endDrag);
-      window.addEventListener('resize', function() {
-        if (!playerEl.style.left || !playerEl.style.top) {
-          placePlayerDefault();
-        } else {
-          setPlayerPosition(parseFloat(playerEl.style.left) || 0, parseFloat(playerEl.style.top) || 0);
-        }
+    function refreshTitle(fallback) {
+      if (!widget) { titleEl.textContent = fallback || queue[index].title; return; }
+      widget.getCurrentSound(function(sound) {
+        var out = fallback || queue[index].title;
+        if (sound && sound.title) { out = sound.title; }
+        titleEl.textContent = out;
       });
+    }
 
-      placePlayerDefault();
-
-      function setTitle(text) {
-        titleEl.textContent = text || queue[currentIndex].label;
-      }
-
-      function setPlayingState(playing) {
-        isPlaying = !!playing;
-        if (isPlaying) {
-          playerEl.classList.add('is-playing');
-          playBtn.setAttribute('aria-label', 'Pause audio');
-        } else {
-          playerEl.classList.remove('is-playing');
-          playBtn.setAttribute('aria-label', 'Play audio');
-        }
-      }
-
-      function setLoadingState(loading) {
-        if (loading) playerEl.classList.add('is-loading');
-        else playerEl.classList.remove('is-loading');
-      }
-
-      function updateFromWidget() {
-        if (!widget) { return; }
-        widget.getCurrentSound(function(sound) {
-          if (sound && sound.title) {
-            setTitle(sound.title);
-          } else {
-            setTitle(queue[currentIndex].label);
-          }
-        });
-      }
-
-      function bindWidgetEvents() {
-        if (!widget) { return; }
-        widget.bind(SC.Widget.Events.READY, function() {
-          isReady = true;
-          setLoadingState(false);
-          updateFromWidget();
-          if (pendingPlay) {
-            pendingPlay = false;
-            widget.play();
-          }
-        });
-        widget.bind(SC.Widget.Events.PLAY, function() {
-          setPlayingState(true);
-          updateFromWidget();
-        });
-        widget.bind(SC.Widget.Events.PAUSE, function() {
-          setPlayingState(false);
-          updateFromWidget();
-        });
-        widget.bind(SC.Widget.Events.PLAY_PROGRESS, function() {
-          if (!isPlaying) { setPlayingState(true); }
-        });
-        widget.bind(SC.Widget.Events.FINISH, function() {
-          goToIndex(currentIndex + 1, true);
-        });
-      }
-
-      function createEmbedUrl(url) {
-        return 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) + '&color=%23c9a84c&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false';
-      }
-
-      function goToIndex(index, autoPlay) {
-        currentIndex = (index + queue.length) % queue.length;
-        isReady = false;
-        setLoadingState(true);
-        setPlayingState(false);
-        setTitle(queue[currentIndex].label);
-        pendingPlay = !!autoPlay;
-
-        if (!widget) {
-          frame.src = createEmbedUrl(queue[currentIndex].url);
-          widget = SC.Widget(frame);
-          bindWidgetEvents();
-          return;
-        }
-
-        widget.load(queue[currentIndex].url, {
-          auto_play: !!autoPlay,
-          show_comments: false,
-          show_user: true,
-          show_reposts: false,
-          show_teaser: false,
-          hide_related: true,
-          color: '#c9a84c'
-        });
-      }
-
-      prevBtn.addEventListener('click', function() {
-        goToIndex(currentIndex - 1, true);
+    function bindWidgetEvents() {
+      if (!widget) { return; }
+      widget.bind(SC.Widget.Events.READY, function() {
+        refreshTitle(queue[index].title);
       });
-      nextBtn.addEventListener('click', function() {
-        goToIndex(currentIndex + 1, true);
+      widget.bind(SC.Widget.Events.PLAY, function() {
+        isPlaying = true;
+        refreshButton();
+        refreshTitle(queue[index].title);
       });
-      playBtn.addEventListener('click', function() {
-        if (!widget) {
-          goToIndex(currentIndex, true);
-          return;
-        }
-        if (!isReady) {
-          pendingPlay = true;
-          return;
-        }
-        if (isPlaying) { widget.pause(); }
-        else { widget.play(); }
+      widget.bind(SC.Widget.Events.PAUSE, function() {
+        isPlaying = false;
+        refreshButton();
       });
+      widget.bind(SC.Widget.Events.FINISH, function() {
+        goTo(index + 1, true);
+      });
+    }
 
-      setTitle(queue[0].label);
-      goToIndex(0, false);
-    })();
-  </script>
+    function loadWidget(idx, autoplay) {
+      index = (idx + queue.length) % queue.length;
+      titleEl.textContent = queue[index].title;
+      if (!widget) {
+        frame.src = buildSrc(queue[index].url, autoplay);
+        widget = SC.Widget(frame);
+        bindWidgetEvents();
+        isPlaying = !!autoplay;
+        refreshButton();
+        return;
+      }
+      widget.load(queue[index].url, {
+        auto_play: !!autoplay,
+        color: '#c9a84c',
+        hide_related: true,
+        show_comments: false,
+        show_user: true,
+        show_reposts: false,
+        show_teaser: false,
+        visual: false
+      });
+      isPlaying = !!autoplay;
+      refreshButton();
+      setTimeout(function() { refreshTitle(queue[index].title); }, 350);
+    }
+
+    function goTo(idx, autoplay) { loadWidget(idx, autoplay); }
+
+    prevBtn.addEventListener('click', function(e) { e.stopPropagation(); goTo(index - 1, isPlaying); });
+    nextBtn.addEventListener('click', function(e) { e.stopPropagation(); goTo(index + 1, isPlaying); });
+    playBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (!widget) { loadWidget(index, true); return; }
+      if (isPlaying) { widget.pause(); } else { widget.play(); }
+    });
+
+    var drag = { active: false, startX: 0, startY: 0, originX: 0, originY: 0 };
+    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+    function pinToViewport(x, y) {
+      var maxX = window.innerWidth - playerEl.offsetWidth - 6;
+      var maxY = window.innerHeight - playerEl.offsetHeight - 6;
+      playerEl.style.left = clamp(x, 6, Math.max(6, maxX)) + 'px';
+      playerEl.style.top = clamp(y, 6, Math.max(6, maxY)) + 'px';
+      playerEl.style.right = 'auto';
+      playerEl.style.bottom = 'auto';
+    }
+    function startDrag(ev) {
+      if (ev.target.closest && ev.target.closest('.sap-controls')) { return; }
+      var pt = ev.touches ? ev.touches[0] : ev;
+      var rect = playerEl.getBoundingClientRect();
+      drag.active = true;
+      drag.startX = pt.clientX;
+      drag.startY = pt.clientY;
+      drag.originX = rect.left;
+      drag.originY = rect.top;
+      playerEl.classList.add('is-dragging');
+      if (ev.preventDefault) { ev.preventDefault(); }
+    }
+    function moveDrag(ev) {
+      if (!drag.active) { return; }
+      var pt = ev.touches ? ev.touches[0] : ev;
+      pinToViewport(drag.originX + (pt.clientX - drag.startX), drag.originY + (pt.clientY - drag.startY));
+      if (ev.preventDefault) { ev.preventDefault(); }
+    }
+    function endDrag() {
+      if (!drag.active) { return; }
+      drag.active = false;
+      playerEl.classList.remove('is-dragging');
+    }
+    dragHandle.addEventListener('mousedown', startDrag);
+    dragHandle.addEventListener('touchstart', startDrag, { passive: false });
+    window.addEventListener('mousemove', moveDrag);
+    window.addEventListener('touchmove', moveDrag, { passive: false });
+    window.addEventListener('mouseup', endDrag);
+    window.addEventListener('touchend', endDrag);
+    window.addEventListener('resize', function() {
+      var rect = playerEl.getBoundingClientRect();
+      if (playerEl.style.left) { pinToViewport(rect.left, rect.top); }
+    });
+
+    loadWidget(0, false);
+    refreshButton();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
+</script>
 
 </body>
 </html>
