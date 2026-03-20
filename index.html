@@ -62,7 +62,7 @@
     .section-rule { width:80px; height:1px; background:linear-gradient(to right,transparent,var(--gold),transparent); margin:1rem auto; }
     .section-sub { color:var(--muted); font-style:italic; max-width:500px; margin:0 auto; }
 
-    #captain { background:linear-gradient(180deg,var(--black) 0%,var(--deep) 50%,var(--black) 100%); scroll-margin-top:10vh; padding-top:5vh; }
+    #captain { background:linear-gradient(180deg,var(--black) 0%,var(--deep) 50%,var(--black) 100%); }
     .captain-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; }
     .captain-img-wrap { position:relative; display:flex; justify-content:center; }
     .captain-img-wrap img { width:min(260px,100%); filter:drop-shadow(0 0 40px rgba(201,168,76,0.2)); }
@@ -139,69 +139,11 @@
        CANNON SCENE — integrated scroll-jacked section
        ============================================================ */
 
-
-
     #cannon-section {
       position: relative;
       /* Height set by JS to match TOTAL scroll distance */
       height: 250vh;
       background: #080808;
-    }
-
-    .cannon-handoff {
-      position: relative;
-      height: 50vh;
-      background:
-        linear-gradient(180deg, rgba(8,8,8,0) 0%, rgba(8,8,8,0.78) 20%, rgba(8,8,8,1) 48%, rgba(7,12,18,1) 100%);
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      padding: 0 1.5rem 10vh;
-      text-align: center;
-      overflow: hidden;
-    }
-
-    .cannon-handoff::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at 50% 18%, rgba(201,168,76,0.18), transparent 40%);
-      pointer-events: none;
-    }
-
-    .cannon-handoff-copy {
-      position: relative;
-      z-index: 1;
-      max-width: 760px;
-    }
-
-    .cannon-handoff-kicker {
-      margin: 0 0 0.8rem;
-      font-family: 'Cinzel', serif;
-      letter-spacing: 0.38em;
-      text-transform: uppercase;
-      font-size: 0.8rem;
-      color: rgba(201,168,76,0.92);
-    }
-
-    .cannon-handoff-title {
-      margin: 0;
-      font-family: 'Cinzel Decorative', serif;
-      font-size: clamp(2rem, 4.5vw, 4rem);
-      color: #f5f0de;
-      text-shadow: 0 10px 30px rgba(0,0,0,0.35);
-    }
-
-    .cannon-handoff-copy p {
-      margin: 1rem auto 0;
-      max-width: 56ch;
-      color: rgba(245,240,222,0.72);
-      line-height: 1.75;
-    }
-
-    @media (max-width:768px) {
-      .cannon-handoff { height: 42vh; padding-bottom: 8vh; }
-      .cannon-handoff-kicker { letter-spacing: 0.26em; font-size: 0.72rem; }
     }
 
     /* Fixed overlay — visible only when cannon is active */
@@ -282,6 +224,164 @@
       animation: csBlink 1.5s ease-in-out infinite;
     }
     @keyframes csBlink { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+  
+
+    /* Mobile-only cannon presentation */
+    #mobile-cannon-section {
+      display: none;
+      position: relative;
+      min-height: 72vh;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(201,168,76,0.16), transparent 38%),
+        linear-gradient(180deg, #080808 0%, #0b0f16 62%, #080808 100%);
+      overflow: hidden;
+      padding: 84px 0 0;
+    }
+    .mobile-cannon-wrap {
+      position: relative;
+      min-height: calc(72vh - 84px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem 5rem;
+    }
+    .mobile-cannon-copy {
+      position: absolute;
+      top: 1.4rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(92vw, 34rem);
+      text-align: center;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .mobile-cannon-kicker {
+      font-family: 'Cinzel', serif;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      font-size: 0.66rem;
+      color: rgba(201,168,76,0.92);
+      margin-bottom: 0.85rem;
+    }
+    .mobile-cannon-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.45rem, 7vw, 2.4rem);
+      line-height: 1.15;
+      color: #f5f0de;
+      margin: 0;
+      text-shadow: 0 10px 28px rgba(0,0,0,0.38);
+    }
+    .mobile-cannon-sub {
+      margin: 0.85rem auto 0;
+      max-width: 30ch;
+      color: rgba(245,240,222,0.74);
+      line-height: 1.55;
+      font-size: 0.98rem;
+    }
+    .mobile-cannon-stage {
+      position: relative;
+      width: min(96vw, 42rem);
+      aspect-ratio: 16 / 10;
+      margin-top: 3.5rem;
+    }
+    .mcs-layer {
+      position: absolute;
+      will-change: transform, opacity;
+    }
+    #mcs-cannon {
+      left: 0;
+      bottom: 4%;
+      width: 36%;
+      opacity: 0;
+      transform: translateX(-18%) scale(1.08);
+      z-index: 3;
+    }
+    #mcs-crowd {
+      right: 0;
+      bottom: 4%;
+      width: 38%;
+      opacity: 0;
+      transform: translateX(18%) scale(1.04);
+      z-index: 2;
+    }
+    #mcs-media {
+      left: 20%;
+      bottom: 14%;
+      width: 54%;
+      opacity: 0;
+      transform: scale(0.34) translateX(0);
+      transform-origin: 14% 75%;
+      z-index: 4;
+    }
+    #mcs-cannon img, #mcs-crowd img, #mcs-media img {
+      width: 100%;
+      display: block;
+      mix-blend-mode: screen;
+    }
+    #mcs-flash {
+      position: absolute;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,230,80,1) 0%, rgba(255,100,0,0.82) 48%, transparent 72%);
+      left: 28%;
+      bottom: 24%;
+      transform: translate(-50%, 50%) scale(0.3);
+      opacity: 0;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .mobile-cannon-progress {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      background: rgba(201,168,76,0.12);
+    }
+    .mobile-cannon-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: rgba(201,168,76,0.62);
+      transition: width 0.12s linear;
+    }
+    .mobile-cannon-scrollcue {
+      position: absolute;
+      left: 50%;
+      bottom: 1rem;
+      transform: translateX(-50%);
+      text-align: center;
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: rgba(201,168,76,0.72);
+      z-index: 2;
+    }
+    .mobile-cannon-scrollcue span {
+      display: block;
+      width: 1px;
+      height: 26px;
+      margin: 0.45rem auto 0;
+      background: linear-gradient(to bottom, rgba(201,168,76,0.72), transparent);
+      animation: csBlink 1.5s ease-in-out infinite;
+    }
+
+    @media (max-width: 768px) {
+      #cannon-section,
+      #cannon-overlay,
+      #cs-progress,
+      #cs-hint {
+        display: none !important;
+      }
+      #mobile-cannon-section {
+        display: block;
+      }
+      #captain {
+        scroll-margin-top: 88px;
+      }
+    }
 
   </style>
 </head>
@@ -413,11 +513,23 @@
   <div id="cs-progress"></div>
   <div id="cs-hint">Scroll to begin<span></span></div>
 
-  <section class="cannon-handoff scroll-snap-section" aria-hidden="true">
-    <div class="cannon-handoff-copy">
-      <p class="cannon-handoff-kicker"></p>
-      <h2 class="cannon-handoff-title">&#8593Scroll Animation&#8593</h2>
-      <p>&#8593 Crows Nest &#8593</p>
+
+
+  <section id="mobile-cannon-section" aria-label="Cinematic introduction">
+    <div class="mobile-cannon-wrap">
+      <div class="mobile-cannon-copy">
+        <p class="mobile-cannon-kicker">Mobile Cinematic</p>
+        <h2 class="mobile-cannon-title">Fire Into the Crowd</h2>
+        <p class="mobile-cannon-sub">On smaller screens, the intro shifts to a full-frame cinematic so the scene reads clearly instead of sitting tiny at the bottom edge.</p>
+      </div>
+      <div class="mobile-cannon-stage" id="mobile-cannon-stage">
+        <div class="mcs-layer" id="mcs-crowd"><img src="crowd.png" alt=""></div>
+        <div class="mcs-layer" id="mcs-cannon"><img src="cannon.png" alt=""></div>
+        <div class="mcs-layer" id="mcs-media"><img src="media.png" alt=""></div>
+        <div id="mcs-flash"></div>
+        <div class="mobile-cannon-progress"><div class="mobile-cannon-progress-bar" id="mcs-progress-bar"></div></div>
+      </div>
+      <div class="mobile-cannon-scrollcue">Continue below<span></span></div>
     </div>
   </section>
 
@@ -696,11 +808,152 @@
       }
     }
   
+
+
+  /* ============================================================
+     MOBILE CANNON SCENE
+     ============================================================ */
+  (function() {
+    if (!window.matchMedia || !window.matchMedia('(max-width: 768px)').matches) return;
+
+    var mobileSection = document.getElementById('mobile-cannon-section');
+    var cannon = document.getElementById('mcs-cannon');
+    var crowd = document.getElementById('mcs-crowd');
+    var media = document.getElementById('mcs-media');
+    var flash = document.getElementById('mcs-flash');
+    var progress = document.getElementById('mcs-progress-bar');
+    if (!mobileSection || !cannon || !crowd || !media || !flash || !progress) return;
+
+    var mobileActive = false;
+    var startTime = 0;
+    var duration = 2400;
+    var rafId = 0;
+    var fired = false;
+
+    Math.clamp = Math.clamp || function(v, a, b) {
+      return Math.max(a, Math.min(b, v));
+    };
+
+    function ease(t) {
+      t = Math.clamp(t, 0, 1);
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+    function easeOut(t) {
+      t = Math.clamp(t, 0, 1);
+      return 1 - Math.pow(1 - t, 3);
+    }
+    function rng(val, a, b) {
+      return Math.clamp((val - a) / (b - a), 0, 1);
+    }
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    function applyFrame(p) {
+      progress.style.width = (p * 100) + '%';
+      cannon.style.opacity = rng(p, 0.02, 0.16);
+      crowd.style.opacity = rng(p, 0.10, 0.24);
+
+      if (p < 0.38) {
+        cannon.style.transform = 'translateX(' + lerp(-18, 0, ease(rng(p, 0.02, 0.24))) + '%) scale(' + lerp(1.08, 1, rng(p, 0.02, 0.24)) + ')';
+        crowd.style.transform = 'translateX(' + lerp(18, 0, ease(rng(p, 0.10, 0.30))) + '%) scale(' + lerp(1.04, 1, rng(p, 0.10, 0.30)) + ')';
+      }
+
+      if (p < 0.40) {
+        media.style.opacity = 0;
+        media.style.transform = 'scale(0.34) translateX(0)';
+      } else {
+        var bp = rng(p, 0.40, 1.00);
+        var sc = bp < 0.24 ? lerp(0.34, 1.0, easeOut(rng(bp, 0, 0.24))) : 1.0;
+        var tx = lerp(0, 112, bp);
+        var op = bp < 0.54 ? 1 : lerp(1, 0, rng(bp, 0.54, 0.70));
+        media.style.opacity = op;
+        media.style.transform = 'scale(' + sc + ') translateX(' + tx + '%)';
+
+        if (bp >= 0.25) {
+          var crowdTx = lerp(0, 48, rng(bp, 0.25, 0.72));
+          var crowdOp = bp < 0.58 ? 1 : lerp(1, 0, rng(bp, 0.58, 0.74));
+          crowd.style.opacity = crowdOp;
+          crowd.style.transform = 'translateX(' + crowdTx + '%) scale(1)';
+        }
+      }
+
+      if (p >= 0.40 && p <= 0.49) {
+        var recoil = p < 0.445 ? lerp(0, -8, rng(p, 0.40, 0.445)) : lerp(-8, 0, rng(p, 0.445, 0.49));
+        cannon.style.transform = 'translateX(' + recoil + '%) scale(1)';
+      }
+
+      if (!fired && p >= 0.40) {
+        fired = true;
+        flash.style.transition = 'none';
+        flash.style.opacity = '1';
+        flash.style.transform = 'translate(-50%, 50%) scale(1.15)';
+        setTimeout(function() {
+          flash.style.transition = 'opacity 0.18s, transform 0.22s';
+          flash.style.opacity = '0';
+          flash.style.transform = 'translate(-50%, 50%) scale(0.3)';
+        }, 70);
+      }
+
+      if (p < 0.34) fired = false;
+
+      if (p >= 0.76) {
+        cannon.style.opacity = lerp(1, 0, rng(p, 0.76, 0.92));
+        cannon.style.transform = 'translateX(' + lerp(0, -24, ease(rng(p, 0.76, 0.92))) + '%) scale(1)';
+      }
+    }
+
+    function animate(ts) {
+      if (!mobileActive) return;
+      if (!startTime) startTime = ts;
+      var p = Math.clamp((ts - startTime) / duration, 0, 1);
+      applyFrame(p);
+      if (p < 1) {
+        rafId = requestAnimationFrame(animate);
+      }
+    }
+
+    function resetMobileScene() {
+      startTime = 0;
+      fired = false;
+      progress.style.width = '0%';
+      cannon.style.opacity = '0';
+      crowd.style.opacity = '0';
+      media.style.opacity = '0';
+      cannon.style.transform = 'translateX(-18%) scale(1.08)';
+      crowd.style.transform = 'translateX(18%) scale(1.04)';
+      media.style.transform = 'scale(0.34) translateX(0)';
+      flash.style.opacity = '0';
+      flash.style.transform = 'translate(-50%, 50%) scale(0.3)';
+    }
+
+    resetMobileScene();
+
+    if ('IntersectionObserver' in window) {
+      var mobObs = new IntersectionObserver(function(entries) {
+        for (var i = 0; i < entries.length; i++) {
+          if (entries[i].isIntersecting) {
+            mobileActive = true;
+            cancelAnimationFrame(rafId);
+            resetMobileScene();
+            rafId = requestAnimationFrame(animate);
+          } else {
+            mobileActive = false;
+            cancelAnimationFrame(rafId);
+          }
+        }
+      }, { threshold: 0.55 });
+      mobObs.observe(mobileSection);
+    }
+  })();
+
   /* ============================================================
      CANNON SCENE JAVASCRIPT
      ============================================================ */
   (function() {
-    var TOTAL      = Math.round(2.2 * window.innerHeight);
+    if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return;
+
+    var TOTAL      = Math.round(2.25 * window.innerHeight);
     var section    = document.getElementById('cannon-section');
     var overlay    = document.getElementById('cannon-overlay');
     var csFlash    = document.getElementById('cs-flash');
@@ -709,6 +962,8 @@
     var csMedia    = document.getElementById('cs-media');
     var csProgress = document.getElementById('cs-progress');
     var csHint     = document.getElementById('cs-hint');
+
+    if (!section || !overlay || !csFlash || !csCannon || !csCrowd || !csMedia || !csProgress || !csHint) return;
 
     section.style.height = TOTAL + 'px';
 
@@ -720,10 +975,20 @@
       return Math.max(a, Math.min(b, v));
     };
 
-    function csEase(t) { t = Math.clamp(t, 0, 1); return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
-    function csEaseOut(t) { t = Math.clamp(t, 0, 1); return 1 - Math.pow(1 - t, 3); }
-    function csRng(val, a, b) { return Math.clamp((val - a) / (b - a), 0, 1); }
-    function csLerp(a, b, t) { return a + (b - a) * t; }
+    function csEase(t) {
+      t = Math.clamp(t, 0, 1);
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+    function csEaseOut(t) {
+      t = Math.clamp(t, 0, 1);
+      return 1 - Math.pow(1 - t, 3);
+    }
+    function csRng(val, a, b) {
+      return Math.clamp((val - a) / (b - a), 0, 1);
+    }
+    function csLerp(a, b, t) {
+      return a + (b - a) * t;
+    }
 
     function csSpawnSmoke() {
       var vw = window.innerWidth / 100;
@@ -748,11 +1013,9 @@
     function csTickSmoke(t) {
       var dt = Math.min((t - csLastST) / 1000, 0.05);
       csLastST = t;
-
       for (var i = csSmokes.length - 1; i >= 0; i--) {
         var s = csSmokes[i];
         s._life += dt;
-
         if (s._life >= s._max) {
           if (s.parentNode) s.parentNode.removeChild(s);
           csSmokes.splice(i, 1);
@@ -764,7 +1027,6 @@
           s.style.transform = 'scale(' + (0.4 + p * 2.2) + ')';
         }
       }
-
       if (csSmokes.length > 0) requestAnimationFrame(csTickSmoke);
     }
 
@@ -778,14 +1040,26 @@
       setTimeout(function() {
         csFlash.style.transition = 'opacity 0.1s';
         csFlash.style.opacity = '0';
-        setTimeout(function() { csFlash.style.transition = ''; }, 130);
+        setTimeout(function() {
+          csFlash.style.transition = '';
+        }, 130);
       }, 70);
     }
 
     function csApplyState(p) {
-      var kf = [[0.00,0.00],[0.06,0.04],[0.36,0.34],[0.44,0.36],[0.50,0.40],[0.66,0.66],[0.74,0.72],[0.80,0.74],[1.00,0.90]];
-      var ap = kf[kf.length - 1][1];
+      var kf = [
+        [0.00, 0.00],
+        [0.06, 0.04],
+        [0.36, 0.34],
+        [0.44, 0.36],
+        [0.50, 0.40],
+        [0.66, 0.66],
+        [0.74, 0.72],
+        [0.80, 0.74],
+        [1.00, 0.90]
+      ];
 
+      var ap = kf[kf.length - 1][1];
       for (var k = 0; k < kf.length - 1; k++) {
         if (p >= kf[k][0] && p <= kf[k + 1][0]) {
           ap = csLerp(kf[k][1], kf[k + 1][1], csRng(p, kf[k][0], kf[k + 1][0]));
@@ -837,10 +1111,8 @@
         csMedia.style.opacity = op;
         csMedia.style.transform = 'scale(' + sc + ') translateX(' + tx + 'px)';
 
-        var impactBp = 0.25;
-        var txAtImpact = 0.30 * window.innerWidth;
-        if (bp >= impactBp) {
-          var crowdTx = tx - txAtImpact;
+        if (bp >= 0.25) {
+          var crowdTx = tx - (0.30 * window.innerWidth);
           var crowdOp = bp < 0.45 ? 1.0 : csLerp(1, 0, csRng(bp, 0.45, 0.52));
           csCrowd.style.opacity = crowdOp;
           csCrowd.style.transform = 'translateX(' + crowdTx + 'px)';
@@ -876,17 +1148,17 @@
     }
 
     window.addEventListener('scroll', updateFromScroll, { passive: true });
-
     window.addEventListener('resize', function() {
-      TOTAL = Math.round(2.2 * window.innerHeight);
+      TOTAL = Math.round(2.25 * window.innerHeight);
       section.style.height = TOTAL + 'px';
       updateFromScroll();
     });
 
+    csApplyState(0);
     updateFromScroll();
   })();
 
-  </script>
+</script>
 
 </body>
 </html>
