@@ -19,7 +19,7 @@
       --border:    rgba(201,168,76,0.15);
     }
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    html { scroll-behavior: smooth; overflow-x: hidden; }
+    html { overflow-x: hidden; }
     body { background:var(--black); color:var(--white); font-family:'Crimson Text',Georgia,serif; font-size:18px; }
 
     nav { position:fixed; top:0; left:0; right:0; z-index:900; padding:0 2rem; height:72px; display:flex; align-items:center; justify-content:space-between; background:linear-gradient(to bottom,rgba(8,8,8,0.95),rgba(8,8,8,0.7)); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); }
@@ -875,6 +875,18 @@
         });
       })(cards[c]);
     }
+
+    // SMOOTH SCROLL — JS-based for Firefox compatibility
+    // CSS scroll-behavior:smooth breaks anchor links in Firefox
+    document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+      anchor.addEventListener('click', function(e) {
+        var target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
 
     // SCROLL REVEAL
     if ('IntersectionObserver' in window) {
