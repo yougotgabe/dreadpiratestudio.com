@@ -1,1429 +1,404 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dread Pirate Studio</title>
-  <link rel="icon" type="image/png" href="icon.png">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --black:     #080808;
-      --deep:      #0d0f14;
-      --surface:   #131620;
-      --gold:      #c9a84c;
-      --gold-dim:  #8a6f2e;
-      --gold-glow: rgba(201,168,76,0.18);
-      --white:     #e8e0d0;
-      --muted:     #6b6355;
-      --border:    rgba(201,168,76,0.15);
-    }
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    html { scroll-behavior: smooth; }
-    body { background:var(--black); color:var(--white); font-family:'Crimson Text',Georgia,serif; font-size:18px; overflow-x:hidden; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Your Profile — Dread Pirate Studio</title>
+<link rel="icon" type="image/png" href="../icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#080808;--deep:#0d0f14;--surface:#131620;
+    --gold:#c9a84c;--gold-dim:#8a6f2e;--gold-glow:rgba(201,168,76,0.18);
+    --white:#e8e0d0;--muted:#6b6355;--border:rgba(201,168,76,0.15);
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--black);color:var(--white);font-family:'Crimson Text',Georgia,serif;font-size:18px;min-height:100vh;}
 
-    nav { position:fixed; top:0; left:0; right:0; z-index:900; padding:0 2rem; height:72px; display:flex; align-items:center; justify-content:space-between; background:linear-gradient(to bottom,rgba(8,8,8,0.95),rgba(8,8,8,0.7)); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); }
-    .nav-logo { text-decoration:none; }
-    .nav-logo img { height:44px; width:auto; }
-    .nav-links { display:flex; gap:2rem; list-style:none; }
-    .nav-links a { color:var(--muted); text-decoration:none; font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; transition:color 0.3s; }
-    .nav-links a:hover { color:var(--gold); }
+  nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:0 2rem;height:72px;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,8,0.97);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);}
+  .nav-logo{text-decoration:none;}
+  .nav-logo img{height:44px;width:auto;}
+  .nav-back{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.3s;}
+  .nav-back:hover{color:var(--gold);}
 
-    #hero { position:relative; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:80px 2rem 4rem; }
-    .hero-bg { position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(201,168,76,0.06) 0%,transparent 70%),radial-gradient(ellipse 60% 40% at 50% 80%,rgba(139,26,26,0.08) 0%,transparent 60%),linear-gradient(180deg,#080808 0%,#0a0c10 50%,#080808 100%); z-index:0; }
-    .hero-vignette { position:absolute; inset:0; background:radial-gradient(ellipse 100% 100% at 50% 50%,transparent 30%,rgba(8,8,8,0.6) 100%); z-index:0; }
+  .wrap{max-width:700px;margin:0 auto;padding:6rem 2rem 5rem;}
 
-    .parallax-layer { position:absolute; inset:0; pointer-events:none; z-index:1; }
-    .obj { position:absolute; will-change:transform; }
-    @media (max-width:768px) { .obj { display:none; } }
+  /* Token gate */
+  #token-gate{text-align:center;padding:4rem 0;}
+  .gate-title{font-family:'Cinzel Decorative',serif;font-size:2rem;color:var(--gold);margin-bottom:0.5rem;}
+  .gate-sub{color:var(--muted);font-style:italic;margin-bottom:2.5rem;}
+  .token-row{display:flex;gap:0.75rem;max-width:420px;margin:0 auto;}
+  .token-row input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--white);padding:0.75rem 1rem;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.1em;outline:none;transition:border-color 0.3s;}
+  .token-row input:focus{border-color:var(--gold-dim);}
+  .token-row button{background:var(--gold);color:var(--black);border:none;padding:0.75rem 1.5rem;font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:opacity 0.3s;}
+  .token-row button:hover{opacity:0.85;}
+  .gate-err{color:#8a3030;font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.1em;margin-top:1rem;}
 
-    .hero-content { position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:1.5rem; animation:fadeUp 1.2s ease both; }
-    @keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
-    .hero-logo { width:min(340px,70vw); filter:drop-shadow(0 0 40px rgba(201,168,76,0.3)) brightness(1.1); animation:logoPulse 4s ease-in-out infinite; }
-    @keyframes logoPulse { 0%,100% { filter:drop-shadow(0 0 30px rgba(201,168,76,0.25)) brightness(1.0); } 50% { filter:drop-shadow(0 0 55px rgba(201,168,76,0.45)) brightness(1.2); } }
-    .hero-tagline { font-family:'Cinzel',serif; font-size:clamp(0.65rem,2vw,0.85rem); letter-spacing:0.4em; text-transform:uppercase; color:var(--gold); opacity:0.8; animation:fadeUp 1.2s 0.3s ease both; }
-    .hero-divider { width:200px; height:1px; background:linear-gradient(to right,transparent,var(--gold-dim),transparent); animation:fadeUp 1.2s 0.5s ease both; }
-    .hero-desc { max-width:540px; color:var(--muted); font-size:1.1rem; line-height:1.7; font-style:italic; animation:fadeUp 1.2s 0.6s ease both; }
-    .hero-cta-group { display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; animation:fadeUp 1.2s 0.8s ease both; }
-    .btn { display:inline-block; padding:0.7rem 2rem; font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; text-decoration:none; border-radius:2px; transition:all 0.3s; }
-    .btn-gold { background:var(--gold); color:var(--black); border:1px solid var(--gold); }
-    .btn-gold:hover { background:transparent; color:var(--gold); box-shadow:0 0 20px var(--gold-glow); }
-    .btn-outline { background:transparent; color:var(--gold); border:1px solid var(--gold-dim); }
-    .btn-outline:hover { border-color:var(--gold); box-shadow:0 0 20px var(--gold-glow); }
-    .scroll-hint { position:absolute; bottom:2rem; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:0.5rem; color:var(--muted); font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; z-index:2; animation:fadeUp 2s 1.5s ease both; }
-    .scroll-hint span { display:block; width:1px; height:40px; background:linear-gradient(to bottom,var(--gold-dim),transparent); animation:scrollLine 2s ease-in-out infinite; }
-    @keyframes scrollLine { 0%,100% { opacity:0.3; } 50% { opacity:0.8; } }
+  /* Form sections */
+  #edit-wrap{display:none;}
+  .sec-label{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.45em;text-transform:uppercase;color:var(--gold);opacity:0.8;margin:2.5rem 0 1.25rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);}
+  .fg{margin-bottom:1.15rem;}
+  .fg label{display:block;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;}
+  .fg input,.fg textarea,.fg select{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--white);padding:0.65rem 0.9rem;font-family:'Crimson Text',Georgia,serif;font-size:1rem;outline:none;transition:border-color 0.3s;resize:vertical;}
+  .fg input:focus,.fg textarea:focus,.fg select:focus{border-color:var(--gold-dim);}
+  .fg textarea{min-height:100px;}
+  .hint{font-size:0.82rem;color:var(--muted);font-style:italic;margin-top:0.3rem;}
+  .two-col{display:grid;grid-template-columns:1fr 2fr;gap:0.75rem;}
 
-    section { padding:6rem 2rem; position:relative; }
-    .section-inner { max-width:1100px; margin:0 auto; }
-    .section-header { text-align:center; margin-bottom:4rem; }
-    .section-label { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.5em; text-transform:uppercase; color:var(--gold); opacity:0.7; margin-bottom:0.75rem; }
-    .section-title { font-family:'Cinzel Decorative',serif; font-size:clamp(1.6rem,4vw,2.8rem); color:var(--white); line-height:1.2; }
-    .section-rule { width:80px; height:1px; background:linear-gradient(to right,transparent,var(--gold),transparent); margin:1rem auto; }
-    .section-sub { color:var(--muted); font-style:italic; max-width:500px; margin:0 auto; }
+  /* Discipline tags */
+  .disc-wrap{display:flex;flex-wrap:wrap;gap:0.5rem;}
+  .dt{padding:0.3rem 0.85rem;border:1px solid var(--border);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);background:var(--surface);cursor:pointer;user-select:none;transition:all 0.2s;}
+  .dt.on{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,0.08);}
+  .dt-add{display:flex;gap:0.5rem;margin-top:0.5rem;width:100%;}
+  .dt-add input{flex:1;}
+  .dt-add button{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:0.4rem 0.8rem;font-family:'Cinzel',serif;font-size:0.6rem;cursor:pointer;transition:all 0.2s;}
+  .dt-add button:hover{border-color:var(--gold-dim);color:var(--gold);}
 
-    #captain { background:linear-gradient(180deg,var(--black) 0%,var(--deep) 50%,var(--black) 100%); }
-    .captain-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; }
-    .captain-img-wrap { position:relative; display:flex; justify-content:center; }
-    .captain-img-wrap img { width:min(260px,100%); filter:drop-shadow(0 0 40px rgba(201,168,76,0.2)); }
-    .captain-text h3 { font-family:'Cinzel Decorative',serif; font-size:1.8rem; color:var(--gold); margin-bottom:0.25rem; }
-    .captain-text .rank { font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.3em; color:var(--muted); text-transform:uppercase; margin-bottom:1.5rem; }
-    .captain-text p { color:var(--muted); line-height:1.8; margin-bottom:1rem; font-size:1rem; }
-    .skills-list { display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:1.5rem; }
-    .skill-tag { padding:0.3rem 0.9rem; border:1px solid var(--border); font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--gold-dim); background:rgba(201,168,76,0.04); transition:all 0.3s; }
-    .skill-tag:hover { border-color:var(--gold); color:var(--gold); background:var(--gold-glow); }
+  /* Media items */
+  .media-list{display:flex;flex-direction:column;gap:1rem;}
+  .media-item{background:var(--deep);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+  .media-item-header{padding:0.75rem 1rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer;background:var(--surface);}
+  .media-item-num{font-family:'Cinzel',serif;font-size:0.65rem;color:var(--gold-dim);flex-shrink:0;}
+  .media-item-title-display{flex:1;font-family:'Cinzel',serif;font-size:0.8rem;color:var(--white);}
+  .media-item-actions{display:flex;gap:0.5rem;}
+  .mi-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:0.25rem 0.6rem;font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+  .mi-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
+  .mi-btn.del:hover{border-color:#8a3030;color:#c05050;}
+  .media-item-body{padding:1rem;display:none;}
+  .media-item-body.open{display:block;}
+  .media-item-body .fg{margin-bottom:0.85rem;}
 
-    #crew { background:var(--black); }
-    .crew-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1.5rem; }
-    .glow-card { position:relative; background:var(--surface); border:1px solid var(--border); border-radius:4px; padding:2px; cursor:default; transition:transform 0.3s,border-color 0.3s,box-shadow 0.3s; isolation:isolate; }
-    .glow-card:hover { transform:translateY(-6px); border-color:rgba(201,168,76,0.4); box-shadow:0 0 30px rgba(201,168,76,0.12),0 20px 40px rgba(0,0,0,0.5); }
-    .glow-card::before { content:''; position:absolute; width:300px; height:300px; background:radial-gradient(circle,rgba(201,168,76,0.15) 0%,transparent 70%); border-radius:50%; pointer-events:none; transform:translate(-50%,-50%); left:var(--mx,50%); top:var(--my,50%); opacity:0; transition:opacity 0.3s; z-index:-1; }
-    .glow-card:hover::before { opacity:1; }
-    .glow-card__inner { background:var(--deep); border-radius:2px; padding:1.5rem; position:relative; z-index:1; text-align:center; }
-    .crew-icon { font-size:1.8rem; margin-bottom:1rem; }
-    .crew-name { font-family:'Cinzel',serif; font-size:0.85rem; color:var(--gold); letter-spacing:0.1em; margin-bottom:0.25rem; }
-    .crew-role { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:1rem; }
-    .crew-links { display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; }
-    .crew-link { padding:0.25rem 0.7rem; border:1px solid var(--border); font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); text-decoration:none; transition:all 0.3s; }
-    .crew-link:hover { border-color:var(--gold); color:var(--gold); }
+  /* Add media button */
+  .add-media-btn{width:100%;padding:0.85rem;border:1px dashed var(--border);background:transparent;color:var(--muted);font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;transition:all 0.3s;margin-top:0.5rem;}
+  .add-media-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
 
-    #hold { background:linear-gradient(180deg,var(--black) 0%,var(--deep) 100%); }
-    .hold-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.5rem; }
-    .hold-card { border:1px solid var(--border); background:var(--surface); border-radius:4px; overflow:hidden; transition:all 0.3s; text-decoration:none; display:block; }
-    .hold-card:hover { border-color:var(--gold-dim); transform:translateY(-3px); box-shadow:0 10px 40px rgba(0,0,0,0.4); }
-    .hold-card-header { padding:1.25rem 1.5rem 0; display:flex; align-items:center; gap:0.75rem; }
-    .hold-icon { font-size:1.5rem; }
-    .hold-label { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--gold); opacity:0.7; }
-    .hold-card-body { padding:0.75rem 1.5rem 1.5rem; }
-    .hold-card-title { font-family:'Cinzel',serif; font-size:1rem; color:var(--white); margin-bottom:0.5rem; }
-    .hold-card-desc { font-size:0.9rem; color:var(--muted); line-height:1.6; }
-
-    #video { background:linear-gradient(180deg,var(--deep) 0%,var(--black) 100%); }
-    .video-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(480px,1fr)); gap:2rem; }
-    @media (max-width:600px) { .video-grid { grid-template-columns:1fr; } }
-    .video-card { border:1px solid var(--border); background:var(--surface); border-radius:4px; overflow:hidden; transition:border-color 0.3s,box-shadow 0.3s; }
-    .video-card:hover { border-color:var(--gold-dim); box-shadow:0 10px 40px rgba(0,0,0,0.5); }
-    .video-embed { position:relative; width:100%; padding-top:56.25%; }
-    .video-embed iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:none; }
-    .video-card-body { padding:1.25rem 1.5rem; border-top:1px solid var(--border); }
-    .video-card-title { font-family:'Cinzel',serif; font-size:0.85rem; color:var(--white); letter-spacing:0.05em; margin-bottom:0.4rem; }
-    .video-card-meta { font-size:0.85rem; color:var(--muted); font-style:italic; }
-
-    #music { background:var(--black); border-top:1px solid var(--border); }
-    .music-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:1.5rem; }
-    .sc-card { border:1px solid var(--border); background:var(--deep); border-radius:4px; overflow:hidden; transition:border-color 0.3s; }
-    .sc-card:hover { border-color:var(--gold-dim); }
-    .sc-card-header { padding:1rem 1.25rem; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:0.75rem; }
-    .sc-dot { width:8px; height:8px; border-radius:50%; background:var(--gold); flex-shrink:0; }
-    .sc-title { font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.15em; color:var(--gold); text-transform:uppercase; }
-    .sc-embed iframe { display:block; width:100%; border:none; }
-
-    #contact { background:linear-gradient(180deg,var(--deep) 0%,var(--black) 100%); text-align:center; }
-    .contact-inner { max-width:600px; margin:0 auto; }
-    .contact-email { display:inline-block; margin:2rem 0; padding:1rem 2.5rem; border:1px solid var(--gold-dim); font-family:'Cinzel',serif; font-size:0.8rem; letter-spacing:0.2em; color:var(--gold); text-decoration:none; transition:all 0.3s; }
-    .contact-email:hover { background:var(--gold-glow); border-color:var(--gold); box-shadow:0 0 30px var(--gold-glow); }
-    .contact-note { color:var(--muted); font-style:italic; font-size:1rem; }
-
-    footer { border-top:1px solid var(--border); padding:2rem; text-align:center; background:var(--black); }
-    .footer-logo { height:40px; margin-bottom:1rem; filter:brightness(0.6); }
-    .footer-text { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; color:var(--muted); text-transform:uppercase; }
-
-    @media (max-width:768px) {
-      .captain-grid { grid-template-columns:1fr; text-align:center; }
-      .captain-img-wrap { margin-bottom:2rem; }
-      .skills-list { justify-content:center; }
-      .nav-links { display:none; }
-    }
-
-    /* ============================================================
-       CANNON SCENE — integrated scroll-jacked section
-       ============================================================ */
-
-    #cannon-section {
-      position: relative;
-      /* Height set by JS to match TOTAL scroll distance */
-      height: 250vh;
-      background: #080808;
-    }
-
-    /* Fixed overlay — visible only when cannon is active */
-    #cannon-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 200;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.4s;
-      background: #080808;
-      overflow: hidden;
-    }
-    #cannon-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    /* Scene sits inside overlay */
-    #cannon-stage {
-      position: absolute;
-      bottom: 0; left: 50%;
-      transform: translateX(-50%);
-      width: 80vw; height: 50vh;
-      pointer-events: none;
-    }
-    .cs-layer { position: absolute; pointer-events: none; }
-
-    #cs-cannon {
-      bottom: 0; left: 0; width: 22vw;
-      opacity: 0; transform: translateX(-120px);
-      z-index: 4;
-    }
-    #cs-cannon img { width: 100%; display: block; mix-blend-mode: screen; }
-
-    #cs-crowd {
-      bottom: 0; right: 0; width: 22vw;
-      opacity: 0; transform: translateX(120px);
-      z-index: 3;
-    }
-    #cs-crowd img { width: 100%; display: block; mix-blend-mode: screen; }
-
-    #cs-media {
-      position: fixed;
-      left: 14.6vw; bottom: 1.1vw; width: 50vw;
-      opacity: 0; transform: scale(0.35);
-      transform-origin: 15% 75%;
-      z-index: 203;
-    }
-    #cs-media img { width: 100%; display: block; mix-blend-mode: screen; }
-
-    #cs-flash {
-      position: fixed;
-      width: 70px; height: 70px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,230,80,1) 0%, rgba(255,100,0,0.8) 50%, transparent 70%);
-      z-index: 204; opacity: 0; pointer-events: none;
-      left: 0; bottom: 0;
-      transform: translate(-50%, 50%);
-    }
-
-    #cs-progress {
-      position: fixed; bottom: 0; left: 0; height: 2px;
-      width: 0%; background: rgba(201,168,76,0.6);
-      z-index: 210; pointer-events: none;
-    }
-    #cs-hint {
-      position: fixed; bottom: 2.5rem; left: 50%;
-      transform: translateX(-50%); z-index: 210;
-      color: rgba(201,168,76,0.7); text-align: center;
-      letter-spacing: 0.3em; font-size: 0.7rem;
-      text-transform: uppercase; pointer-events: none;
-      transition: opacity 0.5s; font-family: 'Cinzel', serif;
-    }
-    #cs-hint span {
-      display: block; width: 1px; height: 32px;
-      background: linear-gradient(to bottom, rgba(201,168,76,0.7), transparent);
-      margin: 0.4rem auto 0;
-      animation: csBlink 1.5s ease-in-out infinite;
-    }
-    @keyframes csBlink { 0%,100%{opacity:0.3} 50%{opacity:1} }
-
-  
-
-    /* Mobile-only cannon presentation */
-    #mobile-cannon-section {
-      display: none;
-      position: relative;
-      min-height: 40vh;
-      background:
-        radial-gradient(circle at 50% 18%, rgba(201,168,76,0.16), transparent 38%),
-        linear-gradient(180deg, #080808 0%, #0b0f16 62%, #080808 100%);
-      overflow: hidden;
-      padding: 0;
-    }
-    .mobile-cannon-wrap {
-      position: relative;
-      min-height: 40vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem 1rem 3rem;
-    }
-    .mobile-cannon-copy {
-      display: none;
-    }
-    .mobile-cannon-kicker { display: none; }
-    .mobile-cannon-title  { display: none; }
-    .mobile-cannon-sub    { display: none; }
-    .mobile-cannon-stage {
-      position: relative;
-      width: min(96vw, 42rem);
-      aspect-ratio: 16 / 10;
-      margin-top: 3.5rem;
-    }
-    .mcs-layer {
-      position: absolute;
-      will-change: transform, opacity;
-    }
-    #mcs-cannon {
-      left: 0;
-      bottom: 4%;
-      width: 36%;
-      opacity: 0;
-      transform: translateX(-18%) scale(1.08);
-      z-index: 3;
-    }
-    #mcs-crowd {
-      right: 0;
-      bottom: 4%;
-      width: 38%;
-      opacity: 0;
-      transform: translateX(18%) scale(1.04);
-      z-index: 2;
-    }
-    #mcs-media {
-      left: 20%;
-      bottom: 14%;
-      width: 54%;
-      opacity: 0;
-      transform: scale(0.34) translateX(0);
-      transform-origin: 14% 75%;
-      z-index: 4;
-    }
-    #mcs-cannon img, #mcs-crowd img, #mcs-media img {
-      width: 100%;
-      display: block;
-      mix-blend-mode: screen;
-    }
-    #mcs-flash {
-      position: absolute;
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,230,80,1) 0%, rgba(255,100,0,0.82) 48%, transparent 72%);
-      left: 28%;
-      bottom: 24%;
-      transform: translate(-50%, 50%) scale(0.3);
-      opacity: 0;
-      z-index: 5;
-      pointer-events: none;
-    }
-    .mobile-cannon-progress {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 2px;
-      background: rgba(201,168,76,0.12);
-    }
-    .mobile-cannon-progress-bar {
-      width: 0%;
-      height: 100%;
-      background: rgba(201,168,76,0.62);
-      transition: width 0.12s linear;
-    }
-    .mobile-cannon-scrollcue {
-      position: absolute;
-      left: 50%;
-      bottom: 1rem;
-      transform: translateX(-50%);
-      text-align: center;
-      font-family: 'Cinzel', serif;
-      font-size: 0.58rem;
-      letter-spacing: 0.24em;
-      text-transform: uppercase;
-      color: rgba(201,168,76,0.72);
-      z-index: 2;
-    }
-    .mobile-cannon-scrollcue span {
-      display: block;
-      width: 1px;
-      height: 26px;
-      margin: 0.45rem auto 0;
-      background: linear-gradient(to bottom, rgba(201,168,76,0.72), transparent);
-      animation: csBlink 1.5s ease-in-out infinite;
-    }
-
-    @media (max-width: 768px) {
-      #cannon-section,
-      #cannon-overlay,
-      #cs-progress,
-      #cs-hint {
-        display: none !important;
-      }
-      #mobile-cannon-section {
-        display: block;
-      }
-      #captain {
-        scroll-margin-top: 88px;
-      }
-    }
-
-  
-
-    /* Floating site audio player */
-    #site-audio-player {
-      position: fixed;
-      right: 20px;
-      bottom: 20px;
-      z-index: 1400;
-      width: min(360px, calc(100vw - 24px));
-      background: rgba(13,15,20,0.92);
-      border: 1px solid rgba(201,168,76,0.28);
-      box-shadow: 0 14px 40px rgba(0,0,0,0.45), 0 0 24px rgba(201,168,76,0.08);
-      backdrop-filter: blur(12px);
-      border-radius: 18px;
-      overflow: hidden;
-      user-select: none;
-      touch-action: none;
-    }
-    #site-audio-player.is-dragging { cursor: grabbing; }
-    .sap-bar {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      padding: 0.8rem 0.9rem;
-      cursor: grab;
-    }
-    .sap-badge {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      flex: 0 0 auto;
-      display: grid;
-      place-items: center;
-      color: var(--black);
-      background: linear-gradient(135deg, var(--gold), #e0c36a);
-      font-size: 1rem;
-      box-shadow: 0 0 16px rgba(201,168,76,0.22);
-    }
-    .sap-meta { min-width: 0; flex: 1 1 auto; }
-    .sap-kicker {
-      font-family: 'Cinzel', serif;
-      font-size: 0.52rem;
-      letter-spacing: 0.24em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.18rem;
-    }
-    .sap-title {
-      font-family: 'Cinzel', serif;
-      font-size: 0.78rem;
-      letter-spacing: 0.06em;
-      color: var(--white);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .sap-controls {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      flex: 0 0 auto;
-    }
-    .sap-btn {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      border: 1px solid rgba(201,168,76,0.22);
-      background: rgba(201,168,76,0.08);
-      color: var(--gold);
-      font-size: 0.95rem;
-      line-height: 1;
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
-    }
-    .sap-btn:hover {
-      transform: translateY(-1px);
-      border-color: rgba(201,168,76,0.45);
-      background: rgba(201,168,76,0.14);
-    }
-    .sap-btn:active { transform: translateY(0); }
-    .sap-hidden-frame {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      left: -9999px;
-      top: -9999px;
-      opacity: 0;
-      pointer-events: none;
-    }
-    @media (max-width: 768px) {
-      #site-audio-player {
-        width: min(340px, calc(100vw - 16px));
-        right: 8px;
-        bottom: 8px;
-        z-index: 1600;
-      }
-      .sap-bar { padding: 0.75rem 0.8rem; }
-      .sap-title { font-size: 0.72rem; }
-    }
-
-  </style>
+  /* Bottom save bar */
+  .save-bar{margin-top:2.5rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap;padding-top:1.5rem;border-top:1px solid var(--border);}
+  .btn-save{background:var(--gold);color:var(--black);border:none;padding:0.85rem 2.5rem;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;transition:opacity 0.3s;}
+  .btn-save:hover{opacity:0.85;}
+  .btn-save:disabled{opacity:0.4;cursor:not-allowed;}
+  .btn-preview{background:transparent;color:var(--gold);border:1px solid var(--gold-dim);padding:0.85rem 1.5rem;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:all 0.3s;display:inline-block;}
+  .btn-preview:hover{border-color:var(--gold);}
+  .save-status{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.15em;}
+  .save-status.ok{color:#4a9e64;}
+  .save-status.err{color:#8a3030;}
+  .save-status.saving{color:var(--muted);}
+</style>
 </head>
 <body>
 
-  <nav>
-    <a href="#hero" class="nav-logo"><img src="logo-horizontal.png" alt="Dread Pirate Studio"></a>
-    <ul class="nav-links">
-      <li><a href="#captain">The Captain</a></li>
-      <li><a href="#crew">The Crew</a></li>
-      <li><a href="#hold">The Hold</a></li>
-      <li><a href="#video">Video</a></li>
-      <li><a href="#music">Music</a></li>
-      <li><a href="#contact">Contact</a></li>
-    </ul>
-  </nav>
+<nav>
+  <a href="../index.html" class="nav-logo"><img src="../logo-horizontal.png" alt="Dread Pirate Studio"></a>
+  <a href="../crew.html" class="nav-back">&#8592; The Crew</a>
+</nav>
 
-  <section id="hero">
-    <div class="hero-bg"></div>
-    <div class="hero-vignette"></div>
+<div class="wrap">
 
-    <div class="parallax-layer" id="px">
-      <div class="obj" style="top:10%;left:4%;" data-speed="40" data-dir="-1">
-        <svg width="110" height="110" viewBox="0 0 100 100">
-          <ellipse cx="50" cy="42" rx="30" ry="28" fill="#c9a84c" opacity="0.2"/>
-          <ellipse cx="38" cy="44" rx="7" ry="8" fill="#080808"/>
-          <ellipse cx="62" cy="44" rx="7" ry="8" fill="#080808"/>
-          <rect x="35" y="62" width="8" height="6" rx="1" fill="#c9a84c" opacity="0.2"/>
-          <rect x="46" y="62" width="8" height="6" rx="1" fill="#c9a84c" opacity="0.2"/>
-          <rect x="57" y="62" width="8" height="6" rx="1" fill="#c9a84c" opacity="0.2"/>
-        </svg>
-      </div>
-      <div class="obj" style="top:8%;right:5%;" data-speed="60" data-dir="1">
-        <svg width="100" height="100" viewBox="0 0 100 100">
-          <line x1="10" y1="10" x2="90" y2="90" stroke="#c9a84c" stroke-width="4" opacity="0.25" stroke-linecap="round"/>
-          <line x1="90" y1="10" x2="10" y2="90" stroke="#c9a84c" stroke-width="4" opacity="0.25" stroke-linecap="round"/>
-          <polygon points="10,10 5,18 18,5" fill="#c9a84c" opacity="0.3"/>
-          <polygon points="90,10 82,5 95,18" fill="#c9a84c" opacity="0.3"/>
-        </svg>
-      </div>
-      <div class="obj" style="top:42%;right:3%;" data-speed="30" data-dir="-1">
-        <svg width="80" height="80" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="44" stroke="#c9a84c" stroke-width="1.5" fill="none" opacity="0.2"/>
-          <polygon points="50,10 54,46 50,42 46,46" fill="#c9a84c" opacity="0.3"/>
-          <polygon points="50,90 54,54 50,58 46,54" fill="#c9a84c" opacity="0.15"/>
-          <polygon points="10,50 46,54 42,50 46,46" fill="#c9a84c" opacity="0.15"/>
-          <polygon points="90,50 54,54 58,50 54,46" fill="#c9a84c" opacity="0.3"/>
-          <circle cx="50" cy="50" r="5" fill="#c9a84c" opacity="0.35"/>
-        </svg>
-      </div>
-      <div class="obj" style="bottom:14%;left:5%;" data-speed="50" data-dir="1">
-        <svg width="70" height="85" viewBox="0 0 70 85">
-          <circle cx="35" cy="14" r="10" stroke="#c9a84c" stroke-width="2.5" fill="none" opacity="0.25"/>
-          <line x1="35" y1="24" x2="35" y2="70" stroke="#c9a84c" stroke-width="2.5" opacity="0.25" stroke-linecap="round"/>
-          <path d="M10 42 Q35 54 60 42" stroke="#c9a84c" stroke-width="2.5" fill="none" opacity="0.25" stroke-linecap="round"/>
-          <line x1="10" y1="42" x2="10" y2="62" stroke="#c9a84c" stroke-width="2" opacity="0.25" stroke-linecap="round"/>
-          <line x1="60" y1="42" x2="60" y2="62" stroke="#c9a84c" stroke-width="2" opacity="0.25" stroke-linecap="round"/>
-          <path d="M4 62 Q10 72 16 62" stroke="#c9a84c" stroke-width="2" fill="none" opacity="0.25"/>
-          <path d="M54 62 Q60 72 66 62" stroke="#c9a84c" stroke-width="2" fill="none" opacity="0.25"/>
-        </svg>
-      </div>
-      <div class="obj" style="bottom:8%;right:4%;" data-speed="70" data-dir="-1">
-        <svg width="100" height="100" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="44" stroke="#c9a84c" stroke-width="2" fill="none" opacity="0.2"/>
-          <circle cx="50" cy="50" r="12" stroke="#c9a84c" stroke-width="2.5" fill="none" opacity="0.3"/>
-          <line x1="50" y1="6"  x2="50" y2="38" stroke="#c9a84c" stroke-width="2.5" opacity="0.25"/>
-          <line x1="50" y1="62" x2="50" y2="94" stroke="#c9a84c" stroke-width="2.5" opacity="0.25"/>
-          <line x1="6"  y1="50" x2="38" y2="50" stroke="#c9a84c" stroke-width="2.5" opacity="0.25"/>
-          <line x1="62" y1="50" x2="94" y2="50" stroke="#c9a84c" stroke-width="2.5" opacity="0.25"/>
-          <line x1="19" y1="19" x2="41" y2="41" stroke="#c9a84c" stroke-width="2" opacity="0.2"/>
-          <line x1="59" y1="59" x2="81" y2="81" stroke="#c9a84c" stroke-width="2" opacity="0.2"/>
-          <line x1="81" y1="19" x2="59" y2="41" stroke="#c9a84c" stroke-width="2" opacity="0.2"/>
-          <line x1="41" y1="59" x2="19" y2="81" stroke="#c9a84c" stroke-width="2" opacity="0.2"/>
-        </svg>
-      </div>
-      <div class="obj" style="top:35%;left:35%;" data-speed="80" data-dir="1">
-        <svg width="50" height="30" viewBox="0 0 50 30">
-          <circle cx="5"  cy="15" r="3.5" fill="#c9a84c" opacity="0.35"/>
-          <circle cx="18" cy="8"  r="2.5" fill="#c9a84c" opacity="0.25"/>
-          <circle cx="30" cy="20" r="4"   fill="#c9a84c" opacity="0.2"/>
-          <circle cx="42" cy="10" r="2"   fill="#c9a84c" opacity="0.3"/>
-        </svg>
-      </div>
-      <div class="obj" style="bottom:20%;left:22%;" data-speed="20" data-dir="-1">
-        <svg width="200" height="25" viewBox="0 0 200 25">
-          <path d="M0 12 Q25 4 50 12 Q75 20 100 12 Q125 4 150 12 Q175 20 200 12" stroke="#c9a84c" stroke-width="1.5" fill="none" opacity="0.18"/>
-        </svg>
-      </div>
+  <!-- TOKEN GATE -->
+  <div id="token-gate">
+    <h1 class="gate-title">Edit Your Profile</h1>
+    <p class="gate-sub">Enter your personal access token to continue.</p>
+    <div class="token-row">
+      <input type="password" id="tok-in" placeholder="Your access token" autocomplete="off">
+      <button onclick="doValidate()">Enter</button>
     </div>
-
-    <div class="hero-content">
-      <img src="logo.png" alt="Dread Pirate Studio" class="hero-logo">
-      <p class="hero-tagline">Music &nbsp;&middot;&nbsp; Technology &nbsp;&middot;&nbsp; Creation</p>
-      <div class="hero-divider"></div>
-      <p class="hero-desc">A creative collective built at the intersection of craft and technology. Music, maker projects, gaming, content &mdash; all sailing under one flag.</p>
-      <div class="hero-cta-group">
-        <a href="#hold" class="btn btn-gold">Explore the Hold</a>
-        <a href="#crew" class="btn btn-outline">Meet the Crew</a>
-      </div>
-    </div>
-
-    <div class="scroll-hint">
-      <p>Sail Down</p>
-      <span></span>
-    </div>
-  </section>
-
-
-  <!-- ============================================================
-       CANNON SCENE SECTION
-       Scroll-jacked cinematic. Activates on entry, releases on complete.
-       ============================================================ -->
-  <section id="cannon-section"></section>
-
-  <!-- Fixed overlay — activated by JS when cannon section is in view -->
-  <div id="cannon-overlay">
-    <div id="cannon-stage">
-      <div class="cs-layer" id="cs-crowd">
-        <img src="crowd.png" alt="">
-      </div>
-      <div class="cs-layer" id="cs-cannon">
-        <img src="cannon.png" alt="">
-      </div>
-    </div>
-    <div id="cs-media"><img src="media.png" alt=""></div>
-    <div id="cs-flash"></div>
+    <p id="gate-err" class="gate-err" style="display:none"></p>
   </div>
 
-  <div id="cs-progress"></div>
-  <div id="cs-hint">Scroll to begin<span></span></div>
+  <!-- EDIT FORM -->
+  <div id="edit-wrap">
 
+    <p class="sec-label">Identity</p>
+    <div class="fg"><label>Display Name</label><input type="text" id="f-name" maxlength="60"></div>
+    <div class="fg"><label>Rank / Title</label><input type="text" id="f-rank" maxlength="60" placeholder="e.g. Captain, First Mate, Crew"></div>
 
-
-  <section id="mobile-cannon-section" aria-label="Cinematic introduction">
-    <div class="mobile-cannon-wrap">
-      <div class="mobile-cannon-stage" id="mobile-cannon-stage">
-        <div class="mcs-layer" id="mcs-crowd"><img src="crowd.png" alt=""></div>
-        <div class="mcs-layer" id="mcs-cannon"><img src="cannon.png" alt=""></div>
-        <div class="mcs-layer" id="mcs-media"><img src="media.png" alt=""></div>
-        <div id="mcs-flash"></div>
-        <div class="mobile-cannon-progress"><div class="mobile-cannon-progress-bar" id="mcs-progress-bar"></div></div>
+    <p class="sec-label">Disciplines</p>
+    <div class="fg">
+      <div class="disc-wrap" id="disc-wrap">
+        <span class="dt" data-v="Music Production">Music Production</span>
+        <span class="dt" data-v="Music">Music</span>
+        <span class="dt" data-v="Performance">Performance</span>
+        <span class="dt" data-v="Video">Video</span>
+        <span class="dt" data-v="Drone">Drone</span>
+        <span class="dt" data-v="Photography">Photography</span>
+        <span class="dt" data-v="Electronics">Electronics</span>
+        <span class="dt" data-v="3D Printing">3D Printing</span>
+        <span class="dt" data-v="Automation">Automation</span>
+        <span class="dt" data-v="Gaming">Gaming</span>
+        <span class="dt" data-v="Vocals">Vocals</span>
+        <span class="dt" data-v="Creative">Creative</span>
+        <span class="dt" data-v="Design">Design</span>
+        <span class="dt" data-v="Collab">Collab</span>
       </div>
-      <div class="mobile-cannon-scrollcue">Continue below<span></span></div>
-    </div>
-  </section>
-
-  <section id="captain">
-    <div class="section-inner">
-      <div class="section-header">
-        <p class="section-label">At the Helm</p>
-        <h2 class="section-title">The Captain</h2>
-        <div class="section-rule"></div>
-      </div>
-      <div class="captain-grid">
-        <div class="captain-img-wrap">
-          <img src="icon.png" alt="Captain Gabe Nelson">
-        </div>
-        <div class="captain-text">
-          <h3>Gabe Nelson</h3>
-          <p class="rank">Captain &nbsp;/&nbsp; YouGotGabe</p>
-          <p>Builder, musician, maker, and technologist based in Willmar, Minnesota. The creative force behind Dread Pirate Studio &mdash; a brand that refuses to be defined by a single discipline.</p>
-          <p>From electronics and 3D printing to music production, video creation, automation systems, and content &mdash; if it can be built, it gets built.</p>
-          <div class="skills-list">
-            <span class="skill-tag">Music Production</span>
-            <span class="skill-tag">Electronics</span>
-            <span class="skill-tag">3D Printing</span>
-            <span class="skill-tag">Video Production</span>
-            <span class="skill-tag">Automation</span>
-            <span class="skill-tag">Content Creation</span>
-            <span class="skill-tag">Ukulele / Guitar</span>
-            <span class="skill-tag">Gaming</span>
-          </div>
-        </div>
+      <div class="dt-add">
+        <input type="text" id="dt-custom" placeholder="Add a custom discipline...">
+        <button onclick="addDisc()">+ Add</button>
       </div>
     </div>
-  </section>
 
-  <section id="crew">
-    <div class="section-inner">
-      <div class="section-header">
-        <p class="section-label">The Company</p>
-        <h2 class="section-title">The Crew</h2>
-        <div class="section-rule"></div>
-        <p class="section-sub">Every great voyage needs a worthy crew.</p>
-      </div>
-      <div class="crew-grid">
-        <a href="crew/gabe.html" class="glow-card" style="text-decoration:none;">
-          <div class="glow-card__inner">
-            <div class="crew-icon">&#9760;</div>
-            <p class="crew-name">Gabe Nelson</p>
-            <p class="crew-role">Captain &nbsp;&middot;&nbsp; YouGotGabe</p>
-            <div class="crew-links">
-              <span class="crew-link">View Profile &#8594;</span>
-            </div>
-          </div>
-        </a>
-        <a href="crew/ot.html" class="glow-card" style="text-decoration:none;">
-          <div class="glow-card__inner">
-            <div class="crew-icon">&#127928;</div>
-            <p class="crew-name">OT</p>
-            <p class="crew-role">Music &nbsp;&middot;&nbsp; Performance</p>
-            <div class="crew-links">
-              <span class="crew-link">View Profile &#8594;</span>
-            </div>
-          </div>
-        </a>
-        <a href="crew/zach.html" class="glow-card" style="text-decoration:none;">
-          <div class="glow-card__inner">
-            <div class="crew-icon">&#127916;</div>
-            <p class="crew-name">Zach</p>
-            <p class="crew-role">Video &nbsp;&middot;&nbsp; Drone</p>
-            <div class="crew-links">
-              <span class="crew-link">View Profile &#8594;</span>
-            </div>
-          </div>
-        </a>
-        <a href="crew/abram.html" class="glow-card" style="text-decoration:none;">
-          <div class="glow-card__inner">
-            <div class="crew-icon">&#127908;</div>
-            <p class="crew-name">Abram</p>
-            <p class="crew-role">Original Music &nbsp;&middot;&nbsp; Vocals</p>
-            <div class="crew-links">
-              <span class="crew-link">View Profile &#8594;</span>
-            </div>
-          </div>
-        </a>
-        <a href="crew/jade.html" class="glow-card" style="text-decoration:none;">
-          <div class="glow-card__inner">
-            <div class="crew-icon">&#127912;</div>
-            <p class="crew-name">Jade</p>
-            <p class="crew-role">Creative &nbsp;&middot;&nbsp; Collab</p>
-            <div class="crew-links">
-              <span class="crew-link">View Profile &#8594;</span>
-            </div>
-          </div>
-        </a>
-      </div>
-      <div style="text-align:center;margin-top:2.5rem;">
-        <a href="crew.html" class="btn btn-outline">View Full Crew Roster &#8594;</a>
-      </div>
+    <p class="sec-label">Your Story</p>
+    <div class="fg"><label>Bio</label><textarea id="f-bio" rows="7" placeholder="Tell your story. Separate paragraphs with a blank line."></textarea></div>
+    <div class="fg"><label>Personal Quote</label><input type="text" id="f-quote" maxlength="220" placeholder="A line that says it all."></div>
+
+    <p class="sec-label">About You</p>
+    <div class="fg">
+      <label>Talents</label>
+      <textarea id="f-talents" rows="3" placeholder="What are you skilled at? Music production, welding, building circuits..."></textarea>
     </div>
-  </section>
-
-  <section id="hold">
-    <div class="section-inner">
-      <div class="section-header">
-        <p class="section-label">The Archive</p>
-        <h2 class="section-title">The Hold</h2>
-        <div class="section-rule"></div>
-        <p class="section-sub">Content, projects, and things we've made.</p>
-      </div>
-      <div class="hold-grid">
-        <a href="https://www.youtube.com/@DreadPirateStudio" target="_blank" class="hold-card">
-          <div class="hold-card-header"><span class="hold-icon">&#127916;</span><span class="hold-label">Video</span></div>
-          <div class="hold-card-body">
-            <h3 class="hold-card-title">YouTube Channel</h3>
-            <p class="hold-card-desc">Live sessions, gaming footage, travel videos, and creative projects.</p>
-          </div>
-        </a>
-        <a href="https://soundcloud.com/yougotgabe" target="_blank" class="hold-card">
-          <div class="hold-card-header"><span class="hold-icon">&#127925;</span><span class="hold-label">Music</span></div>
-          <div class="hold-card-body">
-            <h3 class="hold-card-title">YouGotGabe on SoundCloud</h3>
-            <p class="hold-card-desc">Original tracks, covers, and audio experiments.</p>
-          </div>
-        </a>
-        <a href="https://soundcloud.com/maderightband" target="_blank" class="hold-card">
-          <div class="hold-card-header"><span class="hold-icon">&#127928;</span><span class="hold-label">Band</span></div>
-          <div class="hold-card-body">
-            <h3 class="hold-card-title">Made Right</h3>
-            <p class="hold-card-desc">Band recordings and live performance content from Gabe &amp; OT.</p>
-          </div>
-        </a>
-        <a href="https://soundcloud.com/asabovesobelowmusic" target="_blank" class="hold-card">
-          <div class="hold-card-header"><span class="hold-icon">&#127754;</span><span class="hold-label">Music</span></div>
-          <div class="hold-card-body">
-            <h3 class="hold-card-title">As Above So Below</h3>
-            <p class="hold-card-desc">Deeper waters. Ambient and experimental audio works.</p>
-          </div>
-        </a>
-        <div class="hold-card" style="cursor:default;">
-          <div class="hold-card-header"><span class="hold-icon">&#9881;&#65039;</span><span class="hold-label">Tech</span></div>
-          <div class="hold-card-body">
-            <h3 class="hold-card-title">Maker Projects</h3>
-            <p class="hold-card-desc">Electronics, 3D printing, WLED builds, and automation work. Coming soon.</p>
-          </div>
-        </div>
-        <div class="hold-card" style="cursor:default;">
-          <div class="hold-card-header"><span class="hold-icon">&#128268;</span><span class="hold-label">Services</span></div>
-          <div class="hold-card-body">
-            <h3 class="hold-card-title">Integrations &amp; Automation</h3>
-            <p class="hold-card-desc">Technology solutions with a pirate's sense of adventure. Coming soon.</p>
-          </div>
-        </div>
-      </div>
+    <div class="fg">
+      <label>Interests</label>
+      <textarea id="f-interests" rows="3" placeholder="What are you into? Science fiction, vintage gear, local shows..."></textarea>
     </div>
-  </section>
-
-  <section id="video">
-    <div class="section-inner">
-      <div class="section-header">
-        <p class="section-label">From the Vault</p>
-        <h2 class="section-title">Video</h2>
-        <div class="section-rule"></div>
-        <p class="section-sub">Live recordings and original performances from the crew.</p>
-      </div>
-      <div class="video-grid">
-        <div class="video-card">
-          <div class="video-embed">
-            <iframe src="https://www.youtube.com/embed/aXe3K5saepk" title="Born to Do This - Dan Reeb" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-          </div>
-          <div class="video-card-body">
-            <p class="video-card-title">Born to Do This</p>
-            <p class="video-card-meta">Dan Reeb &nbsp;&middot;&nbsp; Recorded by Dread Pirate Studio</p>
-          </div>
-        </div>
-        <div class="video-card">
-          <div class="video-embed">
-            <iframe src="https://www.youtube.com/embed/CEwUJDqtFWw" title="New Old Friend - Sam Murphy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-          </div>
-          <div class="video-card-body">
-            <p class="video-card-title">New Old Friend</p>
-            <p class="video-card-meta">Sam Murphy &nbsp;&middot;&nbsp; Recorded by Dread Pirate Studio</p>
-          </div>
-        </div>
-      </div>
+    <div class="fg">
+      <label>Hobbies</label>
+      <textarea id="f-hobbies" rows="3" placeholder="What do you do for fun? Cooking, hiking, retro gaming..."></textarea>
     </div>
-  </section>
 
-  <section id="music">
-    <div class="section-inner">
-      <div class="section-header">
-        <p class="section-label">From the Hold</p>
-        <h2 class="section-title">Music</h2>
-        <div class="section-rule"></div>
-      </div>
-      <div class="music-grid">
-        <div class="sc-card">
-          <div class="sc-card-header"><div class="sc-dot"></div><span class="sc-title">YouGotGabe</span></div>
-          <div class="sc-embed">
-            <iframe height="166" scrolling="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/yougotgabe&color=%23c9a84c&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false"></iframe>
-          </div>
-        </div>
-        <div class="sc-card">
-          <div class="sc-card-header"><div class="sc-dot"></div><span class="sc-title">Made Right</span></div>
-          <div class="sc-embed">
-            <iframe height="166" scrolling="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/maderightband&color=%23c9a84c&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false"></iframe>
-          </div>
-        </div>
-        <div class="sc-card">
-          <div class="sc-card-header"><div class="sc-dot"></div><span class="sc-title">As Above So Below</span></div>
-          <div class="sc-embed">
-            <iframe height="166" scrolling="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/asabovesobelowmusic&color=%23c9a84c&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false"></iframe>
-          </div>
-        </div>
-      </div>
+    <p class="sec-label">Photo</p>
+    <div class="fg">
+      <label>Photo URL</label>
+      <input type="url" id="f-photo" placeholder="https://... (paste a direct link to your image)">
+      <p class="hint">Upload your image to Imgur, Google Drive, or Dropbox and paste the direct link here.</p>
     </div>
-  </section>
 
-  <section id="contact">
-    <div class="section-inner">
-      <div class="contact-inner">
-        <p class="section-label">Join the Crew</p>
-        <h2 class="section-title">Set Sail Together</h2>
-        <div class="section-rule"></div>
-        <p class="contact-note">Collaborations, commissions, questions, or just a good conversation &mdash; the captain's door is open.</p>
-        <a href="/cdn-cgi/l/email-protection#96f1f7f4f3d6f2e4f3f7f2e6ffe4f7e2f3e5e2e3f2fff9b8f5f9fb" class="contact-email"><span class="__cf_email__" data-cfemail="d6b1b7b4b396b2a4b3b7b2a6bfa4b7a2b3a5a2a3b2bfb9f8b5b9bb">[email&#160;protected]</span></a>
-        <p class="contact-note" style="font-size:0.85rem;">Response time: usually within 24 hours</p>
-      </div>
+    <p class="sec-label">Links</p>
+    <div class="fg"><label>Link 1</label><div class="two-col"><input type="text" id="f-l1l" placeholder="Label (e.g. YouTube)"><input type="url" id="f-l1u" placeholder="https://..."></div></div>
+    <div class="fg"><label>Link 2</label><div class="two-col"><input type="text" id="f-l2l" placeholder="Label"><input type="url" id="f-l2u" placeholder="https://..."></div></div>
+    <div class="fg"><label>Link 3</label><div class="two-col"><input type="text" id="f-l3l" placeholder="Label"><input type="url" id="f-l3u" placeholder="https://..."></div></div>
+    <div class="fg"><label>Link 4</label><div class="two-col"><input type="text" id="f-l4l" placeholder="Label"><input type="url" id="f-l4u" placeholder="https://..."></div></div>
+
+    <p class="sec-label">Media Library</p>
+    <p class="hint" style="margin-bottom:1.25rem;">Add music, videos, photos, or links. Each item can have a title, caption, and notes (great for lyrics, credits, or backstory).</p>
+    <div class="media-list" id="media-list"></div>
+    <button class="add-media-btn" onclick="addMediaItem()">+ Add Media Item</button>
+
+    <div class="save-bar">
+      <button class="btn-save" id="save-btn" onclick="doSave()">Save Everything</button>
+      <a id="preview-link" href="#" class="btn-preview" target="_blank">Preview Profile</a>
+      <span class="save-status" id="save-status"></span>
     </div>
-  </section>
-
-  <footer>
-    <img src="icon.png" alt="DPS" class="footer-logo">
-    <p class="footer-text">&copy; 2026 Dread Pirate Studio &nbsp;&middot;&nbsp; dreadpiratestudio.com &nbsp;&middot;&nbsp; All Rights Reserved</p>
-    <p style="margin-top:1rem;">
-      <a href="crew/edit.html" style="font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;opacity:0.5;transition:opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">&#128273; Crew Profile Access</a>
-    </p>
-  </footer>
-
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-    // PARALLAX - no backticks, no arrow functions, no const/let
-    // Plain ES5 to survive any Cloudflare transformation
-    var pObjs = document.querySelectorAll('.obj');
-    var tX = 0, tY = 0, cX = 0, cY = 0;
-
-    window.addEventListener('mousemove', function(e) {
-      tX = (e.clientX - window.innerWidth  / 2) / (window.innerWidth  / 2);
-      tY = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
-    });
-
-    function tick() {
-      cX += (tX - cX) * 0.08;
-      cY += (tY - cY) * 0.08;
-      for (var i = 0; i < pObjs.length; i++) {
-        var spd = parseFloat(pObjs[i].getAttribute('data-speed'));
-        var dir = parseFloat(pObjs[i].getAttribute('data-dir'));
-        pObjs[i].style.transform = 'translate(' + (cX * spd * dir) + 'px, ' + (cY * spd * dir) + 'px)';
-      }
-      requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-
-    // GLOW CARDS
-    var cards = document.querySelectorAll('.glow-card');
-    for (var c = 0; c < cards.length; c++) {
-      (function(card) {
-        card.addEventListener('mousemove', function(e) {
-          var r = card.getBoundingClientRect();
-          card.style.setProperty('--mx', ((e.clientX - r.left) / r.width  * 100).toFixed(1) + '%');
-          card.style.setProperty('--my', ((e.clientY - r.top)  / r.height * 100).toFixed(1) + '%');
-        });
-        card.addEventListener('mouseleave', function() {
-          card.style.setProperty('--mx', '50%');
-          card.style.setProperty('--my', '50%');
-        });
-      })(cards[c]);
-    }
-
-    // SCROLL REVEAL
-    if ('IntersectionObserver' in window) {
-      var revealEls = document.querySelectorAll('.glow-card, .hold-card, .sc-card, .video-card');
-      var obs = new IntersectionObserver(function(entries) {
-        for (var e = 0; e < entries.length; e++) {
-          if (entries[e].isIntersecting) {
-            entries[e].target.style.opacity = '1';
-            entries[e].target.style.animation = 'fadeUp 0.7s ease both';
-            obs.unobserve(entries[e].target);
-          }
-        }
-      }, { threshold: 0.1 });
-      for (var r = 0; r < revealEls.length; r++) {
-        revealEls[r].style.opacity = '0';
-        obs.observe(revealEls[r]);
-      }
-    }
-  
-
-
-  /* ============================================================
-     MOBILE CANNON SCENE
-     ============================================================ */
-  (function() {
-    if (!window.matchMedia || !window.matchMedia('(max-width: 768px)').matches) return;
-
-    var mobileSection = document.getElementById('mobile-cannon-section');
-    var cannon = document.getElementById('mcs-cannon');
-    var crowd = document.getElementById('mcs-crowd');
-    var media = document.getElementById('mcs-media');
-    var flash = document.getElementById('mcs-flash');
-    var progress = document.getElementById('mcs-progress-bar');
-    if (!mobileSection || !cannon || !crowd || !media || !flash || !progress) return;
-
-    var mobileActive = false;
-    var startTime = 0;
-    var duration = 2400;
-    var rafId = 0;
-    var fired = false;
-
-    Math.clamp = Math.clamp || function(v, a, b) {
-      return Math.max(a, Math.min(b, v));
-    };
-
-    function ease(t) {
-      t = Math.clamp(t, 0, 1);
-      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    }
-    function easeOut(t) {
-      t = Math.clamp(t, 0, 1);
-      return 1 - Math.pow(1 - t, 3);
-    }
-    function rng(val, a, b) {
-      return Math.clamp((val - a) / (b - a), 0, 1);
-    }
-    function lerp(a, b, t) {
-      return a + (b - a) * t;
-    }
-
-    function applyFrame(p) {
-      progress.style.width = (p * 100) + '%';
-      cannon.style.opacity = rng(p, 0.02, 0.16);
-      crowd.style.opacity = rng(p, 0.10, 0.24);
-
-      if (p < 0.38) {
-        cannon.style.transform = 'translateX(' + lerp(-18, 0, ease(rng(p, 0.02, 0.24))) + '%) scale(' + lerp(1.08, 1, rng(p, 0.02, 0.24)) + ')';
-        crowd.style.transform = 'translateX(' + lerp(18, 0, ease(rng(p, 0.10, 0.30))) + '%) scale(' + lerp(1.04, 1, rng(p, 0.10, 0.30)) + ')';
-      }
-
-      if (p < 0.40) {
-        media.style.opacity = 0;
-        media.style.transform = 'scale(0.34) translateX(0)';
-      } else {
-        var bp = rng(p, 0.40, 1.00);
-        var sc = bp < 0.24 ? lerp(0.34, 1.0, easeOut(rng(bp, 0, 0.24))) : 1.0;
-        var tx = lerp(0, 112, bp);
-        var op = bp < 0.54 ? 1 : lerp(1, 0, rng(bp, 0.54, 0.70));
-        media.style.opacity = op;
-        media.style.transform = 'scale(' + sc + ') translateX(' + tx + '%)';
-
-        if (bp >= 0.25) {
-          var crowdTx = lerp(0, 48, rng(bp, 0.25, 0.72));
-          var crowdOp = bp < 0.58 ? 1 : lerp(1, 0, rng(bp, 0.58, 0.74));
-          crowd.style.opacity = crowdOp;
-          crowd.style.transform = 'translateX(' + crowdTx + '%) scale(1)';
-        }
-      }
-
-      if (p >= 0.40 && p <= 0.49) {
-        var recoil = p < 0.445 ? lerp(0, -8, rng(p, 0.40, 0.445)) : lerp(-8, 0, rng(p, 0.445, 0.49));
-        cannon.style.transform = 'translateX(' + recoil + '%) scale(1)';
-      }
-
-      if (!fired && p >= 0.40) {
-        fired = true;
-        flash.style.transition = 'none';
-        flash.style.opacity = '1';
-        flash.style.transform = 'translate(-50%, 50%) scale(1.15)';
-        setTimeout(function() {
-          flash.style.transition = 'opacity 0.18s, transform 0.22s';
-          flash.style.opacity = '0';
-          flash.style.transform = 'translate(-50%, 50%) scale(0.3)';
-        }, 70);
-      }
-
-      if (p < 0.34) fired = false;
-
-      if (p >= 0.76) {
-        cannon.style.opacity = lerp(1, 0, rng(p, 0.76, 0.92));
-        cannon.style.transform = 'translateX(' + lerp(0, -24, ease(rng(p, 0.76, 0.92))) + '%) scale(1)';
-      }
-    }
-
-    function animate(ts) {
-      if (!mobileActive) return;
-      if (!startTime) startTime = ts;
-      var p = Math.clamp((ts - startTime) / duration, 0, 1);
-      applyFrame(p);
-      if (p < 1) {
-        rafId = requestAnimationFrame(animate);
-      }
-    }
-
-    function resetMobileScene() {
-      startTime = 0;
-      fired = false;
-      progress.style.width = '0%';
-      cannon.style.opacity = '0';
-      crowd.style.opacity = '0';
-      media.style.opacity = '0';
-      cannon.style.transform = 'translateX(-18%) scale(1.08)';
-      crowd.style.transform = 'translateX(18%) scale(1.04)';
-      media.style.transform = 'scale(0.34) translateX(0)';
-      flash.style.opacity = '0';
-      flash.style.transform = 'translate(-50%, 50%) scale(0.3)';
-    }
-
-    resetMobileScene();
-
-    if ('IntersectionObserver' in window) {
-      var mobObs = new IntersectionObserver(function(entries) {
-        for (var i = 0; i < entries.length; i++) {
-          if (entries[i].isIntersecting) {
-            mobileActive = true;
-            cancelAnimationFrame(rafId);
-            resetMobileScene();
-            rafId = requestAnimationFrame(animate);
-          } else {
-            mobileActive = false;
-            cancelAnimationFrame(rafId);
-          }
-        }
-      }, { threshold: 0.55 });
-      mobObs.observe(mobileSection);
-    }
-  })();
-
-  /* ============================================================
-     CANNON SCENE JAVASCRIPT
-     ============================================================ */
-  (function() {
-    if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return;
-
-    var TOTAL      = Math.round(2.25 * window.innerHeight);
-    var section    = document.getElementById('cannon-section');
-    var overlay    = document.getElementById('cannon-overlay');
-    var csFlash    = document.getElementById('cs-flash');
-    var csCannon   = document.getElementById('cs-cannon');
-    var csCrowd    = document.getElementById('cs-crowd');
-    var csMedia    = document.getElementById('cs-media');
-    var csProgress = document.getElementById('cs-progress');
-    var csHint     = document.getElementById('cs-hint');
-
-    if (!section || !overlay || !csFlash || !csCannon || !csCrowd || !csMedia || !csProgress || !csHint) return;
-
-    section.style.height = TOTAL + 'px';
-
-    var csFiredAt = -1;
-    var csSmokes  = [];
-    var csLastST  = 0;
-
-    Math.clamp = Math.clamp || function(v, a, b) {
-      return Math.max(a, Math.min(b, v));
-    };
-
-    function csEase(t) {
-      t = Math.clamp(t, 0, 1);
-      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    }
-    function csEaseOut(t) {
-      t = Math.clamp(t, 0, 1);
-      return 1 - Math.pow(1 - t, 3);
-    }
-    function csRng(val, a, b) {
-      return Math.clamp((val - a) / (b - a), 0, 1);
-    }
-    function csLerp(a, b, t) {
-      return a + (b - a) * t;
-    }
-
-    function csSpawnSmoke() {
-      var vw = window.innerWidth / 100;
-      for (var i = 0; i < 10; i++) {
-        var el = document.createElement('div');
-        el.style.cssText = 'position:fixed;border-radius:50%;background:rgba(220,220,220,0.5);pointer-events:none;z-index:209;';
-        var sz = 6 + Math.random() * 18;
-        el.style.width = sz + 'px';
-        el.style.height = sz + 'px';
-        el.style.left = (22.1 * vw + (Math.random() - 0.5) * 10) + 'px';
-        el.style.bottom = (6.1 * vw + (Math.random() - 0.5) * 8) + 'px';
-        el._vx = (Math.random() * 3 + 0.5);
-        el._vy = -(Math.random() * 2.5 + 0.3);
-        el._life = 0;
-        el._max = 0.5 + Math.random() * 0.5;
-        el.style.opacity = 0;
-        document.body.appendChild(el);
-        csSmokes.push(el);
-      }
-    }
-
-    function csTickSmoke(t) {
-      var dt = Math.min((t - csLastST) / 1000, 0.05);
-      csLastST = t;
-      for (var i = csSmokes.length - 1; i >= 0; i--) {
-        var s = csSmokes[i];
-        s._life += dt;
-        if (s._life >= s._max) {
-          if (s.parentNode) s.parentNode.removeChild(s);
-          csSmokes.splice(i, 1);
-        } else {
-          var p = s._life / s._max;
-          s.style.opacity = p < 0.2 ? (p / 0.2) * 0.5 : (1 - p) * 0.5;
-          s.style.left = (parseFloat(s.style.left) + s._vx * dt * 30) + 'px';
-          s.style.bottom = (parseFloat(s.style.bottom) + s._vy * dt * 30) + 'px';
-          s.style.transform = 'scale(' + (0.4 + p * 2.2) + ')';
-        }
-      }
-      if (csSmokes.length > 0) requestAnimationFrame(csTickSmoke);
-    }
-
-    function csDoFlash() {
-      csFlash.style.opacity = '1';
-      csSpawnSmoke();
-      requestAnimationFrame(function(t) {
-        csLastST = t;
-        csTickSmoke(t);
-      });
-      setTimeout(function() {
-        csFlash.style.transition = 'opacity 0.1s';
-        csFlash.style.opacity = '0';
-        setTimeout(function() {
-          csFlash.style.transition = '';
-        }, 130);
-      }, 70);
-    }
-
-    function csApplyState(p) {
-      var kf = [
-        [0.00, 0.00],
-        [0.06, 0.04],
-        [0.36, 0.34],
-        [0.44, 0.36],
-        [0.50, 0.40],
-        [0.66, 0.66],
-        [0.74, 0.72],
-        [0.80, 0.74],
-        [1.00, 0.90]
-      ];
-
-      var ap = kf[kf.length - 1][1];
-      for (var k = 0; k < kf.length - 1; k++) {
-        if (p >= kf[k][0] && p <= kf[k + 1][0]) {
-          ap = csLerp(kf[k][1], kf[k + 1][1], csRng(p, kf[k][0], kf[k + 1][0]));
-          break;
-        }
-      }
-
-      csProgress.style.width = (p * 100) + '%';
-      csHint.style.opacity = (1 - Math.clamp(p / 0.04, 0, 1));
-
-      if (p > 0 && p < 1) {
-        overlay.classList.add('active');
-        csProgress.style.opacity = '1';
-        csHint.style.display = 'block';
-      } else {
-        overlay.classList.remove('active');
-        csProgress.style.opacity = '0';
-        csHint.style.display = p <= 0 ? 'block' : 'none';
-      }
-
-      var ct = csEase(csRng(ap, 0.04, 0.22));
-      csCannon.style.opacity = csRng(ap, 0.04, 0.18);
-      if (ap < 0.40) {
-        csCannon.style.transform = 'translateX(' + csLerp(-120, 0, ct) + 'px)';
-      }
-
-      if (ap < 0.40) {
-        var crt = csEase(csRng(ap, 0.10, 0.32));
-        csCrowd.style.opacity = csRng(ap, 0.10, 0.26);
-        csCrowd.style.transform = 'translateX(' + csLerp(120, 0, crt) + 'px)';
-      }
-
-      if (ap >= 0.40 && csFiredAt < 0) {
-        csFiredAt = ap;
-        csDoFlash();
-      }
-      if (ap < 0.36) {
-        csFiredAt = -1;
-      }
-
-      if (ap < 0.40) {
-        csMedia.style.opacity = 0;
-        csMedia.style.transform = 'scale(0.35)';
-      } else {
-        var bp = csRng(ap, 0.40, 1.00);
-        var sc = bp < 0.25 ? csLerp(0.35, 1.0, csEaseOut(csRng(bp, 0, 0.25))) : 1.0;
-        var tx = bp * window.innerWidth * 1.2;
-        var op = bp < 0.45 ? 1.0 : csLerp(1, 0, csRng(bp, 0.45, 0.52));
-        csMedia.style.opacity = op;
-        csMedia.style.transform = 'scale(' + sc + ') translateX(' + tx + 'px)';
-
-        if (bp >= 0.25) {
-          var crowdTx = tx - (0.30 * window.innerWidth);
-          var crowdOp = bp < 0.45 ? 1.0 : csLerp(1, 0, csRng(bp, 0.45, 0.52));
-          csCrowd.style.opacity = crowdOp;
-          csCrowd.style.transform = 'translateX(' + crowdTx + 'px)';
-        }
-      }
-
-      if (ap >= 0.40 && ap <= 0.48) {
-        var rt = ap < 0.44 ? csLerp(0, -14, csRng(ap, 0.40, 0.44)) : csLerp(-14, 0, csRng(ap, 0.44, 0.48));
-        csCannon.style.transform = 'translateX(' + rt + 'px)';
-      } else if (ap > 0.48 && ap < 0.74) {
-        csCannon.style.transform = 'translateX(0px)';
-      }
-
-      var cannonImg = csCannon.querySelector('img');
-      if (cannonImg) {
-        var cr = cannonImg.getBoundingClientRect();
-        csFlash.style.left = (cr.left + cr.width * 0.89) + 'px';
-        csFlash.style.bottom = (window.innerHeight - (cr.top + cr.height * 0.52)) + 'px';
-      }
-
-      if (ap >= 0.74) {
-        var ct2 = csEase(csRng(ap, 0.74, 0.88));
-        csCannon.style.opacity = csLerp(1, 0, csRng(ap, 0.76, 0.88));
-        csCannon.style.transform = 'translateX(' + csLerp(0, -200, ct2) + 'px)';
-      }
-    }
-
-    function updateFromScroll() {
-      var rect = section.getBoundingClientRect();
-      var traveled = Math.clamp(-rect.top, 0, TOTAL);
-      var p = Math.clamp(traveled / TOTAL, 0, 1);
-      csApplyState(p);
-    }
-
-    window.addEventListener('scroll', updateFromScroll, { passive: true });
-    window.addEventListener('resize', function() {
-      TOTAL = Math.round(2.25 * window.innerHeight);
-      section.style.height = TOTAL + 'px';
-      updateFromScroll();
-    });
-
-    csApplyState(0);
-    updateFromScroll();
-  })();
-
-</script>
-
-
-
-  <div id="site-audio-player" aria-label="Site audio player">
-    <div class="sap-bar" id="sap-drag-handle">
-      <div class="sap-badge">♫</div>
-      <div class="sap-meta">
-        <div class="sap-kicker">Now Playing</div>
-        <div class="sap-title" id="sap-title">Ready to set sail</div>
-      </div>
-      <div class="sap-controls">
-        <button class="sap-btn" id="sap-prev" type="button" aria-label="Previous track">⏮</button>
-        <button class="sap-btn" id="sap-play" type="button" aria-label="Play or pause">▶</button>
-        <button class="sap-btn" id="sap-next" type="button" aria-label="Next track">⏭</button>
-      </div>
-    </div>
-    <iframe id="sap-widget-frame" class="sap-hidden-frame" title="Hidden site audio player" allow="autoplay"></iframe>
   </div>
 
+</div>
 
 <script>
-  window.SITE_AUDIO_PLAYLIST_URL = 'https://soundcloud.com/yougotgabe/sets/dread-pirate-studio';
+var SURL='https://efylfnnshmaauhiwqaxj.supabase.co';
+var SKEY='sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
+var profile=null, token=null, selDiscs=[], mediaItems=[];
+
+document.getElementById('tok-in').addEventListener('keydown',function(e){if(e.key==='Enter')doValidate();});
+
+function doValidate(){
+  var t=document.getElementById('tok-in').value.trim();
+  if(!t)return;
+  document.getElementById('gate-err').style.display='none';
+  fetch(SURL+'/rest/v1/crew_profiles?edit_token=eq.'+encodeURIComponent(t)+'&select=*&limit=1',{
+    headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}
+  }).then(function(r){return r.json();}).then(function(d){
+    if(!d||d.length===0){
+      var e=document.getElementById('gate-err');
+      e.textContent='Invalid token. Check with Gabe if you need yours.';
+      e.style.display='block';return;
+    }
+    token=t; profile=d[0];
+    loadMedia(d[0]);
+  }).catch(function(){
+    var e=document.getElementById('gate-err');
+    e.textContent='Connection error. Please try again.';
+    e.style.display='block';
+  });
+}
+
+function loadMedia(p){
+  fetch(SURL+'/rest/v1/crew_media?crew_slug=eq.'+encodeURIComponent(p.slug)+'&order=sort_order.asc,created_at.asc',{
+    headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}
+  }).then(function(r){return r.json();}).then(function(d){
+    mediaItems=(d||[]).map(function(m){return Object.assign({},m,{_id:m.id,_new:false});});
+    populateForm(p);
+    document.getElementById('token-gate').style.display='none';
+    document.getElementById('edit-wrap').style.display='block';
+  });
+}
+
+function populateForm(p){
+  document.getElementById('f-name').value=p.display_name||'';
+  document.getElementById('f-rank').value=p.rank||'';
+  document.getElementById('f-bio').value=p.bio||'';
+  document.getElementById('f-quote').value=p.quote||'';
+  document.getElementById('f-talents').value=p.talents||'';
+  document.getElementById('f-interests').value=p.interests||'';
+  document.getElementById('f-hobbies').value=p.hobbies||'';
+  document.getElementById('f-photo').value=p.photo_url||'';
+  document.getElementById('f-l1l').value=p.link_1_label||'';document.getElementById('f-l1u').value=p.link_1_url||'';
+  document.getElementById('f-l2l').value=p.link_2_label||'';document.getElementById('f-l2u').value=p.link_2_url||'';
+  document.getElementById('f-l3l').value=p.link_3_label||'';document.getElementById('f-l3u').value=p.link_3_url||'';
+  document.getElementById('f-l4l').value=p.link_4_label||'';document.getElementById('f-l4u').value=p.link_4_url||'';
+  document.getElementById('preview-link').href=p.slug+'.html';
+
+  selDiscs=p.disciplines?p.disciplines.slice():[];
+  var tags=document.querySelectorAll('.dt');
+  var presets=[];
+  for(var i=0;i<tags.length;i++){presets.push(tags[i].getAttribute('data-v'));if(selDiscs.indexOf(tags[i].getAttribute('data-v'))!==-1)tags[i].classList.add('on');tags[i].addEventListener('click',toggleDisc);}
+  for(var k=0;k<selDiscs.length;k++){if(presets.indexOf(selDiscs[k])===-1)addDiscTag(selDiscs[k]);}
+
+  renderMediaList();
+}
+
+function toggleDisc(){var v=this.getAttribute('data-v'),idx=selDiscs.indexOf(v);if(idx===-1){selDiscs.push(v);this.classList.add('on');}else{selDiscs.splice(idx,1);this.classList.remove('on');}}
+function addDisc(){var i=document.getElementById('dt-custom'),v=i.value.trim();if(!v)return;if(selDiscs.indexOf(v)===-1){selDiscs.push(v);addDiscTag(v);}i.value='';}
+function addDiscTag(v){var w=document.getElementById('disc-wrap'),t=document.createElement('span');t.className='dt on';t.setAttribute('data-v',v);t.textContent=v;t.addEventListener('click',toggleDisc);w.insertBefore(t,w.querySelector('.dt-add'));}
+document.getElementById('dt-custom').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addDisc();}});
+
+var mediaCounter=0;
+var openItems={};  // track which item indices are open
+
+function addMediaItem(init){
+  var item=init||{_uid:'new-'+(++mediaCounter),_new:true,type:'soundcloud',title:'',caption:'',notes:'',url:'',sort_order:mediaItems.length+1,published:true};
+  if(!init){
+    mediaItems.push(item);
+    openItems[mediaItems.length-1]=true;  // auto-open new item
+  }
+  renderMediaList();
+}
+
+function renderMediaList(){
+  var list=document.getElementById('media-list');
+  if(!mediaItems.length){list.innerHTML='<p style="color:var(--muted);font-style:italic;font-size:0.9rem;">No media items yet. Add your first one below.</p>';return;}
+  list.innerHTML=mediaItems.map(function(item,idx){
+    var uid=item._id||item._uid||idx;
+    return '<div class="media-item" data-uid="'+uid+'">'
+      +'<div class="media-item-header" onclick="toggleMediaBody(this)">'
+      +'<span class="media-item-num">#'+(idx+1)+'</span>'
+      +'<span class="media-item-title-display">'+(item.title||'Untitled Item')+'</span>'
+      +(item.published===false?'<span style="font-family:Cinzel,serif;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;color:#8a6f2e;border:1px solid #8a6f2e;padding:0.15rem 0.5rem;margin-right:0.5rem;">Draft</span>':'')
+      +'<div class="media-item-actions" onclick="event.stopPropagation()">'
+      +(idx>0?'<button class="mi-btn" onclick="moveItem('+idx+',-1)">&#8593;</button>':'')
+      +(idx<mediaItems.length-1?'<button class="mi-btn" onclick="moveItem('+idx+',1)">&#8595;</button>':'')
+      +'<button class="mi-btn del" onclick="removeItem('+idx+')">Remove</button>'
+      +'</div></div>'
+      +'<div class="media-item-body">'
+      +'<div class="fg"><label>Type</label>'
+      +'<select onchange="updateItemField('+idx+',\'type\',this.value)">'
+      +'<option value="soundcloud"'+(item.type==='soundcloud'?' selected':'')+'>SoundCloud</option>'
+      +'<option value="youtube"'+(item.type==='youtube'?' selected':'')+'>YouTube</option>'
+      +'<option value="spotify"'+(item.type==='spotify'?' selected':'')+'>Spotify</option>'
+      +'<option value="photo"'+(item.type==='photo'?' selected':'')+'>Photo</option>'
+      +'<option value="video"'+(item.type==='video'?' selected':'')+'>Video</option>'
+      +'<option value="instagram"'+(item.type==='instagram'?' selected':'')+'>Instagram (link card)</option>'
+      +'<option value="tiktok"'+(item.type==='tiktok'?' selected':'')+'>TikTok (link card)</option>'
+      +'<option value="x"'+(item.type==='x'?' selected':'')+'>X / Twitter (link card)</option>'
+      +'<option value="link"'+(item.type==='link'?' selected':'')+'>Other Link</option>'
+      +'</select></div>'
+      +'<div class="fg"><label>Title</label><input type="text" value="'+esc(item.title)+'" oninput="updateItemField('+idx+',\'title\',this.value)" placeholder="Give this item a name"></div>'
+      +'<div class="fg"><label>URL / Embed Source</label><input type="url" value="'+esc(item.url)+'" oninput="updateItemField('+idx+',\'url\',this.value)" placeholder="https://..."><p class="hint">For SoundCloud/YouTube, paste the embed src URL. For photos, paste a direct image link.</p></div>'
+      +'<div class="fg"><label>Caption</label><input type="text" value="'+esc(item.caption)+'" oninput="updateItemField('+idx+',\'caption\',this.value)" placeholder="Short description shown on the card"></div>'
+      +'<div class="fg"><label>Notes <span style="opacity:0.6;font-size:0.85rem;">(lyrics, backstory, credits — shown when expanded)</span></label>'
+      +'<textarea rows="6" oninput="updateItemField('+idx+',\'notes\',this.value)" placeholder="Add lyrics, the story behind this track, credits, anything you want...">'+esc(item.notes)+'</textarea></div>'
+      +'<div class="fg"><label>Published</label>'
+      +'<select onchange="updateItemField('+idx+',\'published\',this.value===\'true\')">'
+      +'<option value="true"'+(item.published?' selected':'')+'>Visible on profile</option>'
+      +'<option value="false"'+(!item.published?' selected':'')+'>Hidden (draft)</option>'
+      +'</select></div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+  // Restore open states
+  var bodies=document.querySelectorAll('.media-item-body');
+  for(var i=0;i<bodies.length;i++){
+    if(openItems[i]) bodies[i].classList.add('open');
+  }
+}
+
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function toggleMediaBody(h){
+  var body=h.nextElementSibling;
+  body.classList.toggle('open');
+  // find index of this item
+  var items=document.querySelectorAll('.media-item');
+  for(var i=0;i<items.length;i++){
+    if(items[i].querySelector('.media-item-header')===h){
+      openItems[i]=body.classList.contains('open');
+      break;
+    }
+  }
+}
+function updateItemField(idx,field,val){if(mediaItems[idx])mediaItems[idx][field]=val;if(field==='title')renderMediaList();}
+function moveItem(idx,dir){var ni=idx+dir;if(ni<0||ni>=mediaItems.length)return;var t=mediaItems[idx];mediaItems[idx]=mediaItems[ni];mediaItems[ni]=t;renderMediaList();}
+function removeItem(idx){mediaItems.splice(idx,1);renderMediaList();}
+
+function doSave(){
+  if(!profile||!token)return;
+  var btn=document.getElementById('save-btn');
+  var st=document.getElementById('save-status');
+  btn.disabled=true;
+  st.className='save-status saving';
+  st.textContent='Saving\u2026';
+
+  var payload={
+    display_name:document.getElementById('f-name').value.trim(),
+    rank:document.getElementById('f-rank').value.trim(),
+    disciplines:selDiscs,
+    bio:document.getElementById('f-bio').value.trim(),
+    quote:document.getElementById('f-quote').value.trim(),
+    talents:document.getElementById('f-talents').value.trim(),
+    interests:document.getElementById('f-interests').value.trim(),
+    hobbies:document.getElementById('f-hobbies').value.trim(),
+    photo_url:document.getElementById('f-photo').value.trim(),
+    link_1_label:document.getElementById('f-l1l').value.trim(),link_1_url:document.getElementById('f-l1u').value.trim(),
+    link_2_label:document.getElementById('f-l2l').value.trim(),link_2_url:document.getElementById('f-l2u').value.trim(),
+    link_3_label:document.getElementById('f-l3l').value.trim(),link_3_url:document.getElementById('f-l3u').value.trim(),
+    link_4_label:document.getElementById('f-l4l').value.trim(),link_4_url:document.getElementById('f-l4u').value.trim(),
+    updated_at:new Date().toISOString()
+  };
+
+  // Save profile first, then save all media
+  fetch(SURL+'/rest/v1/crew_profiles?edit_token=eq.'+encodeURIComponent(token),{
+    method:'PATCH',
+    headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify(payload)
+  }).then(function(r){
+    if(!r.ok)throw new Error('Profile save failed');
+    return saveMedia();
+  }).then(function(){
+    btn.disabled=false;
+    st.className='save-status ok';
+    st.textContent='All saved!';
+    setTimeout(function(){st.textContent='';},3000);
+  }).catch(function(e){
+    btn.disabled=false;
+    st.className='save-status err';
+    st.textContent='Save failed. Please try again.';
+  });
+}
+
+function saveMedia(){
+  var slug=profile.slug;
+  // Delete all existing media for this crew member, then re-insert current list
+  // This is the simplest approach — avoids complex upsert logic
+  return fetch(SURL+'/rest/v1/crew_media?crew_slug=eq.'+encodeURIComponent(slug),{
+    method:'DELETE',
+    headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}
+  }).then(function(){
+    if(!mediaItems.length) return Promise.resolve();
+    var toInsert=mediaItems.map(function(item,idx){
+      return {
+        crew_slug:slug,
+        type:item.type||'link',
+        title:item.title||'',
+        caption:item.caption||'',
+        notes:item.notes||'',
+        url:item.url||'',
+        sort_order:idx+1,
+        published:item.published!==false
+      };
+    });
+    return fetch(SURL+'/rest/v1/crew_media',{
+      method:'POST',
+      headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify(toInsert)
+    });
+  });
+}
 </script>
-
-<script src="https://w.soundcloud.com/player/api.js"></script>
-<script>
-(function() {
-  function boot() {
-    if (!window.SC || !SC.Widget) { return; }
-    var playerEl = document.getElementById('site-audio-player');
-    var titleEl = document.getElementById('sap-title');
-    var prevBtn = document.getElementById('sap-prev');
-    var playBtn = document.getElementById('sap-play');
-    var nextBtn = document.getElementById('sap-next');
-    var dragHandle = document.getElementById('sap-drag-handle');
-    var frame = document.getElementById('sap-widget-frame');
-    if (!playerEl || !titleEl || !prevBtn || !playBtn || !nextBtn || !dragHandle || !frame) { return; }
-
-    var PLAYLIST_URL = window.SITE_AUDIO_PLAYLIST_URL || 'https://soundcloud.com/yougotgabe/sets/dread-pirate-studio';
-    var widget = null;
-    var isPlaying = false;
-
-    function buildSrc(url, autoPlay) {
-      return 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) + '&color=%23c9a84c&auto_play=' + (autoPlay ? 'true' : 'false') + '&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false';
-    }
-
-    function refreshButton() {
-      playBtn.textContent = isPlaying ? '❚❚' : '▶';
-      playBtn.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play');
-    }
-
-    function refreshTitle(fallback) {
-      if (!widget) {
-        titleEl.textContent = fallback || 'Dread Pirate Studio Playlist';
-        return;
-      }
-      widget.getCurrentSound(function(sound) {
-        var out = fallback || 'Dread Pirate Studio Playlist';
-        if (sound && sound.title) {
-          out = sound.user && sound.user.username ? (sound.title + ' — ' + sound.user.username) : sound.title;
-        }
-        titleEl.textContent = out;
-      });
-    }
-
-    function syncPausedState() {
-      if (!widget) { return; }
-      widget.isPaused(function(paused) {
-        isPlaying = !paused;
-        refreshButton();
-      });
-    }
-
-    function bindWidgetEvents() {
-      if (!widget) { return; }
-      widget.bind(SC.Widget.Events.READY, function() {
-        syncPausedState();
-        refreshTitle('Dread Pirate Studio Playlist');
-      });
-      widget.bind(SC.Widget.Events.PLAY, function() {
-        isPlaying = true;
-        refreshButton();
-        refreshTitle();
-      });
-      widget.bind(SC.Widget.Events.PAUSE, function() {
-        isPlaying = false;
-        refreshButton();
-        refreshTitle();
-      });
-      widget.bind(SC.Widget.Events.FINISH, function() {
-        setTimeout(function() {
-          syncPausedState();
-          refreshTitle();
-        }, 120);
-      });
-      widget.bind(SC.Widget.Events.PLAY_PROGRESS, function() {
-        refreshTitle();
-      });
-    }
-
-    function initWidget() {
-      frame.src = buildSrc(PLAYLIST_URL, false);
-      widget = SC.Widget(frame);
-      bindWidgetEvents();
-      titleEl.textContent = 'Dread Pirate Studio Playlist';
-      refreshButton();
-    }
-
-    prevBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      if (!widget) { return; }
-      widget.prev();
-      setTimeout(function() {
-        if (isPlaying) { widget.play(); }
-        refreshTitle();
-      }, 180);
-    });
-
-    nextBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      if (!widget) { return; }
-      widget.next();
-      setTimeout(function() {
-        if (isPlaying) { widget.play(); }
-        refreshTitle();
-      }, 180);
-    });
-
-    playBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      if (!widget) { return; }
-      widget.isPaused(function(paused) {
-        if (paused) {
-          widget.play();
-        } else {
-          widget.pause();
-        }
-      });
-    });
-
-    var drag = { active: false, startX: 0, startY: 0, originX: 0, originY: 0 };
-    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
-    function pinToViewport(x, y) {
-      var maxX = window.innerWidth - playerEl.offsetWidth - 6;
-      var maxY = window.innerHeight - playerEl.offsetHeight - 6;
-      playerEl.style.left = clamp(x, 6, Math.max(6, maxX)) + 'px';
-      playerEl.style.top = clamp(y, 6, Math.max(6, maxY)) + 'px';
-      playerEl.style.right = 'auto';
-      playerEl.style.bottom = 'auto';
-    }
-    function startDrag(ev) {
-      if (ev.target.closest && ev.target.closest('.sap-controls')) { return; }
-      var pt = ev.touches ? ev.touches[0] : ev;
-      var rect = playerEl.getBoundingClientRect();
-      drag.active = true;
-      drag.startX = pt.clientX;
-      drag.startY = pt.clientY;
-      drag.originX = rect.left;
-      drag.originY = rect.top;
-      playerEl.classList.add('is-dragging');
-      if (ev.preventDefault) { ev.preventDefault(); }
-    }
-    function moveDrag(ev) {
-      if (!drag.active) { return; }
-      var pt = ev.touches ? ev.touches[0] : ev;
-      pinToViewport(drag.originX + (pt.clientX - drag.startX), drag.originY + (pt.clientY - drag.startY));
-      if (ev.preventDefault) { ev.preventDefault(); }
-    }
-    function endDrag() {
-      if (!drag.active) { return; }
-      drag.active = false;
-      playerEl.classList.remove('is-dragging');
-    }
-    dragHandle.addEventListener('mousedown', startDrag);
-    dragHandle.addEventListener('touchstart', startDrag, { passive: false });
-    window.addEventListener('mousemove', moveDrag);
-    window.addEventListener('touchmove', moveDrag, { passive: false });
-    window.addEventListener('mouseup', endDrag);
-    window.addEventListener('touchend', endDrag);
-    window.addEventListener('resize', function() {
-      var rect = playerEl.getBoundingClientRect();
-      
+</body>
+</html>
