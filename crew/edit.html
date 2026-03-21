@@ -7,80 +7,82 @@
 <link rel="icon" type="image/png" href="../icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --black:    #080808;
-    --deep:     #0d0f14;
-    --surface:  #131620;
-    --gold:     #c9a84c;
-    --gold-dim: #8a6f2e;
-    --gold-glow:rgba(201,168,76,0.18);
-    --white:    #e8e0d0;
-    --muted:    #6b6355;
-    --border:   rgba(201,168,76,0.15);
-    --error:    #8a3030;
-    --success:  #2e6b3e;
+  :root{
+    --black:#080808;--deep:#0d0f14;--surface:#131620;
+    --gold:#c9a84c;--gold-dim:#8a6f2e;--gold-glow:rgba(201,168,76,0.18);
+    --white:#e8e0d0;--muted:#6b6355;--border:rgba(201,168,76,0.15);
   }
-  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-  body { background:var(--black); color:var(--white); font-family:'Crimson Text',Georgia,serif; font-size:18px; min-height:100vh; }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--black);color:var(--white);font-family:'Crimson Text',Georgia,serif;font-size:18px;min-height:100vh;}
 
-  nav { position:fixed; top:0; left:0; right:0; z-index:900; padding:0 2rem; height:72px; display:flex; align-items:center; justify-content:space-between; background:rgba(8,8,8,0.97); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); }
-  .nav-logo { text-decoration:none; }
-  .nav-logo img { height:44px; width:auto; }
-  .nav-back { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); text-decoration:none; transition:color 0.3s; }
-  .nav-back:hover { color:var(--gold); }
+  nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:0 2rem;height:72px;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,8,0.97);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);}
+  .nav-logo{text-decoration:none;}
+  .nav-logo img{height:44px;width:auto;}
+  .nav-back{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.3s;}
+  .nav-back:hover{color:var(--gold);}
 
-  .page-wrap { max-width:680px; margin:0 auto; padding:6rem 2rem 4rem; }
+  .wrap{max-width:700px;margin:0 auto;padding:6rem 2rem 5rem;}
 
   /* Token gate */
-  #token-gate { text-align:center; padding:4rem 0; }
-  .gate-title { font-family:'Cinzel Decorative',serif; font-size:1.8rem; color:var(--gold); margin-bottom:0.5rem; }
-  .gate-sub { color:var(--muted); font-style:italic; margin-bottom:2.5rem; }
-  .token-input-wrap { display:flex; gap:0.75rem; max-width:420px; margin:0 auto; }
-  .token-input-wrap input { flex:1; background:var(--surface); border:1px solid var(--border); color:var(--white); padding:0.75rem 1rem; font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.1em; outline:none; transition:border-color 0.3s; }
-  .token-input-wrap input:focus { border-color:var(--gold-dim); }
-  .token-input-wrap button { background:var(--gold); color:var(--black); border:none; padding:0.75rem 1.5rem; font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.15em; text-transform:uppercase; cursor:pointer; transition:opacity 0.3s; }
-  .token-input-wrap button:hover { opacity:0.85; }
-  .gate-error { color:var(--error); font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.1em; margin-top:1rem; }
+  #token-gate{text-align:center;padding:4rem 0;}
+  .gate-title{font-family:'Cinzel Decorative',serif;font-size:2rem;color:var(--gold);margin-bottom:0.5rem;}
+  .gate-sub{color:var(--muted);font-style:italic;margin-bottom:2.5rem;}
+  .token-row{display:flex;gap:0.75rem;max-width:420px;margin:0 auto;}
+  .token-row input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--white);padding:0.75rem 1rem;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.1em;outline:none;transition:border-color 0.3s;}
+  .token-row input:focus{border-color:var(--gold-dim);}
+  .token-row button{background:var(--gold);color:var(--black);border:none;padding:0.75rem 1.5rem;font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:opacity 0.3s;}
+  .token-row button:hover{opacity:0.85;}
+  .gate-err{color:#8a3030;font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.1em;margin-top:1rem;}
 
-  /* Edit form */
-  #edit-form-wrap { display:none; }
-  .section-label { font-family:'Cinzel',serif; font-size:0.62rem; letter-spacing:0.45em; text-transform:uppercase; color:var(--gold); opacity:0.75; margin:2.5rem 0 1.25rem; padding-bottom:0.5rem; border-bottom:1px solid var(--border); }
-  .form-group { margin-bottom:1.25rem; }
-  .form-group label { display:block; font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:0.45rem; }
-  .form-group input, .form-group textarea, .form-group select {
-    width:100%; background:var(--surface); border:1px solid var(--border);
-    color:var(--white); padding:0.7rem 1rem;
-    font-family:'Crimson Text',Georgia,serif; font-size:1rem;
-    outline:none; transition:border-color 0.3s; resize:vertical;
-  }
-  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:var(--gold-dim); }
-  .form-group textarea { min-height:120px; }
-  .form-hint { font-size:0.8rem; color:var(--muted); font-style:italic; margin-top:0.3rem; }
-  .form-row { display:grid; grid-template-columns:1fr 2fr; gap:0.75rem; }
+  /* Form sections */
+  #edit-wrap{display:none;}
+  .sec-label{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.45em;text-transform:uppercase;color:var(--gold);opacity:0.8;margin:2.5rem 0 1.25rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);}
+  .fg{margin-bottom:1.15rem;}
+  .fg label{display:block;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;}
+  .fg input,.fg textarea,.fg select{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--white);padding:0.65rem 0.9rem;font-family:'Crimson Text',Georgia,serif;font-size:1rem;outline:none;transition:border-color 0.3s;resize:vertical;}
+  .fg input:focus,.fg textarea:focus,.fg select:focus{border-color:var(--gold-dim);}
+  .fg textarea{min-height:100px;}
+  .hint{font-size:0.82rem;color:var(--muted);font-style:italic;margin-top:0.3rem;}
+  .two-col{display:grid;grid-template-columns:1fr 2fr;gap:0.75rem;}
 
-  .disciplines-wrap { display:flex; flex-wrap:wrap; gap:0.5rem; }
-  .disc-tag {
-    padding:0.3rem 0.9rem; border:1px solid var(--border);
-    font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.12em; text-transform:uppercase;
-    color:var(--muted); background:var(--surface); cursor:pointer; user-select:none; transition:all 0.2s;
-  }
-  .disc-tag.active { border-color:var(--gold); color:var(--gold); background:rgba(201,168,76,0.08); }
-  .disc-tag-custom { display:flex; gap:0.5rem; margin-top:0.5rem; width:100%; }
-  .disc-tag-custom input { flex:1; }
-  .disc-tag-custom button { background:var(--surface); border:1px solid var(--border); color:var(--muted); padding:0.4rem 0.8rem; font-family:'Cinzel',serif; font-size:0.6rem; cursor:pointer; transition:all 0.2s; }
-  .disc-tag-custom button:hover { border-color:var(--gold-dim); color:var(--gold); }
+  /* Discipline tags */
+  .disc-wrap{display:flex;flex-wrap:wrap;gap:0.5rem;}
+  .dt{padding:0.3rem 0.85rem;border:1px solid var(--border);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);background:var(--surface);cursor:pointer;user-select:none;transition:all 0.2s;}
+  .dt.on{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,0.08);}
+  .dt-add{display:flex;gap:0.5rem;margin-top:0.5rem;width:100%;}
+  .dt-add input{flex:1;}
+  .dt-add button{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:0.4rem 0.8rem;font-family:'Cinzel',serif;font-size:0.6rem;cursor:pointer;transition:all 0.2s;}
+  .dt-add button:hover{border-color:var(--gold-dim);color:var(--gold);}
 
-  .submit-row { margin-top:2.5rem; display:flex; gap:1rem; align-items:center; flex-wrap:wrap; }
-  .btn-save { background:var(--gold); color:var(--black); border:none; padding:0.85rem 2.5rem; font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; transition:opacity 0.3s; }
-  .btn-save:hover { opacity:0.85; }
-  .btn-save:disabled { opacity:0.4; cursor:not-allowed; }
-  .btn-preview { background:transparent; color:var(--gold); border:1px solid var(--gold-dim); padding:0.85rem 1.5rem; font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; cursor:pointer; text-decoration:none; transition:all 0.3s; display:inline-block; }
-  .btn-preview:hover { border-color:var(--gold); }
+  /* Media items */
+  .media-list{display:flex;flex-direction:column;gap:1rem;}
+  .media-item{background:var(--deep);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+  .media-item-header{padding:0.75rem 1rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer;background:var(--surface);}
+  .media-item-num{font-family:'Cinzel',serif;font-size:0.65rem;color:var(--gold-dim);flex-shrink:0;}
+  .media-item-title-display{flex:1;font-family:'Cinzel',serif;font-size:0.8rem;color:var(--white);}
+  .media-item-actions{display:flex;gap:0.5rem;}
+  .mi-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:0.25rem 0.6rem;font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+  .mi-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
+  .mi-btn.del:hover{border-color:#8a3030;color:#c05050;}
+  .media-item-body{padding:1rem;display:none;}
+  .media-item-body.open{display:block;}
+  .media-item-body .fg{margin-bottom:0.85rem;}
 
-  .save-status { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.15em; }
-  .save-status.success { color:#4a9e64; }
-  .save-status.error   { color:var(--error); }
-  .save-status.saving  { color:var(--muted); }
+  /* Add media button */
+  .add-media-btn{width:100%;padding:0.85rem;border:1px dashed var(--border);background:transparent;color:var(--muted);font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;transition:all 0.3s;margin-top:0.5rem;}
+  .add-media-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
+
+  /* Bottom save bar */
+  .save-bar{margin-top:2.5rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap;padding-top:1.5rem;border-top:1px solid var(--border);}
+  .btn-save{background:var(--gold);color:var(--black);border:none;padding:0.85rem 2.5rem;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;transition:opacity 0.3s;}
+  .btn-save:hover{opacity:0.85;}
+  .btn-save:disabled{opacity:0.4;cursor:not-allowed;}
+  .btn-preview{background:transparent;color:var(--gold);border:1px solid var(--gold-dim);padding:0.85rem 1.5rem;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:all 0.3s;display:inline-block;}
+  .btn-preview:hover{border-color:var(--gold);}
+  .save-status{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.15em;}
+  .save-status.ok{color:#4a9e64;}
+  .save-status.err{color:#8a3030;}
+  .save-status.saving{color:var(--muted);}
 </style>
 </head>
 <body>
@@ -90,120 +92,88 @@
   <a href="../crew.html" class="nav-back">&#8592; The Crew</a>
 </nav>
 
-<div class="page-wrap">
+<div class="wrap">
 
-  <!-- Step 1: Token gate -->
+  <!-- TOKEN GATE -->
   <div id="token-gate">
     <h1 class="gate-title">Edit Your Profile</h1>
     <p class="gate-sub">Enter your personal access token to continue.</p>
-    <div class="token-input-wrap">
-      <input type="password" id="token-input" placeholder="Your access token" autocomplete="off">
-      <button onclick="validateToken()">Enter</button>
+    <div class="token-row">
+      <input type="password" id="tok-in" placeholder="Your access token" autocomplete="off">
+      <button onclick="doValidate()">Enter</button>
     </div>
-    <p id="gate-error" class="gate-error" style="display:none;"></p>
+    <p id="gate-err" class="gate-err" style="display:none"></p>
   </div>
 
-  <!-- Step 2: Edit form (shown after valid token) -->
-  <div id="edit-form-wrap">
-    <p class="section-label">Identity</p>
-    <div class="form-group">
-      <label>Display Name</label>
-      <input type="text" id="f-name" maxlength="60">
-    </div>
-    <div class="form-group">
-      <label>Rank / Title</label>
-      <input type="text" id="f-rank" maxlength="60" placeholder="e.g. Captain, First Mate, Crew">
-    </div>
+  <!-- EDIT FORM -->
+  <div id="edit-wrap">
 
-    <p class="section-label">Disciplines</p>
-    <div class="form-group">
-      <div class="disciplines-wrap" id="disciplines-wrap">
-        <span class="disc-tag" data-val="Music Production">Music Production</span>
-        <span class="disc-tag" data-val="Music">Music</span>
-        <span class="disc-tag" data-val="Performance">Performance</span>
-        <span class="disc-tag" data-val="Video">Video</span>
-        <span class="disc-tag" data-val="Drone">Drone</span>
-        <span class="disc-tag" data-val="Photography">Photography</span>
-        <span class="disc-tag" data-val="Electronics">Electronics</span>
-        <span class="disc-tag" data-val="3D Printing">3D Printing</span>
-        <span class="disc-tag" data-val="Automation">Automation</span>
-        <span class="disc-tag" data-val="Gaming">Gaming</span>
-        <span class="disc-tag" data-val="Vocals">Vocals</span>
-        <span class="disc-tag" data-val="Creative">Creative</span>
-        <span class="disc-tag" data-val="Design">Design</span>
-        <span class="disc-tag" data-val="Collab">Collab</span>
+    <p class="sec-label">Identity</p>
+    <div class="fg"><label>Display Name</label><input type="text" id="f-name" maxlength="60"></div>
+    <div class="fg"><label>Rank / Title</label><input type="text" id="f-rank" maxlength="60" placeholder="e.g. Captain, First Mate, Crew"></div>
+
+    <p class="sec-label">Disciplines</p>
+    <div class="fg">
+      <div class="disc-wrap" id="disc-wrap">
+        <span class="dt" data-v="Music Production">Music Production</span>
+        <span class="dt" data-v="Music">Music</span>
+        <span class="dt" data-v="Performance">Performance</span>
+        <span class="dt" data-v="Video">Video</span>
+        <span class="dt" data-v="Drone">Drone</span>
+        <span class="dt" data-v="Photography">Photography</span>
+        <span class="dt" data-v="Electronics">Electronics</span>
+        <span class="dt" data-v="3D Printing">3D Printing</span>
+        <span class="dt" data-v="Automation">Automation</span>
+        <span class="dt" data-v="Gaming">Gaming</span>
+        <span class="dt" data-v="Vocals">Vocals</span>
+        <span class="dt" data-v="Creative">Creative</span>
+        <span class="dt" data-v="Design">Design</span>
+        <span class="dt" data-v="Collab">Collab</span>
       </div>
-      <div class="disc-tag-custom">
-        <input type="text" id="disc-custom-input" placeholder="Add a custom discipline...">
-        <button onclick="addCustomDisc()">+ Add</button>
+      <div class="dt-add">
+        <input type="text" id="dt-custom" placeholder="Add a custom discipline...">
+        <button onclick="addDisc()">+ Add</button>
       </div>
     </div>
 
-    <p class="section-label">Your Story</p>
-    <div class="form-group">
-      <label>Bio</label>
-      <textarea id="f-bio" rows="6" placeholder="Tell your story. This appears on your profile page."></textarea>
-      <p class="form-hint">Separate paragraphs with a blank line.</p>
+    <p class="sec-label">Your Story</p>
+    <div class="fg"><label>Bio</label><textarea id="f-bio" rows="7" placeholder="Tell your story. Separate paragraphs with a blank line."></textarea></div>
+    <div class="fg"><label>Personal Quote</label><input type="text" id="f-quote" maxlength="220" placeholder="A line that says it all."></div>
+
+    <p class="sec-label">About You</p>
+    <div class="fg">
+      <label>Talents</label>
+      <textarea id="f-talents" rows="3" placeholder="What are you skilled at? Music production, welding, building circuits..."></textarea>
     </div>
-    <div class="form-group">
-      <label>Personal Quote</label>
-      <input type="text" id="f-quote" maxlength="200" placeholder="Something that says it all.">
+    <div class="fg">
+      <label>Interests</label>
+      <textarea id="f-interests" rows="3" placeholder="What are you into? Science fiction, vintage gear, local shows..."></textarea>
+    </div>
+    <div class="fg">
+      <label>Hobbies</label>
+      <textarea id="f-hobbies" rows="3" placeholder="What do you do for fun? Cooking, hiking, retro gaming..."></textarea>
     </div>
 
-    <p class="section-label">Photo</p>
-    <div class="form-group">
+    <p class="sec-label">Photo</p>
+    <div class="fg">
       <label>Photo URL</label>
-      <input type="url" id="f-photo" placeholder="https://... (link to your image)">
-      <p class="form-hint">Upload your image somewhere (Google Drive, Dropbox, Imgur) and paste the direct link here.</p>
+      <input type="url" id="f-photo" placeholder="https://... (paste a direct link to your image)">
+      <p class="hint">Upload your image to Imgur, Google Drive, or Dropbox and paste the direct link here.</p>
     </div>
 
-    <p class="section-label">Links</p>
-    <div class="form-group">
-      <label>Link 1</label>
-      <div class="form-row">
-        <input type="text" id="f-l1-label" placeholder="Label (e.g. YouTube)">
-        <input type="url"  id="f-l1-url"   placeholder="https://...">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Link 2</label>
-      <div class="form-row">
-        <input type="text" id="f-l2-label" placeholder="Label">
-        <input type="url"  id="f-l2-url"   placeholder="https://...">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Link 3</label>
-      <div class="form-row">
-        <input type="text" id="f-l3-label" placeholder="Label">
-        <input type="url"  id="f-l3-url"   placeholder="https://...">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Link 4</label>
-      <div class="form-row">
-        <input type="text" id="f-l4-label" placeholder="Label">
-        <input type="url"  id="f-l4-url"   placeholder="https://...">
-      </div>
-    </div>
+    <p class="sec-label">Links</p>
+    <div class="fg"><label>Link 1</label><div class="two-col"><input type="text" id="f-l1l" placeholder="Label (e.g. YouTube)"><input type="url" id="f-l1u" placeholder="https://..."></div></div>
+    <div class="fg"><label>Link 2</label><div class="two-col"><input type="text" id="f-l2l" placeholder="Label"><input type="url" id="f-l2u" placeholder="https://..."></div></div>
+    <div class="fg"><label>Link 3</label><div class="two-col"><input type="text" id="f-l3l" placeholder="Label"><input type="url" id="f-l3u" placeholder="https://..."></div></div>
+    <div class="fg"><label>Link 4</label><div class="two-col"><input type="text" id="f-l4l" placeholder="Label"><input type="url" id="f-l4u" placeholder="https://..."></div></div>
 
-    <p class="section-label">Featured Content</p>
-    <div class="form-group">
-      <label>Embed Type</label>
-      <select id="f-embed-type">
-        <option value="">None</option>
-        <option value="soundcloud">SoundCloud</option>
-        <option value="youtube">YouTube</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Embed URL</label>
-      <input type="url" id="f-embed-url" placeholder="Paste the SoundCloud or YouTube embed URL">
-      <p class="form-hint">For SoundCloud: right-click the player &rarr; Copy embed code &rarr; paste the URL from the src="..." part. For YouTube: Share &rarr; Embed &rarr; copy the src URL.</p>
-    </div>
+    <p class="sec-label">Media Library</p>
+    <p class="hint" style="margin-bottom:1.25rem;">Add music, videos, photos, or links. Each item can have a title, caption, and notes (great for lyrics, credits, or backstory).</p>
+    <div class="media-list" id="media-list"></div>
+    <button class="add-media-btn" onclick="addMediaItem()">+ Add Media Item</button>
 
-    <div class="submit-row">
-      <button class="btn-save" id="save-btn" onclick="saveProfile()">Save Changes</button>
+    <div class="save-bar">
+      <button class="btn-save" id="save-btn" onclick="doSave()">Save Everything</button>
       <a id="preview-link" href="#" class="btn-preview" target="_blank">Preview Profile</a>
       <span class="save-status" id="save-status"></span>
     </div>
@@ -212,179 +182,222 @@
 </div>
 
 <script>
-  var SUPABASE_URL = 'https://efylfnnshmaauhiwqaxj.supabase.co';
-  var SUPABASE_KEY = 'sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
+var SURL='https://efylfnnshmaauhiwqaxj.supabase.co';
+var SKEY='sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
+var profile=null, token=null, selDiscs=[], mediaItems=[];
 
-  var currentProfile = null;
-  var currentToken   = null;
-  var selectedDiscs  = [];
+document.getElementById('tok-in').addEventListener('keydown',function(e){if(e.key==='Enter')doValidate();});
 
-  // Enter key on token field
-  document.getElementById('token-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') validateToken();
+function doValidate(){
+  var t=document.getElementById('tok-in').value.trim();
+  if(!t)return;
+  document.getElementById('gate-err').style.display='none';
+  fetch(SURL+'/rest/v1/crew_profiles?edit_token=eq.'+encodeURIComponent(t)+'&select=*&limit=1',{
+    headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}
+  }).then(function(r){return r.json();}).then(function(d){
+    if(!d||d.length===0){
+      var e=document.getElementById('gate-err');
+      e.textContent='Invalid token. Check with Gabe if you need yours.';
+      e.style.display='block';return;
+    }
+    token=t; profile=d[0];
+    loadMedia(d[0]);
+  }).catch(function(){
+    var e=document.getElementById('gate-err');
+    e.textContent='Connection error. Please try again.';
+    e.style.display='block';
   });
+}
 
-  function validateToken() {
-    var token = document.getElementById('token-input').value.trim();
-    if (!token) return;
-    document.getElementById('gate-error').style.display = 'none';
-
-    fetch(SUPABASE_URL + '/rest/v1/crew_profiles?edit_token=eq.' + encodeURIComponent(token) + '&select=*&limit=1', {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (!data || data.length === 0) {
-        var err = document.getElementById('gate-error');
-        err.textContent = 'Invalid token. Check with Gabe if you need yours.';
-        err.style.display = 'block';
-        return;
-      }
-      currentToken   = token;
-      currentProfile = data[0];
-      populateForm(data[0]);
-      document.getElementById('token-gate').style.display   = 'none';
-      document.getElementById('edit-form-wrap').style.display = 'block';
-    })
-    .catch(function() {
-      var err = document.getElementById('gate-error');
-      err.textContent = 'Connection error. Please try again.';
-      err.style.display = 'block';
-    });
-  }
-
-  function populateForm(p) {
-    document.getElementById('f-name').value      = p.display_name  || '';
-    document.getElementById('f-rank').value      = p.rank          || '';
-    document.getElementById('f-bio').value       = p.bio           || '';
-    document.getElementById('f-quote').value     = p.quote         || '';
-    document.getElementById('f-photo').value     = p.photo_url     || '';
-    document.getElementById('f-l1-label').value  = p.link_1_label  || '';
-    document.getElementById('f-l1-url').value    = p.link_1_url    || '';
-    document.getElementById('f-l2-label').value  = p.link_2_label  || '';
-    document.getElementById('f-l2-url').value    = p.link_2_url    || '';
-    document.getElementById('f-l3-label').value  = p.link_3_label  || '';
-    document.getElementById('f-l3-url').value    = p.link_3_url    || '';
-    document.getElementById('f-l4-label').value  = p.link_4_label  || '';
-    document.getElementById('f-l4-url').value    = p.link_4_url    || '';
-    document.getElementById('f-embed-type').value = p.embed_type   || '';
-    document.getElementById('f-embed-url').value  = p.embed_url    || '';
-
-    // Set preview link
-    document.getElementById('preview-link').href = p.slug + '.html';
-
-    // Disciplines
-    selectedDiscs = p.disciplines ? p.disciplines.slice() : [];
-    var wrap = document.getElementById('disciplines-wrap');
-    var tags = wrap.querySelectorAll('.disc-tag');
-    for (var i = 0; i < tags.length; i++) {
-      var val = tags[i].getAttribute('data-val');
-      if (selectedDiscs.indexOf(val) !== -1) tags[i].classList.add('active');
-      tags[i].addEventListener('click', toggleDisc);
-    }
-
-    // Add any custom disciplines that aren't in the preset list
-    var presets = [];
-    for (var j = 0; j < tags.length; j++) presets.push(tags[j].getAttribute('data-val'));
-    for (var k = 0; k < selectedDiscs.length; k++) {
-      if (presets.indexOf(selectedDiscs[k]) === -1) {
-        addCustomDiscTag(selectedDiscs[k]);
-      }
-    }
-  }
-
-  function toggleDisc() {
-    var val = this.getAttribute('data-val');
-    var idx = selectedDiscs.indexOf(val);
-    if (idx === -1) {
-      selectedDiscs.push(val);
-      this.classList.add('active');
-    } else {
-      selectedDiscs.splice(idx, 1);
-      this.classList.remove('active');
-    }
-  }
-
-  function addCustomDisc() {
-    var inp = document.getElementById('disc-custom-input');
-    var val = inp.value.trim();
-    if (!val) return;
-    if (selectedDiscs.indexOf(val) === -1) {
-      selectedDiscs.push(val);
-      addCustomDiscTag(val);
-    }
-    inp.value = '';
-  }
-
-  function addCustomDiscTag(val) {
-    var wrap = document.getElementById('disciplines-wrap');
-    var tag = document.createElement('span');
-    tag.className = 'disc-tag active';
-    tag.setAttribute('data-val', val);
-    tag.textContent = val;
-    tag.addEventListener('click', toggleDisc);
-    wrap.insertBefore(tag, wrap.querySelector('.disc-tag-custom'));
-  }
-
-  document.getElementById('disc-custom-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') { e.preventDefault(); addCustomDisc(); }
+function loadMedia(p){
+  fetch(SURL+'/rest/v1/crew_media?crew_slug=eq.'+encodeURIComponent(p.slug)+'&order=sort_order.asc,created_at.asc',{
+    headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}
+  }).then(function(r){return r.json();}).then(function(d){
+    mediaItems=(d||[]).map(function(m){return Object.assign({},m,{_id:m.id,_new:false});});
+    populateForm(p);
+    document.getElementById('token-gate').style.display='none';
+    document.getElementById('edit-wrap').style.display='block';
   });
+}
 
-  function saveProfile() {
-    if (!currentProfile || !currentToken) return;
-    var btn = document.getElementById('save-btn');
-    var status = document.getElementById('save-status');
-    btn.disabled = true;
-    status.className = 'save-status saving';
-    status.textContent = 'Saving\u2026';
+function populateForm(p){
+  document.getElementById('f-name').value=p.display_name||'';
+  document.getElementById('f-rank').value=p.rank||'';
+  document.getElementById('f-bio').value=p.bio||'';
+  document.getElementById('f-quote').value=p.quote||'';
+  document.getElementById('f-talents').value=p.talents||'';
+  document.getElementById('f-interests').value=p.interests||'';
+  document.getElementById('f-hobbies').value=p.hobbies||'';
+  document.getElementById('f-photo').value=p.photo_url||'';
+  document.getElementById('f-l1l').value=p.link_1_label||'';document.getElementById('f-l1u').value=p.link_1_url||'';
+  document.getElementById('f-l2l').value=p.link_2_label||'';document.getElementById('f-l2u').value=p.link_2_url||'';
+  document.getElementById('f-l3l').value=p.link_3_label||'';document.getElementById('f-l3u').value=p.link_3_url||'';
+  document.getElementById('f-l4l').value=p.link_4_label||'';document.getElementById('f-l4u').value=p.link_4_url||'';
+  document.getElementById('preview-link').href=p.slug+'.html';
 
-    var payload = {
-      display_name: document.getElementById('f-name').value.trim(),
-      rank:         document.getElementById('f-rank').value.trim(),
-      disciplines:  selectedDiscs,
-      bio:          document.getElementById('f-bio').value.trim(),
-      quote:        document.getElementById('f-quote').value.trim(),
-      photo_url:    document.getElementById('f-photo').value.trim(),
-      link_1_label: document.getElementById('f-l1-label').value.trim(),
-      link_1_url:   document.getElementById('f-l1-url').value.trim(),
-      link_2_label: document.getElementById('f-l2-label').value.trim(),
-      link_2_url:   document.getElementById('f-l2-url').value.trim(),
-      link_3_label: document.getElementById('f-l3-label').value.trim(),
-      link_3_url:   document.getElementById('f-l3-url').value.trim(),
-      link_4_label: document.getElementById('f-l4-label').value.trim(),
-      link_4_url:   document.getElementById('f-l4-url').value.trim(),
-      embed_type:   document.getElementById('f-embed-type').value,
-      embed_url:    document.getElementById('f-embed-url').value.trim(),
-      updated_at:   new Date().toISOString()
-    };
+  selDiscs=p.disciplines?p.disciplines.slice():[];
+  var tags=document.querySelectorAll('.dt');
+  var presets=[];
+  for(var i=0;i<tags.length;i++){presets.push(tags[i].getAttribute('data-v'));if(selDiscs.indexOf(tags[i].getAttribute('data-v'))!==-1)tags[i].classList.add('on');tags[i].addEventListener('click',toggleDisc);}
+  for(var k=0;k<selDiscs.length;k++){if(presets.indexOf(selDiscs[k])===-1)addDiscTag(selDiscs[k]);}
 
-    fetch(SUPABASE_URL + '/rest/v1/crew_profiles?edit_token=eq.' + encodeURIComponent(currentToken), {
-      method: 'PATCH',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify(payload)
-    })
-    .then(function(r) {
-      btn.disabled = false;
-      if (r.ok) {
-        status.className = 'save-status success';
-        status.textContent = 'Saved successfully!';
-        setTimeout(function() { status.textContent = ''; }, 3000);
-      } else {
-        status.className = 'save-status error';
-        status.textContent = 'Save failed. Please try again.';
-      }
-    })
-    .catch(function() {
-      btn.disabled = false;
-      status.className = 'save-status error';
-      status.textContent = 'Connection error. Please try again.';
-    });
+  renderMediaList();
+}
+
+function toggleDisc(){var v=this.getAttribute('data-v'),idx=selDiscs.indexOf(v);if(idx===-1){selDiscs.push(v);this.classList.add('on');}else{selDiscs.splice(idx,1);this.classList.remove('on');}}
+function addDisc(){var i=document.getElementById('dt-custom'),v=i.value.trim();if(!v)return;if(selDiscs.indexOf(v)===-1){selDiscs.push(v);addDiscTag(v);}i.value='';}
+function addDiscTag(v){var w=document.getElementById('disc-wrap'),t=document.createElement('span');t.className='dt on';t.setAttribute('data-v',v);t.textContent=v;t.addEventListener('click',toggleDisc);w.insertBefore(t,w.querySelector('.dt-add'));}
+document.getElementById('dt-custom').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addDisc();}});
+
+var mediaCounter=0;
+var openItems={};  // track which item indices are open
+
+function addMediaItem(init){
+  var item=init||{_uid:'new-'+(++mediaCounter),_new:true,type:'soundcloud',title:'',caption:'',notes:'',url:'',sort_order:mediaItems.length+1,published:true};
+  if(!init){
+    mediaItems.push(item);
+    openItems[mediaItems.length-1]=true;  // auto-open new item
   }
+  renderMediaList();
+}
+
+function renderMediaList(){
+  var list=document.getElementById('media-list');
+  if(!mediaItems.length){list.innerHTML='<p style="color:var(--muted);font-style:italic;font-size:0.9rem;">No media items yet. Add your first one below.</p>';return;}
+  list.innerHTML=mediaItems.map(function(item,idx){
+    var uid=item._id||item._uid||idx;
+    return '<div class="media-item" data-uid="'+uid+'">'
+      +'<div class="media-item-header" onclick="toggleMediaBody(this)">'
+      +'<span class="media-item-num">#'+(idx+1)+'</span>'
+      +'<span class="media-item-title-display">'+(item.title||'Untitled Item')+'</span>'
+      +'<div class="media-item-actions" onclick="event.stopPropagation()">'
+      +(idx>0?'<button class="mi-btn" onclick="moveItem('+idx+',-1)">&#8593;</button>':'')
+      +(idx<mediaItems.length-1?'<button class="mi-btn" onclick="moveItem('+idx+',1)">&#8595;</button>':'')
+      +'<button class="mi-btn del" onclick="removeItem('+idx+')">Remove</button>'
+      +'</div></div>'
+      +'<div class="media-item-body">'
+      +'<div class="fg"><label>Type</label>'
+      +'<select onchange="updateItemField('+idx+',\'type\',this.value)">'
+      +'<option value="soundcloud"'+(item.type==='soundcloud'?' selected':'')+'>SoundCloud</option>'
+      +'<option value="youtube"'+(item.type==='youtube'?' selected':'')+'>YouTube</option>'
+      +'<option value="spotify"'+(item.type==='spotify'?' selected':'')+'>Spotify</option>'
+      +'<option value="photo"'+(item.type==='photo'?' selected':'')+'>Photo</option>'
+      +'<option value="video"'+(item.type==='video'?' selected':'')+'>Video</option>'
+      +'<option value="instagram"'+(item.type==='instagram'?' selected':'')+'>Instagram (link card)</option>'
+      +'<option value="tiktok"'+(item.type==='tiktok'?' selected':'')+'>TikTok (link card)</option>'
+      +'<option value="x"'+(item.type==='x'?' selected':'')+'>X / Twitter (link card)</option>'
+      +'<option value="link"'+(item.type==='link'?' selected':'')+'>Other Link</option>'
+      +'</select></div>'
+      +'<div class="fg"><label>Title</label><input type="text" value="'+esc(item.title)+'" oninput="updateItemField('+idx+',\'title\',this.value)" placeholder="Give this item a name"></div>'
+      +'<div class="fg"><label>URL / Embed Source</label><input type="url" value="'+esc(item.url)+'" oninput="updateItemField('+idx+',\'url\',this.value)" placeholder="https://..."><p class="hint">For SoundCloud/YouTube, paste the embed src URL. For photos, paste a direct image link.</p></div>'
+      +'<div class="fg"><label>Caption</label><input type="text" value="'+esc(item.caption)+'" oninput="updateItemField('+idx+',\'caption\',this.value)" placeholder="Short description shown on the card"></div>'
+      +'<div class="fg"><label>Notes <span style="opacity:0.6;font-size:0.85rem;">(lyrics, backstory, credits — shown when expanded)</span></label>'
+      +'<textarea rows="6" oninput="updateItemField('+idx+',\'notes\',this.value)" placeholder="Add lyrics, the story behind this track, credits, anything you want...">'+esc(item.notes)+'</textarea></div>'
+      +'<div class="fg"><label>Published</label>'
+      +'<select onchange="updateItemField('+idx+',\'published\',this.value===\'true\')">'
+      +'<option value="true"'+(item.published?' selected':'')+'>Visible on profile</option>'
+      +'<option value="false"'+(!item.published?' selected':'')+'>Hidden (draft)</option>'
+      +'</select></div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+  // Restore open states
+  var bodies=document.querySelectorAll('.media-item-body');
+  for(var i=0;i<bodies.length;i++){
+    if(openItems[i]) bodies[i].classList.add('open');
+  }
+}
+
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function toggleMediaBody(h){
+  var body=h.nextElementSibling;
+  body.classList.toggle('open');
+  // find index of this item
+  var items=document.querySelectorAll('.media-item');
+  for(var i=0;i<items.length;i++){
+    if(items[i].querySelector('.media-item-header')===h){
+      openItems[i]=body.classList.contains('open');
+      break;
+    }
+  }
+}
+function updateItemField(idx,field,val){if(mediaItems[idx])mediaItems[idx][field]=val;if(field==='title')renderMediaList();}
+function moveItem(idx,dir){var ni=idx+dir;if(ni<0||ni>=mediaItems.length)return;var t=mediaItems[idx];mediaItems[idx]=mediaItems[ni];mediaItems[ni]=t;renderMediaList();}
+function removeItem(idx){mediaItems.splice(idx,1);renderMediaList();}
+
+function doSave(){
+  if(!profile||!token)return;
+  var btn=document.getElementById('save-btn');
+  var st=document.getElementById('save-status');
+  btn.disabled=true;
+  st.className='save-status saving';
+  st.textContent='Saving\u2026';
+
+  var payload={
+    display_name:document.getElementById('f-name').value.trim(),
+    rank:document.getElementById('f-rank').value.trim(),
+    disciplines:selDiscs,
+    bio:document.getElementById('f-bio').value.trim(),
+    quote:document.getElementById('f-quote').value.trim(),
+    talents:document.getElementById('f-talents').value.trim(),
+    interests:document.getElementById('f-interests').value.trim(),
+    hobbies:document.getElementById('f-hobbies').value.trim(),
+    photo_url:document.getElementById('f-photo').value.trim(),
+    link_1_label:document.getElementById('f-l1l').value.trim(),link_1_url:document.getElementById('f-l1u').value.trim(),
+    link_2_label:document.getElementById('f-l2l').value.trim(),link_2_url:document.getElementById('f-l2u').value.trim(),
+    link_3_label:document.getElementById('f-l3l').value.trim(),link_3_url:document.getElementById('f-l3u').value.trim(),
+    link_4_label:document.getElementById('f-l4l').value.trim(),link_4_url:document.getElementById('f-l4u').value.trim(),
+    updated_at:new Date().toISOString()
+  };
+
+  // Save profile first, then save all media
+  fetch(SURL+'/rest/v1/crew_profiles?edit_token=eq.'+encodeURIComponent(token),{
+    method:'PATCH',
+    headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify(payload)
+  }).then(function(r){
+    if(!r.ok)throw new Error('Profile save failed');
+    return saveMedia();
+  }).then(function(){
+    btn.disabled=false;
+    st.className='save-status ok';
+    st.textContent='All saved!';
+    setTimeout(function(){st.textContent='';},3000);
+  }).catch(function(e){
+    btn.disabled=false;
+    st.className='save-status err';
+    st.textContent='Save failed. Please try again.';
+  });
+}
+
+function saveMedia(){
+  var slug=profile.slug;
+  // Delete all existing media for this crew member, then re-insert current list
+  // This is the simplest approach — avoids complex upsert logic
+  return fetch(SURL+'/rest/v1/crew_media?crew_slug=eq.'+encodeURIComponent(slug),{
+    method:'DELETE',
+    headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}
+  }).then(function(){
+    if(!mediaItems.length) return Promise.resolve();
+    var toInsert=mediaItems.map(function(item,idx){
+      return {
+        crew_slug:slug,
+        type:item.type||'link',
+        title:item.title||'',
+        caption:item.caption||'',
+        notes:item.notes||'',
+        url:item.url||'',
+        sort_order:idx+1,
+        published:item.published!==false
+      };
+    });
+    return fetch(SURL+'/rest/v1/crew_media',{
+      method:'POST',
+      headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify(toInsert)
+    });
+  });
+}
 </script>
 </body>
 </html>
