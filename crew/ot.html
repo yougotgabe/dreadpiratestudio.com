@@ -98,6 +98,107 @@
     .page-body{grid-template-columns:1fr;}
     .media-grid{grid-template-columns:1fr;}
   }
+
+    /* Floating site audio player */
+    #site-audio-player {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 1400;
+      width: min(360px, calc(100vw - 24px));
+      background: rgba(13,15,20,0.92);
+      border: 1px solid rgba(201,168,76,0.28);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.45), 0 0 24px rgba(201,168,76,0.08);
+      backdrop-filter: blur(12px);
+      border-radius: 18px;
+      overflow: hidden;
+      user-select: none;
+      touch-action: none;
+    }
+    #site-audio-player.is-dragging { cursor: grabbing; }
+    .sap-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.8rem 0.9rem;
+      cursor: grab;
+    }
+    .sap-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      color: var(--black);
+      background: linear-gradient(135deg, var(--gold), #e0c36a);
+      font-size: 1rem;
+      box-shadow: 0 0 16px rgba(201,168,76,0.22);
+    }
+    .sap-meta { min-width: 0; flex: 1 1 auto; }
+    .sap-kicker {
+      font-family: 'Cinzel', serif;
+      font-size: 0.52rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.18rem;
+    }
+    .sap-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      color: var(--white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sap-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex: 0 0 auto;
+    }
+    .sap-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid rgba(201,168,76,0.22);
+      background: rgba(201,168,76,0.08);
+      color: var(--gold);
+      font-size: 0.95rem;
+      line-height: 1;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+    .sap-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(201,168,76,0.45);
+      background: rgba(201,168,76,0.14);
+    }
+    .sap-btn:active { transform: translateY(0); }
+    .sap-hidden-frame {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      left: -9999px;
+      top: -9999px;
+      opacity: 0;
+      pointer-events: none;
+    }
+    @media (max-width: 768px) {
+      #site-audio-player {
+        width: min(340px, calc(100vw - 16px));
+        right: 8px;
+        bottom: 8px;
+        z-index: 1600;
+      }
+      .sap-bar { padding: 0.75rem 0.8rem; }
+      .sap-title { font-size: 0.72rem; }
+    }
+
 </style>
 </head>
 <body>
@@ -198,6 +299,7 @@ function load(){
     if(!profiles||profiles.length===0){document.getElementById('pg-404').style.display='block';return;}
     renderProfile(profiles[0], media||[]);
     document.getElementById('pg-content').style.display='block';
+    if (window.initCrewPlayer) { window.initCrewPlayer(profiles[0].player_playlist_url || ''); }
   }).catch(function(){
     document.getElementById('pg-loading').textContent='Could not load profile. Please try again.';
   });
@@ -303,6 +405,71 @@ function toggleCard(toggleEl){
 }
 
 load();
+</script>
+
+  <!-- Floating audio player — playlist from crew member's profile -->
+  <div id="site-audio-player" aria-label="Site audio player">
+    <div class="sap-bar" id="sap-drag-handle">
+      <div class="sap-badge">&#9835;</div>
+      <div class="sap-meta">
+        <div class="sap-kicker">Now Playing</div>
+        <div class="sap-title" id="sap-title">Loading&hellip;</div>
+      </div>
+      <div class="sap-controls">
+        <button class="sap-btn" id="sap-prev" type="button" aria-label="Previous">&#9198;</button>
+        <button class="sap-btn" id="sap-play" type="button" aria-label="Play">&#9654;</button>
+        <button class="sap-btn" id="sap-next" type="button" aria-label="Next">&#9197;</button>
+      </div>
+    </div>
+    <iframe id="sap-widget-frame" class="sap-hidden-frame" title="Audio player" allow="autoplay"></iframe>
+  </div>
+
+<script src="https://w.soundcloud.com/player/api.js"></script>
+<script>
+(function(){
+  var DEFAULT = 'https://soundcloud.com/yougotgabe/sets/dread-pirate-studio';
+  function boot(url){
+    if(!window.SC||!SC.Widget)return;
+    var pl=document.getElementById('site-audio-player');
+    var tl=document.getElementById('sap-title');
+    var prev=document.getElementById('sap-prev');
+    var play=document.getElementById('sap-play');
+    var next=document.getElementById('sap-next');
+    var dh=document.getElementById('sap-drag-handle');
+    var fr=document.getElementById('sap-widget-frame');
+    if(!pl||!tl||!prev||!play||!next||!dh||!fr)return;
+    var PL=url||DEFAULT, widget=null, playing=false;
+    function src(u,a){return 'https://w.soundcloud.com/player/?url='+encodeURIComponent(u)+'&color=%23c9a84c&auto_play='+(a?'true':'false')+'&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false';}
+    function refBtn(){play.textContent=playing?'❚❚':'▶';play.setAttribute('aria-label',playing?'Pause':'Play');}
+    function refTitle(fb){if(!widget){tl.textContent=fb||'Playlist';return;}widget.getCurrentSound(function(s){var o=fb||'Playlist';if(s&&s.title)o=s.user&&s.user.username?(s.title+' — '+s.user.username):s.title;tl.textContent=o;});}
+    function syncState(){if(!widget)return;widget.isPaused(function(p){playing=!p;refBtn();});}
+    fr.src=src(PL,false);
+    widget=SC.Widget(fr);
+    widget.bind(SC.Widget.Events.READY,function(){syncState();refTitle('Playlist');});
+    widget.bind(SC.Widget.Events.PLAY,function(){playing=true;refBtn();refTitle();});
+    widget.bind(SC.Widget.Events.PAUSE,function(){playing=false;refBtn();refTitle();});
+    widget.bind(SC.Widget.Events.FINISH,function(){setTimeout(function(){syncState();refTitle();},120);});
+    widget.bind(SC.Widget.Events.PLAY_PROGRESS,function(){refTitle();});
+    prev.addEventListener('click',function(e){e.stopPropagation();if(!widget)return;widget.prev();setTimeout(function(){if(playing)widget.play();refTitle();},180);});
+    next.addEventListener('click',function(e){e.stopPropagation();if(!widget)return;widget.next();setTimeout(function(){if(playing)widget.play();refTitle();},180);});
+    play.addEventListener('click',function(e){e.stopPropagation();if(!widget)return;widget.isPaused(function(p){if(p)widget.play();else widget.pause();});});
+    var drag={on:false,sx:0,sy:0,ox:0,oy:0};
+    function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+    function pin(x,y){var mx=window.innerWidth-pl.offsetWidth-6,my=window.innerHeight-pl.offsetHeight-6;pl.style.left=clamp(x,6,Math.max(6,mx))+'px';pl.style.top=clamp(y,6,Math.max(6,my))+'px';pl.style.right='auto';pl.style.bottom='auto';}
+    function ds(ev){if(ev.target.closest&&ev.target.closest('.sap-controls'))return;var p=ev.touches?ev.touches[0]:ev,r=pl.getBoundingClientRect();drag={on:true,sx:p.clientX,sy:p.clientY,ox:r.left,oy:r.top};pl.classList.add('is-dragging');if(ev.preventDefault)ev.preventDefault();}
+    function dm(ev){if(!drag.on)return;var p=ev.touches?ev.touches[0]:ev;pin(drag.ox+(p.clientX-drag.sx),drag.oy+(p.clientY-drag.sy));if(ev.preventDefault)ev.preventDefault();}
+    function de(){if(!drag.on)return;drag.on=false;pl.classList.remove('is-dragging');}
+    dh.addEventListener('mousedown',ds);dh.addEventListener('touchstart',ds,{passive:false});
+    window.addEventListener('mousemove',dm);window.addEventListener('touchmove',dm,{passive:false});
+    window.addEventListener('mouseup',de);window.addEventListener('touchend',de);
+    window.addEventListener('resize',function(){var r=pl.getBoundingClientRect();pin(r.left,r.top);});
+    tl.textContent='Playlist'; refBtn();
+  }
+  window.initCrewPlayer=function(url){
+    if(document.readyState==='complete')boot(url);
+    else window.addEventListener('load',function(){boot(url);});
+  };
+})();
 </script>
 </body>
 </html>
