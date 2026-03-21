@@ -270,6 +270,7 @@ function renderMediaList(){
       +'<div class="media-item-header" onclick="toggleMediaBody(this)">'
       +'<span class="media-item-num">#'+(idx+1)+'</span>'
       +'<span class="media-item-title-display">'+(item.title||'Untitled Item')+'</span>'
+      +(item.published===false?'<span style="font-family:Cinzel,serif;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;color:#8a6f2e;border:1px solid #8a6f2e;padding:0.15rem 0.5rem;margin-right:0.5rem;">Draft</span>':'')
       +'<div class="media-item-actions" onclick="event.stopPropagation()">'
       +(idx>0?'<button class="mi-btn" onclick="moveItem('+idx+',-1)">&#8593;</button>':'')
       +(idx<mediaItems.length-1?'<button class="mi-btn" onclick="moveItem('+idx+',1)">&#8595;</button>':'')
