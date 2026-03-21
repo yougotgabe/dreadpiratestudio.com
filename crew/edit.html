@@ -112,6 +112,12 @@
     <div class="fg"><label>Display Name</label><input type="text" id="f-name" maxlength="60"></div>
     <div class="fg"><label>Rank / Title</label><input type="text" id="f-rank" maxlength="60" placeholder="e.g. Captain, First Mate, Crew"></div>
 
+    <div class="fg">
+      <label>Email Address</label>
+      <input type="email" id="f-email" placeholder="yourname@dreadpiratestudio.com">
+      <p class="hint">Displayed on your profile page as a contact link. Pre-filled with your DPS address.</p>
+    </div>
+
     <p class="sec-label">Disciplines</p>
     <div class="fg">
       <div class="disc-wrap" id="disc-wrap">
@@ -165,7 +171,7 @@
     <div class="fg">
       <label>SoundCloud Playlist URL</label>
       <input type="url" id="f-playlist" placeholder="https://soundcloud.com/yourname/sets/your-playlist">
-      <p class="hint">Visitors to your profile page will hear this playlist in the floating audio player. Paste your SoundCloud profile URL or a specific set/playlist URL.</p>
+      <p class="hint">Paste your full SoundCloud profile URL or playlist URL — e.g. <em>soundcloud.com/yourname</em> or <em>soundcloud.com/yourname/sets/playlist-name</em>. Do not use short share links (on.soundcloud.com/...) as those won't work in the player.</p>
     </div>
 
     <p class="sec-label">Links</p>
@@ -230,6 +236,7 @@ function loadMedia(p){
 function populateForm(p){
   document.getElementById('f-name').value=p.display_name||'';
   document.getElementById('f-rank').value=p.rank||'';
+  document.getElementById('f-email').value=p.email||'';
   document.getElementById('f-bio').value=p.bio||'';
   document.getElementById('f-quote').value=p.quote||'';
   document.getElementById('f-talents').value=p.talents||'';
@@ -288,6 +295,7 @@ function renderMediaList(){
       +'<div class="fg"><label>Type</label>'
       +'<select onchange="updateItemField('+idx+',\'type\',this.value)">'
       +'<option value="soundcloud"'+(item.type==='soundcloud'?' selected':'')+'>SoundCloud</option>'
+      +'<option value="bandlab"'+(item.type==='bandlab'?' selected':'')+'>BandLab</option>'
       +'<option value="youtube"'+(item.type==='youtube'?' selected':'')+'>YouTube</option>'
       +'<option value="spotify"'+(item.type==='spotify'?' selected':'')+'>Spotify</option>'
       +'<option value="photo"'+(item.type==='photo'?' selected':'')+'>Photo</option>'
@@ -298,7 +306,7 @@ function renderMediaList(){
       +'<option value="link"'+(item.type==='link'?' selected':'')+'>Other Link</option>'
       +'</select></div>'
       +'<div class="fg"><label>Title</label><input type="text" value="'+esc(item.title)+'" oninput="updateItemField('+idx+',\'title\',this.value)" placeholder="Give this item a name"></div>'
-      +'<div class="fg"><label>URL / Embed Source</label><input type="url" value="'+esc(item.url)+'" oninput="updateItemField('+idx+',\'url\',this.value)" placeholder="https://..."><p class="hint">For SoundCloud/YouTube, paste the embed src URL. For photos, paste a direct image link.</p></div>'
+      +'<div class="fg"><label>URL / Embed Source</label><input type="url" value="'+esc(item.url)+'" oninput="updateItemField('+idx+',\'url\',this.value)" placeholder="https://..."><p class="hint">SoundCloud/YouTube/Spotify: paste the embed src URL from their Share &rarr; Embed menu. BandLab: paste the src URL from Share &rarr; Embed (looks like bandlab.com/embed/?id=...). For photos, paste a direct image link.</p></div>'
       +'<div class="fg"><label>Caption</label><input type="text" value="'+esc(item.caption)+'" oninput="updateItemField('+idx+',\'caption\',this.value)" placeholder="Short description shown on the card"></div>'
       +'<div class="fg"><label>Notes <span style="opacity:0.6;font-size:0.85rem;">(lyrics, backstory, credits — shown when expanded)</span></label>'
       +'<textarea rows="6" oninput="updateItemField('+idx+',\'notes\',this.value)" placeholder="Add lyrics, the story behind this track, credits, anything you want...">'+esc(item.notes)+'</textarea></div>'
@@ -345,6 +353,7 @@ function doSave(){
   var payload={
     display_name:document.getElementById('f-name').value.trim(),
     rank:document.getElementById('f-rank').value.trim(),
+      email:document.getElementById('f-email').value.trim(),
     disciplines:selDiscs,
     bio:document.getElementById('f-bio').value.trim(),
     quote:document.getElementById('f-quote').value.trim(),
