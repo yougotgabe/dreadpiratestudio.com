@@ -8,90 +8,95 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --black:    #080808;
-    --deep:     #0d0f14;
-    --surface:  #131620;
-    --gold:     #c9a84c;
-    --gold-dim: #8a6f2e;
-    --gold-glow:rgba(201,168,76,0.18);
-    --white:    #e8e0d0;
-    --muted:    #6b6355;
-    --border:   rgba(201,168,76,0.15);
+    --black:#080808; --deep:#0d0f14; --surface:#131620;
+    --gold:#c9a84c; --gold-dim:#8a6f2e; --gold-glow:rgba(201,168,76,0.18);
+    --white:#e8e0d0; --muted:#6b6355; --border:rgba(201,168,76,0.15);
   }
-  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-  body { background:var(--black); color:var(--white); font-family:'Crimson Text',Georgia,serif; font-size:18px; overflow-x:hidden; }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--black);color:var(--white);font-family:'Crimson Text',Georgia,serif;font-size:18px;overflow-x:hidden;}
 
-  nav { position:fixed; top:0; left:0; right:0; z-index:900; padding:0 2rem; height:72px; display:flex; align-items:center; justify-content:space-between; background:linear-gradient(to bottom,rgba(8,8,8,0.95),rgba(8,8,8,0.7)); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); }
-  .nav-logo { text-decoration:none; }
-  .nav-logo img { height:44px; width:auto; }
-  .nav-back { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); text-decoration:none; transition:color 0.3s; }
-  .nav-back:hover { color:var(--gold); }
+  nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:0 2rem;height:72px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(8,8,8,0.97),rgba(8,8,8,0.75));border-bottom:1px solid var(--border);backdrop-filter:blur(12px);}
+  .nav-logo{text-decoration:none;}
+  .nav-logo img{height:44px;width:auto;}
+  .nav-back{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.3s;}
+  .nav-back:hover{color:var(--gold);}
 
-  /* Hero strip */
-  .profile-hero {
-    min-height:100vh; display:flex; align-items:flex-end;
-    position:relative; padding:0 0 4rem;
-    background:linear-gradient(180deg,#080808 0%,#0a0c10 60%,#080808 100%);
-    overflow:hidden;
-  }
-  .profile-hero-bg {
-    position:absolute; inset:0; z-index:0;
-    background:radial-gradient(ellipse 70% 50% at 50% 40%, rgba(201,168,76,0.07) 0%, transparent 70%);
-  }
-  .profile-hero-inner { position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:8rem 2rem 0; width:100%; display:grid; grid-template-columns:320px 1fr; gap:4rem; align-items:end; }
+  /* HERO */
+  .profile-hero{min-height:100vh;display:flex;align-items:flex-end;position:relative;padding-bottom:4rem;background:linear-gradient(180deg,#080808 0%,#0a0c10 60%,#080808 100%);overflow:hidden;}
+  .hero-glow{position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 40%,rgba(201,168,76,0.07) 0%,transparent 70%);pointer-events:none;}
+  .profile-hero-inner{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:8rem 2rem 0;width:100%;display:grid;grid-template-columns:300px 1fr;gap:4rem;align-items:end;}
+  .profile-photo{width:100%;aspect-ratio:1/1;border-radius:4px;background:var(--deep);border:1px solid var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 0 50px rgba(201,168,76,0.1);}
+  .profile-photo img{width:100%;height:100%;object-fit:cover;}
+  .profile-photo .ph{font-size:5rem;opacity:0.1;}
+  .profile-rank{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);opacity:0.7;margin-bottom:0.5rem;}
+  .profile-name{font-family:'Cinzel Decorative',serif;font-size:clamp(2rem,5vw,3.8rem);color:var(--white);line-height:1.1;margin-bottom:1.5rem;}
+  .disciplines{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:2rem;}
+  .disc-tag{padding:0.3rem 0.9rem;border:1px solid var(--border);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-dim);background:rgba(201,168,76,0.04);}
+  .profile-quote{border-left:2px solid var(--gold-dim);padding-left:1.5rem;color:var(--muted);font-style:italic;font-size:1.15rem;line-height:1.6;max-width:520px;}
 
-  .profile-photo-wrap { position:relative; }
-  .profile-photo {
-    width:100%; aspect-ratio:1/1; border-radius:4px;
-    background:var(--deep); border:1px solid var(--border);
-    overflow:hidden; display:flex; align-items:center; justify-content:center;
-    box-shadow:0 0 40px rgba(201,168,76,0.1);
-  }
-  .profile-photo img { width:100%; height:100%; object-fit:cover; }
-  .profile-photo .placeholder { font-size:6rem; opacity:0.12; }
+  /* INFO STRIP — Talents / Interests / Hobbies */
+  .info-strip{background:var(--deep);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+  .info-strip-inner{max-width:1100px;margin:0 auto;padding:2.5rem 2rem;display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;}
+  .info-col h3{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);opacity:0.75;margin-bottom:0.9rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);}
+  .info-col p{font-size:0.95rem;color:var(--muted);line-height:1.75;}
 
-  .profile-identity { padding-bottom:0.5rem; }
-  .profile-rank { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.5em; text-transform:uppercase; color:var(--gold); opacity:0.7; margin-bottom:0.5rem; }
-  .profile-name { font-family:'Cinzel Decorative',serif; font-size:clamp(2.2rem,5vw,4rem); color:var(--white); line-height:1.1; margin-bottom:1.5rem; }
-  .profile-disciplines { display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:2rem; }
-  .discipline-tag { padding:0.3rem 0.9rem; border:1px solid var(--border); font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--gold-dim); background:rgba(201,168,76,0.04); }
-  .profile-quote { border-left:2px solid var(--gold-dim); padding-left:1.5rem; color:var(--muted); font-style:italic; font-size:1.15rem; line-height:1.6; max-width:540px; }
+  /* MAIN LAYOUT */
+  .page-body{max-width:1100px;margin:0 auto;padding:4rem 2rem;display:grid;grid-template-columns:1fr 320px;gap:4rem;}
 
-  /* Main content */
-  main { max-width:1100px; margin:0 auto; padding:4rem 2rem; display:grid; grid-template-columns:1fr 360px; gap:4rem; }
+  /* BIO */
+  .bio-section h2,.media-section h2{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);opacity:0.75;margin-bottom:1.5rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);}
+  .bio-text{color:var(--muted);line-height:1.9;font-size:1.05rem;}
+  .bio-text p{margin-bottom:1rem;}
 
-  .profile-bio-section h2 { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.4em; text-transform:uppercase; color:var(--gold); opacity:0.7; margin-bottom:1.5rem; }
-  .profile-bio { color:var(--muted); line-height:1.9; font-size:1.05rem; }
-  .profile-bio p { margin-bottom:1rem; }
+  /* MEDIA LIBRARY */
+  .media-section{margin-top:3.5rem;}
+  .media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;}
 
-  .profile-embed { margin-top:3rem; }
-  .profile-embed h2 { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.4em; text-transform:uppercase; color:var(--gold); opacity:0.7; margin-bottom:1.25rem; }
-  .embed-wrap { border:1px solid var(--border); border-radius:4px; overflow:hidden; background:var(--deep); }
-  .embed-wrap iframe { display:block; width:100%; border:none; }
-  .youtube-wrap { position:relative; width:100%; padding-top:56.25%; }
-  .youtube-wrap iframe { position:absolute; top:0; left:0; width:100%; height:100%; }
+  .media-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;overflow:hidden;transition:border-color 0.3s,box-shadow 0.3s;cursor:pointer;}
+  .media-card:hover{border-color:rgba(201,168,76,0.35);box-shadow:0 8px 30px rgba(0,0,0,0.4);}
+  .media-card-header{padding:1rem 1.25rem 0.75rem;display:flex;align-items:center;gap:0.75rem;}
+  .media-type-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;background:rgba(201,168,76,0.1);border:1px solid var(--border);}
+  .media-card-title{font-family:'Cinzel',serif;font-size:0.75rem;color:var(--white);letter-spacing:0.05em;flex:1;min-width:0;}
+  .media-card-caption{padding:0 1.25rem 0.75rem;font-size:0.9rem;color:var(--muted);line-height:1.55;}
+  .media-card-toggle{padding:0.6rem 1.25rem;border-top:1px solid var(--border);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-dim);display:flex;align-items:center;justify-content:space-between;transition:color 0.3s;}
+  .media-card-toggle:hover{color:var(--gold);}
+  .toggle-arrow{transition:transform 0.3s;}
+  .media-card-toggle.open .toggle-arrow{transform:rotate(180deg);}
 
-  /* Sidebar */
-  .profile-sidebar {}
-  .sidebar-section { margin-bottom:2.5rem; }
-  .sidebar-label { font-family:'Cinzel',serif; font-size:0.62rem; letter-spacing:0.4em; text-transform:uppercase; color:var(--gold); opacity:0.7; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.5rem; }
-  .link-list { list-style:none; }
-  .link-list li { margin-bottom:0.5rem; }
-  .link-list a { display:flex; align-items:center; gap:0.75rem; padding:0.6rem 1rem; border:1px solid var(--border); background:var(--surface); text-decoration:none; color:var(--muted); font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.12em; text-transform:uppercase; transition:all 0.3s; }
-  .link-list a:hover { border-color:var(--gold-dim); color:var(--gold); background:rgba(201,168,76,0.04); }
-  .link-list a span { margin-left:auto; opacity:0.4; font-size:0.75rem; }
+  /* Expandable content */
+  .media-card-body{display:none;border-top:1px solid var(--border);}
+  .media-card-body.open{display:block;}
+  .media-embed{padding:0;}
+  .media-embed iframe{display:block;width:100%;border:none;}
+  .youtube-wrap{position:relative;width:100%;padding-top:56.25%;}
+  .youtube-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;}
+  .media-photo img{width:100%;display:block;}
+  .media-notes{padding:1.25rem;font-size:0.95rem;color:var(--muted);line-height:1.8;white-space:pre-wrap;border-top:1px solid var(--border);}
+  .media-link-btn{display:block;padding:1.25rem;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);text-decoration:none;transition:background 0.3s;text-align:center;}
+  .media-link-btn:hover{background:rgba(201,168,76,0.06);}
 
-  footer { border-top:1px solid var(--border); padding:2rem; text-align:center; background:var(--black); }
-  .footer-text { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; color:var(--muted); text-transform:uppercase; }
+  /* SIDEBAR */
+  .sidebar{}
+  .sidebar-section{margin-bottom:2.5rem;}
+  .sidebar-label{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);opacity:0.75;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);}
+  .link-list{list-style:none;}
+  .link-list li{margin-bottom:0.5rem;}
+  .link-list a{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 1rem;border:1px solid var(--border);background:var(--surface);text-decoration:none;color:var(--muted);font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;transition:all 0.3s;}
+  .link-list a:hover{border-color:var(--gold-dim);color:var(--gold);background:rgba(201,168,76,0.04);}
+  .link-list a span{margin-left:auto;opacity:0.4;}
 
-  .loading { text-align:center; padding:8rem 2rem; color:var(--muted); font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.3em; text-transform:uppercase; }
-  .not-found { text-align:center; padding:8rem 2rem; }
-  .not-found h2 { font-family:'Cinzel Decorative',serif; color:var(--gold); margin-bottom:1rem; }
+  footer{border-top:1px solid var(--border);padding:2rem;text-align:center;background:var(--black);}
+  .footer-text{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;}
 
-  @media (max-width:768px) {
-    .profile-hero-inner { grid-template-columns:1fr; gap:2rem; }
-    .profile-photo-wrap { max-width:220px; }
-    main { grid-template-columns:1fr; }
+  .loading{text-align:center;padding:8rem 2rem;color:var(--muted);font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.3em;text-transform:uppercase;}
+
+  @media(max-width:768px){
+    .profile-hero-inner{grid-template-columns:1fr;gap:2rem;}
+    .profile-photo{max-width:200px;}
+    .info-strip-inner{grid-template-columns:1fr;}
+    .page-body{grid-template-columns:1fr;}
+    .media-grid{grid-template-columns:1fr;}
   }
 </style>
 </head>
@@ -102,171 +107,202 @@
   <a href="../crew.html" class="nav-back">&#8592; The Crew</a>
 </nav>
 
-<div id="page-loading" class="loading">Loading&hellip;</div>
+<div id="pg-loading" class="loading">Loading&hellip;</div>
 
-<div id="page-content" style="display:none;">
-  <div class="profile-hero">
-    <div class="profile-hero-bg"></div>
+<div id="pg-content" style="display:none">
+
+  <section class="profile-hero">
+    <div class="hero-glow"></div>
     <div class="profile-hero-inner">
-      <div class="profile-photo-wrap">
-        <div class="profile-photo" id="profile-photo">
-          <div class="placeholder">&#9760;</div>
-        </div>
+      <div class="profile-photo" id="p-photo"><div class="ph">&#9760;</div></div>
+      <div>
+        <p class="profile-rank" id="p-rank"></p>
+        <h1 class="profile-name" id="p-name"></h1>
+        <div class="disciplines" id="p-disciplines"></div>
+        <blockquote class="profile-quote" id="p-quote" style="display:none"></blockquote>
       </div>
-      <div class="profile-identity">
-        <p class="profile-rank" id="profile-rank"></p>
-        <h1 class="profile-name" id="profile-name"></h1>
-        <div class="profile-disciplines" id="profile-disciplines"></div>
-        <blockquote class="profile-quote" id="profile-quote" style="display:none;"></blockquote>
+    </div>
+  </section>
+
+  <div class="info-strip" id="info-strip" style="display:none">
+    <div class="info-strip-inner">
+      <div class="info-col" id="col-talents" style="display:none">
+        <h3>Talents</h3>
+        <p id="p-talents"></p>
+      </div>
+      <div class="info-col" id="col-interests" style="display:none">
+        <h3>Interests</h3>
+        <p id="p-interests"></p>
+      </div>
+      <div class="info-col" id="col-hobbies" style="display:none">
+        <h3>Hobbies</h3>
+        <p id="p-hobbies"></p>
       </div>
     </div>
   </div>
 
-  <main>
-    <div class="profile-main">
-      <section class="profile-bio-section">
+  <div class="page-body">
+    <div class="page-main">
+      <section class="bio-section">
         <h2>About</h2>
-        <div class="profile-bio" id="profile-bio"></div>
+        <div class="bio-text" id="p-bio"></div>
       </section>
-      <section class="profile-embed" id="embed-section" style="display:none;">
-        <h2>Featured</h2>
-        <div class="embed-wrap" id="embed-wrap"></div>
+      <section class="media-section" id="media-section" style="display:none">
+        <h2>Media Library</h2>
+        <div class="media-grid" id="media-grid"></div>
       </section>
     </div>
-
-    <aside class="profile-sidebar">
-      <div class="sidebar-section" id="links-section" style="display:none;">
+    <aside class="sidebar">
+      <div class="sidebar-section" id="links-section" style="display:none">
         <p class="sidebar-label">Find Me Online</p>
-        <ul class="link-list" id="link-list"></ul>
+        <ul class="link-list" id="p-links"></ul>
       </div>
       <div class="sidebar-section">
         <p class="sidebar-label">Dread Pirate Studio</p>
         <ul class="link-list">
-          <li><a href="../index.html">&#127754; Back to the Ship <span>&#8594;</span></a></li>
-          <li><a href="../crew.html">&#128100; The Full Crew <span>&#8594;</span></a></li>
+          <li><a href="../index.html">&#127754; Back to the Ship<span>&#8594;</span></a></li>
+          <li><a href="../crew.html">&#128100; The Full Crew<span>&#8594;</span></a></li>
         </ul>
       </div>
     </aside>
-  </main>
+  </div>
+
 </div>
 
-<div id="page-404" style="display:none;" class="not-found">
-  <h2>Lost at Sea</h2>
-  <p style="color:var(--muted);">That crew member couldn't be found.</p><br>
+<div id="pg-404" style="display:none;text-align:center;padding:8rem 2rem;">
+  <h2 style="font-family:'Cinzel Decorative',serif;color:var(--gold);margin-bottom:1rem;">Lost at Sea</h2>
+  <p style="color:var(--muted)">That crew member couldn't be found.</p><br>
   <a href="../crew.html" style="color:var(--gold);font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.2em;">&#8592; Back to the Crew</a>
 </div>
 
-<footer>
-  <p class="footer-text">&copy; 2026 Dread Pirate Studio &nbsp;&middot;&nbsp; dreadpiratestudio.com</p>
-</footer>
+<footer><p class="footer-text">&copy; 2026 Dread Pirate Studio &nbsp;&middot;&nbsp; dreadpiratestudio.com</p></footer>
 
 <script>
-  var SUPABASE_URL = 'https://efylfnnshmaauhiwqaxj.supabase.co';
-  var SUPABASE_KEY = 'sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
+var SURL = 'https://efylfnnshmaauhiwqaxj.supabase.co';
+var SKEY = 'sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
+var slug = window.location.pathname.split('/').pop().replace('.html','');
 
-  // Get slug from filename: crew/gabe.html -> 'gabe'
-  var slug = window.location.pathname.split('/').pop().replace('.html','');
+function esc(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-  function esc(str) {
-    if (!str) return '';
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function apiFetch(path){
+  return fetch(SURL+'/rest/v1/'+path,{headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}}).then(function(r){return r.json();});
+}
+
+function load(){
+  Promise.all([
+    apiFetch('crew_profiles?slug=eq.'+encodeURIComponent(slug)+'&published=eq.true&select=*&limit=1'),
+    apiFetch('crew_media?crew_slug=eq.'+encodeURIComponent(slug)+'&published=eq.true&order=sort_order.asc,created_at.asc')
+  ]).then(function(results){
+    document.getElementById('pg-loading').style.display='none';
+    var profiles=results[0], media=results[1];
+    if(!profiles||profiles.length===0){document.getElementById('pg-404').style.display='block';return;}
+    renderProfile(profiles[0], media||[]);
+    document.getElementById('pg-content').style.display='block';
+  }).catch(function(){
+    document.getElementById('pg-loading').textContent='Could not load profile. Please try again.';
+  });
+}
+
+function renderProfile(p, media){
+  document.title = p.display_name+' — Dread Pirate Studio';
+
+  if(p.photo_url) document.getElementById('p-photo').innerHTML='<img src="'+esc(p.photo_url)+'" alt="'+esc(p.display_name)+'">';
+  document.getElementById('p-rank').textContent=p.rank||'';
+  document.getElementById('p-name').textContent=p.display_name||'';
+
+  if(p.disciplines&&p.disciplines.length){
+    document.getElementById('p-disciplines').innerHTML=p.disciplines.map(function(d){return '<span class="disc-tag">'+esc(d)+'</span>';}).join('');
+  }
+  if(p.quote){var q=document.getElementById('p-quote');q.textContent=p.quote;q.style.display='block';}
+
+  // Talents / Interests / Hobbies
+  var hasInfo=false;
+  if(p.talents){document.getElementById('p-talents').textContent=p.talents;document.getElementById('col-talents').style.display='block';hasInfo=true;}
+  if(p.interests){document.getElementById('p-interests').textContent=p.interests;document.getElementById('col-interests').style.display='block';hasInfo=true;}
+  if(p.hobbies){document.getElementById('p-hobbies').textContent=p.hobbies;document.getElementById('col-hobbies').style.display='block';hasInfo=true;}
+  if(hasInfo) document.getElementById('info-strip').style.display='block';
+
+  // Bio
+  var bioEl=document.getElementById('p-bio');
+  if(p.bio){
+    bioEl.innerHTML=p.bio.split('\n\n').filter(function(x){return x.trim();}).map(function(x){return '<p>'+esc(x.trim())+'</p>';}).join('');
+  } else {
+    bioEl.innerHTML='<p style="color:var(--muted);font-style:italic;">Bio coming soon.</p>';
   }
 
-  function loadProfile() {
-    var url = SUPABASE_URL + '/rest/v1/crew_profiles?slug=eq.' + encodeURIComponent(slug) + '&published=eq.true&select=*&limit=1';
-    fetch(url, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      document.getElementById('page-loading').style.display = 'none';
-      if (!data || data.length === 0) {
-        document.getElementById('page-404').style.display = 'block';
-        return;
-      }
-      renderProfile(data[0]);
-    })
-    .catch(function() {
-      document.getElementById('page-loading').innerHTML = 'Could not load profile. Please try again.';
-    });
+  // Links
+  var links=[{l:p.link_1_label,u:p.link_1_url},{l:p.link_2_label,u:p.link_2_url},{l:p.link_3_label,u:p.link_3_url},{l:p.link_4_label,u:p.link_4_url}];
+  var lHtml=links.filter(function(x){return x.l&&x.u;}).map(function(x){return '<li><a href="'+esc(x.u)+'" target="_blank" rel="noopener">'+esc(x.l)+'<span>&#8594;</span></a></li>';}).join('');
+  if(lHtml){document.getElementById('p-links').innerHTML=lHtml;document.getElementById('links-section').style.display='block';}
+
+  // Media
+  if(media&&media.length){
+    renderMedia(media);
+    document.getElementById('media-section').style.display='block';
   }
+}
 
-  function renderProfile(p) {
-    document.title = p.display_name + ' — Dread Pirate Studio';
+var TYPE_ICONS={'soundcloud':'&#9835;','youtube':'&#9654;','spotify':'&#127925;','photo':'&#128247;','video':'&#127910;','instagram':'&#128247;','tiktok':'&#127909;','x':'&#120143;','link':'&#128279;'};
 
-    // Photo
-    if (p.photo_url) {
-      document.getElementById('profile-photo').innerHTML = '<img src="' + esc(p.photo_url) + '" alt="' + esc(p.display_name) + '">';
+function renderMedia(items){
+  var grid=document.getElementById('media-grid');
+  grid.innerHTML=items.map(function(item){
+    var icon=TYPE_ICONS[item.type]||'&#128279;';
+    var SOCIAL_TYPES=['instagram','tiktok','x','link'];
+    var EMBED_TYPES=['soundcloud','youtube','spotify','photo','video'];
+    var hasExpand=(EMBED_TYPES.indexOf(item.type)!==-1||item.notes);
+    var hasLink=(SOCIAL_TYPES.indexOf(item.type)!==-1&&item.url);
+    var caption=item.caption?'<div class="media-card-caption">'+esc(item.caption)+'</div>':'';
+
+    var toggleRow='';
+    var platformLabel={'instagram':'View on Instagram','tiktok':'View on TikTok','x':'View on X','link':'Visit Link'};
+    if(hasExpand&&!hasLink){
+      toggleRow='<div class="media-card-toggle" onclick="toggleCard(this)">Expand <span class="toggle-arrow">&#8964;</span></div>';
+    } else if(hasLink){
+      toggleRow='<div class="media-card-toggle"><a class="media-link-btn" href="'+esc(item.url)+'" target="_blank" rel="noopener">'+(platformLabel[item.type]||'Visit Link')+' &#8594;</a></div>';
+    } else if(hasExpand){
+      toggleRow='<div class="media-card-toggle" onclick="toggleCard(this)">Expand <span class="toggle-arrow">&#8964;</span></div>';
     }
 
-    // Identity
-    document.getElementById('profile-rank').textContent = p.rank;
-    document.getElementById('profile-name').textContent = p.display_name;
-
-    // Disciplines
-    var discEl = document.getElementById('profile-disciplines');
-    if (p.disciplines && p.disciplines.length) {
-      var dHtml = '';
-      for (var i = 0; i < p.disciplines.length; i++) {
-        dHtml += '<span class="discipline-tag">' + esc(p.disciplines[i]) + '</span>';
-      }
-      discEl.innerHTML = dHtml;
+    var bodyContent='';
+    if(item.type==='soundcloud'&&item.url){
+      bodyContent='<div class="media-embed"><iframe height="166" scrolling="no" allow="autoplay" src="'+esc(item.url)+'"></iframe></div>';
+    } else if(item.type==='youtube'&&item.url){
+      bodyContent='<div class="media-embed"><div class="youtube-wrap"><iframe src="'+esc(item.url)+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div></div>';
+    } else if(item.type==='spotify'&&item.url){
+      bodyContent='<div class="media-embed"><iframe style="border-radius:4px" src="'+esc(item.url)+'" width="100%" height="152" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe></div>';
+    } else if(item.type==='photo'&&item.url){
+      bodyContent='<div class="media-photo"><img src="'+esc(item.url)+'" alt="'+esc(item.title)+'"></div>';
+    }
+    if(item.notes){
+      bodyContent+='<div class="media-notes">'+esc(item.notes)+'</div>';
     }
 
-    // Quote
-    if (p.quote) {
-      var qEl = document.getElementById('profile-quote');
-      qEl.textContent = p.quote;
-      qEl.style.display = 'block';
-    }
+    var body=bodyContent?'<div class="media-card-body">'+bodyContent+'</div>':'';
 
-    // Bio
-    var bioEl = document.getElementById('profile-bio');
-    if (p.bio) {
-      var paras = p.bio.split('\n\n');
-      var bHtml = '';
-      for (var j = 0; j < paras.length; j++) {
-        if (paras[j].trim()) bHtml += '<p>' + esc(paras[j].trim()) + '</p>';
-      }
-      bioEl.innerHTML = bHtml || '<p>' + esc(p.bio) + '</p>';
-    } else {
-      bioEl.innerHTML = '<p style="color:var(--muted);font-style:italic;">Bio coming soon.</p>';
-    }
+    return '<div class="media-card">'
+      +'<div class="media-card-header">'
+      +'<div class="media-type-icon">'+icon+'</div>'
+      +'<div class="media-card-title">'+esc(item.title)+'</div>'
+      +'</div>'
+      +caption
+      +toggleRow
+      +body
+      +'</div>';
+  }).join('');
+}
 
-    // Links
-    var links = [
-      {label: p.link_1_label, url: p.link_1_url},
-      {label: p.link_2_label, url: p.link_2_url},
-      {label: p.link_3_label, url: p.link_3_url},
-      {label: p.link_4_label, url: p.link_4_url}
-    ];
-    var linkHtml = '';
-    for (var k = 0; k < links.length; k++) {
-      if (links[k].label && links[k].url) {
-        linkHtml += '<li><a href="' + esc(links[k].url) + '" target="_blank" rel="noopener">' + esc(links[k].label) + '<span>&#8594;</span></a></li>';
-      }
-    }
-    if (linkHtml) {
-      document.getElementById('link-list').innerHTML = linkHtml;
-      document.getElementById('links-section').style.display = 'block';
-    }
+function toggleCard(toggleEl){
+  var card=toggleEl.parentElement;
+  var body=card.querySelector('.media-card-body');
+  if(!body) return;
+  var isOpen=body.classList.contains('open');
+  body.classList.toggle('open');
+  toggleEl.classList.toggle('open');
+  toggleEl.innerHTML=(isOpen?'Expand':'Collapse')+' <span class="toggle-arrow'+(isOpen?'':' open')+'">&#8964;</span>';
+}
 
-    // Embed
-    if (p.embed_url && p.embed_type) {
-      var embedWrap = document.getElementById('embed-wrap');
-      if (p.embed_type === 'soundcloud') {
-        embedWrap.innerHTML = '<iframe height="166" scrolling="no" allow="autoplay" src="' + esc(p.embed_url) + '"></iframe>';
-      } else if (p.embed_type === 'youtube') {
-        embedWrap.className = 'embed-wrap youtube-wrap';
-        embedWrap.innerHTML = '<iframe src="' + esc(p.embed_url) + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
-      }
-      document.getElementById('embed-section').style.display = 'block';
-    }
-
-    document.getElementById('page-content').style.display = 'block';
-  }
-
-  loadProfile();
+load();
 </script>
 </body>
 </html>
