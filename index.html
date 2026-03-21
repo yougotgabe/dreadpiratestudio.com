@@ -231,54 +231,27 @@
     #mobile-cannon-section {
       display: none;
       position: relative;
-      min-height: 72vh;
+      min-height: 40vh;
       background:
         radial-gradient(circle at 50% 18%, rgba(201,168,76,0.16), transparent 38%),
         linear-gradient(180deg, #080808 0%, #0b0f16 62%, #080808 100%);
       overflow: hidden;
-      padding: 84px 0 0;
+      padding: 0;
     }
     .mobile-cannon-wrap {
       position: relative;
-      min-height: calc(72vh - 84px);
+      min-height: 40vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2rem 1rem 5rem;
+      padding: 1rem 1rem 3rem;
     }
     .mobile-cannon-copy {
-      position: absolute;
-      top: 1.4rem;
-      left: 50%;
-      transform: translateX(-50%);
-      width: min(92vw, 34rem);
-      text-align: center;
-      z-index: 2;
-      pointer-events: none;
+      display: none;
     }
-    .mobile-cannon-kicker {
-      font-family: 'Cinzel', serif;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      font-size: 0.66rem;
-      color: rgba(201,168,76,0.92);
-      margin-bottom: 0.85rem;
-    }
-    .mobile-cannon-title {
-      font-family: 'Cinzel Decorative', serif;
-      font-size: clamp(1.45rem, 7vw, 2.4rem);
-      line-height: 1.15;
-      color: #f5f0de;
-      margin: 0;
-      text-shadow: 0 10px 28px rgba(0,0,0,0.38);
-    }
-    .mobile-cannon-sub {
-      margin: 0.85rem auto 0;
-      max-width: 30ch;
-      color: rgba(245,240,222,0.74);
-      line-height: 1.55;
-      font-size: 0.98rem;
-    }
+    .mobile-cannon-kicker { display: none; }
+    .mobile-cannon-title  { display: none; }
+    .mobile-cannon-sub    { display: none; }
     .mobile-cannon-stage {
       position: relative;
       width: min(96vw, 42rem);
@@ -619,11 +592,6 @@
 
   <section id="mobile-cannon-section" aria-label="Cinematic introduction">
     <div class="mobile-cannon-wrap">
-      <div class="mobile-cannon-copy">
-        <p class="mobile-cannon-kicker">Mobile Cinematic</p>
-        <h2 class="mobile-cannon-title">Fire Into the Crowd</h2>
-        <p class="mobile-cannon-sub">On smaller screens, the intro shifts to a full-frame cinematic so the scene reads clearly instead of sitting tiny at the bottom edge.</p>
-      </div>
       <div class="mobile-cannon-stage" id="mobile-cannon-stage">
         <div class="mcs-layer" id="mcs-crowd"><img src="crowd.png" alt=""></div>
         <div class="mcs-layer" id="mcs-cannon"><img src="cannon.png" alt=""></div>
@@ -675,46 +643,59 @@
         <p class="section-sub">Every great voyage needs a worthy crew.</p>
       </div>
       <div class="crew-grid">
-        <div class="glow-card">
+        <a href="crew/gabe.html" class="glow-card" style="text-decoration:none;">
+          <div class="glow-card__inner">
+            <div class="crew-icon">&#9760;</div>
+            <p class="crew-name">Gabe Nelson</p>
+            <p class="crew-role">Captain &nbsp;&middot;&nbsp; YouGotGabe</p>
+            <div class="crew-links">
+              <span class="crew-link">View Profile &#8594;</span>
+            </div>
+          </div>
+        </a>
+        <a href="crew/ot.html" class="glow-card" style="text-decoration:none;">
           <div class="glow-card__inner">
             <div class="crew-icon">&#127928;</div>
             <p class="crew-name">OT</p>
             <p class="crew-role">Music &nbsp;&middot;&nbsp; Performance</p>
             <div class="crew-links">
-              <a href="https://soundcloud.com/maderightband" target="_blank" class="crew-link">Made Right</a>
+              <span class="crew-link">View Profile &#8594;</span>
             </div>
           </div>
-        </div>
-        <div class="glow-card">
+        </a>
+        <a href="crew/zach.html" class="glow-card" style="text-decoration:none;">
           <div class="glow-card__inner">
             <div class="crew-icon">&#127916;</div>
             <p class="crew-name">Zach</p>
             <p class="crew-role">Video &nbsp;&middot;&nbsp; Drone</p>
             <div class="crew-links">
-              <span class="crew-link" style="opacity:0.4;cursor:default;">Coming Soon</span>
+              <span class="crew-link">View Profile &#8594;</span>
             </div>
           </div>
-        </div>
-        <div class="glow-card">
+        </a>
+        <a href="crew/abram.html" class="glow-card" style="text-decoration:none;">
           <div class="glow-card__inner">
             <div class="crew-icon">&#127908;</div>
             <p class="crew-name">Abram</p>
             <p class="crew-role">Original Music &nbsp;&middot;&nbsp; Vocals</p>
             <div class="crew-links">
-              <span class="crew-link" style="opacity:0.4;cursor:default;">Coming Soon</span>
+              <span class="crew-link">View Profile &#8594;</span>
             </div>
           </div>
-        </div>
-        <div class="glow-card">
+        </a>
+        <a href="crew/jade.html" class="glow-card" style="text-decoration:none;">
           <div class="glow-card__inner">
             <div class="crew-icon">&#127912;</div>
             <p class="crew-name">Jade</p>
             <p class="crew-role">Creative &nbsp;&middot;&nbsp; Collab</p>
             <div class="crew-links">
-              <span class="crew-link" style="opacity:0.4;cursor:default;">Coming Soon</span>
+              <span class="crew-link">View Profile &#8594;</span>
             </div>
           </div>
-        </div>
+        </a>
+      </div>
+      <div style="text-align:center;margin-top:2.5rem;">
+        <a href="crew.html" class="btn btn-outline">View Full Crew Roster &#8594;</a>
       </div>
     </div>
   </section>
@@ -842,7 +823,7 @@
         <h2 class="section-title">Set Sail Together</h2>
         <div class="section-rule"></div>
         <p class="contact-note">Collaborations, commissions, questions, or just a good conversation &mdash; the captain's door is open.</p>
-        <a href="mailto:gabe@dreadpiratestudio.com" class="contact-email">gabe@dreadpiratestudio.com</a>
+        <a href="/cdn-cgi/l/email-protection#96f1f7f4f3d6f2e4f3f7f2e6ffe4f7e2f3e5e2e3f2fff9b8f5f9fb" class="contact-email"><span class="__cf_email__" data-cfemail="d6b1b7b4b396b2a4b3b7b2a6bfa4b7a2b3a5a2a3b2bfb9f8b5b9bb">[email&#160;protected]</span></a>
         <p class="contact-note" style="font-size:0.85rem;">Response time: usually within 24 hours</p>
       </div>
     </div>
@@ -853,7 +834,7 @@
     <p class="footer-text">&copy; 2026 Dread Pirate Studio &nbsp;&middot;&nbsp; dreadpiratestudio.com &nbsp;&middot;&nbsp; All Rights Reserved</p>
   </footer>
 
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // PARALLAX - no backticks, no arrow functions, no const/let
     // Plain ES5 to survive any Cloudflare transformation
     var pObjs = document.querySelectorAll('.obj');
@@ -1442,19 +1423,4 @@
     window.addEventListener('touchend', endDrag);
     window.addEventListener('resize', function() {
       var rect = playerEl.getBoundingClientRect();
-      if (playerEl.style.left) { pinToViewport(rect.left, rect.top); }
-    });
-
-    initWidget();
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
-  } else {
-    boot();
-  }
-})();
-</script>
-
-</body>
-</html>
+      
