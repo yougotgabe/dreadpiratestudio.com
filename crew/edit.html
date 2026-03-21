@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Your Profile — Dread Pirate Studio</title>
+<link rel="icon" type="image/png" href="../icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black:    #080808;
+    --deep:     #0d0f14;
+    --surface:  #131620;
+    --gold:     #c9a84c;
+    --gold-dim: #8a6f2e;
+    --gold-glow:rgba(201,168,76,0.18);
+    --white:    #e8e0d0;
+    --muted:    #6b6355;
+    --border:   rgba(201,168,76,0.15);
+    --error:    #8a3030;
+    --success:  #2e6b3e;
+  }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--black); color:var(--white); font-family:'Crimson Text',Georgia,serif; font-size:18px; min-height:100vh; }
+
+  nav { position:fixed; top:0; left:0; right:0; z-index:900; padding:0 2rem; height:72px; display:flex; align-items:center; justify-content:space-between; background:rgba(8,8,8,0.97); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); }
+  .nav-logo { text-decoration:none; }
+  .nav-logo img { height:44px; width:auto; }
+  .nav-back { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); text-decoration:none; transition:color 0.3s; }
+  .nav-back:hover { color:var(--gold); }
+
+  .page-wrap { max-width:680px; margin:0 auto; padding:6rem 2rem 4rem; }
+
+  /* Token gate */
+  #token-gate { text-align:center; padding:4rem 0; }
+  .gate-title { font-family:'Cinzel Decorative',serif; font-size:1.8rem; color:var(--gold); margin-bottom:0.5rem; }
+  .gate-sub { color:var(--muted); font-style:italic; margin-bottom:2.5rem; }
+  .token-input-wrap { display:flex; gap:0.75rem; max-width:420px; margin:0 auto; }
+  .token-input-wrap input { flex:1; background:var(--surface); border:1px solid var(--border); color:var(--white); padding:0.75rem 1rem; font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.1em; outline:none; transition:border-color 0.3s; }
+  .token-input-wrap input:focus { border-color:var(--gold-dim); }
+  .token-input-wrap button { background:var(--gold); color:var(--black); border:none; padding:0.75rem 1.5rem; font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.15em; text-transform:uppercase; cursor:pointer; transition:opacity 0.3s; }
+  .token-input-wrap button:hover { opacity:0.85; }
+  .gate-error { color:var(--error); font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.1em; margin-top:1rem; }
+
+  /* Edit form */
+  #edit-form-wrap { display:none; }
+  .section-label { font-family:'Cinzel',serif; font-size:0.62rem; letter-spacing:0.45em; text-transform:uppercase; color:var(--gold); opacity:0.75; margin:2.5rem 0 1.25rem; padding-bottom:0.5rem; border-bottom:1px solid var(--border); }
+  .form-group { margin-bottom:1.25rem; }
+  .form-group label { display:block; font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:0.45rem; }
+  .form-group input, .form-group textarea, .form-group select {
+    width:100%; background:var(--surface); border:1px solid var(--border);
+    color:var(--white); padding:0.7rem 1rem;
+    font-family:'Crimson Text',Georgia,serif; font-size:1rem;
+    outline:none; transition:border-color 0.3s; resize:vertical;
+  }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:var(--gold-dim); }
+  .form-group textarea { min-height:120px; }
+  .form-hint { font-size:0.8rem; color:var(--muted); font-style:italic; margin-top:0.3rem; }
+  .form-row { display:grid; grid-template-columns:1fr 2fr; gap:0.75rem; }
+
+  .disciplines-wrap { display:flex; flex-wrap:wrap; gap:0.5rem; }
+  .disc-tag {
+    padding:0.3rem 0.9rem; border:1px solid var(--border);
+    font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--muted); background:var(--surface); cursor:pointer; user-select:none; transition:all 0.2s;
+  }
+  .disc-tag.active { border-color:var(--gold); color:var(--gold); background:rgba(201,168,76,0.08); }
+  .disc-tag-custom { display:flex; gap:0.5rem; margin-top:0.5rem; width:100%; }
+  .disc-tag-custom input { flex:1; }
+  .disc-tag-custom button { background:var(--surface); border:1px solid var(--border); color:var(--muted); padding:0.4rem 0.8rem; font-family:'Cinzel',serif; font-size:0.6rem; cursor:pointer; transition:all 0.2s; }
+  .disc-tag-custom button:hover { border-color:var(--gold-dim); color:var(--gold); }
+
+  .submit-row { margin-top:2.5rem; display:flex; gap:1rem; align-items:center; flex-wrap:wrap; }
+  .btn-save { background:var(--gold); color:var(--black); border:none; padding:0.85rem 2.5rem; font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; transition:opacity 0.3s; }
+  .btn-save:hover { opacity:0.85; }
+  .btn-save:disabled { opacity:0.4; cursor:not-allowed; }
+  .btn-preview { background:transparent; color:var(--gold); border:1px solid var(--gold-dim); padding:0.85rem 1.5rem; font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; cursor:pointer; text-decoration:none; transition:all 0.3s; display:inline-block; }
+  .btn-preview:hover { border-color:var(--gold); }
+
+  .save-status { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.15em; }
+  .save-status.success { color:#4a9e64; }
+  .save-status.error   { color:var(--error); }
+  .save-status.saving  { color:var(--muted); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="../index.html" class="nav-logo"><img src="../logo-horizontal.png" alt="Dread Pirate Studio"></a>
+  <a href="../crew.html" class="nav-back">&#8592; The Crew</a>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- Step 1: Token gate -->
+  <div id="token-gate">
+    <h1 class="gate-title">Edit Your Profile</h1>
+    <p class="gate-sub">Enter your personal access token to continue.</p>
+    <div class="token-input-wrap">
+      <input type="password" id="token-input" placeholder="Your access token" autocomplete="off">
+      <button onclick="validateToken()">Enter</button>
+    </div>
+    <p id="gate-error" class="gate-error" style="display:none;"></p>
+  </div>
+
+  <!-- Step 2: Edit form (shown after valid token) -->
+  <div id="edit-form-wrap">
+    <p class="section-label">Identity</p>
+    <div class="form-group">
+      <label>Display Name</label>
+      <input type="text" id="f-name" maxlength="60">
+    </div>
+    <div class="form-group">
+      <label>Rank / Title</label>
+      <input type="text" id="f-rank" maxlength="60" placeholder="e.g. Captain, First Mate, Crew">
+    </div>
+
+    <p class="section-label">Disciplines</p>
+    <div class="form-group">
+      <div class="disciplines-wrap" id="disciplines-wrap">
+        <span class="disc-tag" data-val="Music Production">Music Production</span>
+        <span class="disc-tag" data-val="Music">Music</span>
+        <span class="disc-tag" data-val="Performance">Performance</span>
+        <span class="disc-tag" data-val="Video">Video</span>
+        <span class="disc-tag" data-val="Drone">Drone</span>
+        <span class="disc-tag" data-val="Photography">Photography</span>
+        <span class="disc-tag" data-val="Electronics">Electronics</span>
+        <span class="disc-tag" data-val="3D Printing">3D Printing</span>
+        <span class="disc-tag" data-val="Automation">Automation</span>
+        <span class="disc-tag" data-val="Gaming">Gaming</span>
+        <span class="disc-tag" data-val="Vocals">Vocals</span>
+        <span class="disc-tag" data-val="Creative">Creative</span>
+        <span class="disc-tag" data-val="Design">Design</span>
+        <span class="disc-tag" data-val="Collab">Collab</span>
+      </div>
+      <div class="disc-tag-custom">
+        <input type="text" id="disc-custom-input" placeholder="Add a custom discipline...">
+        <button onclick="addCustomDisc()">+ Add</button>
+      </div>
+    </div>
+
+    <p class="section-label">Your Story</p>
+    <div class="form-group">
+      <label>Bio</label>
+      <textarea id="f-bio" rows="6" placeholder="Tell your story. This appears on your profile page."></textarea>
+      <p class="form-hint">Separate paragraphs with a blank line.</p>
+    </div>
+    <div class="form-group">
+      <label>Personal Quote</label>
+      <input type="text" id="f-quote" maxlength="200" placeholder="Something that says it all.">
+    </div>
+
+    <p class="section-label">Photo</p>
+    <div class="form-group">
+      <label>Photo URL</label>
+      <input type="url" id="f-photo" placeholder="https://... (link to your image)">
+      <p class="form-hint">Upload your image somewhere (Google Drive, Dropbox, Imgur) and paste the direct link here.</p>
+    </div>
+
+    <p class="section-label">Links</p>
+    <div class="form-group">
+      <label>Link 1</label>
+      <div class="form-row">
+        <input type="text" id="f-l1-label" placeholder="Label (e.g. YouTube)">
+        <input type="url"  id="f-l1-url"   placeholder="https://...">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Link 2</label>
+      <div class="form-row">
+        <input type="text" id="f-l2-label" placeholder="Label">
+        <input type="url"  id="f-l2-url"   placeholder="https://...">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Link 3</label>
+      <div class="form-row">
+        <input type="text" id="f-l3-label" placeholder="Label">
+        <input type="url"  id="f-l3-url"   placeholder="https://...">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Link 4</label>
+      <div class="form-row">
+        <input type="text" id="f-l4-label" placeholder="Label">
+        <input type="url"  id="f-l4-url"   placeholder="https://...">
+      </div>
+    </div>
+
+    <p class="section-label">Featured Content</p>
+    <div class="form-group">
+      <label>Embed Type</label>
+      <select id="f-embed-type">
+        <option value="">None</option>
+        <option value="soundcloud">SoundCloud</option>
+        <option value="youtube">YouTube</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Embed URL</label>
+      <input type="url" id="f-embed-url" placeholder="Paste the SoundCloud or YouTube embed URL">
+      <p class="form-hint">For SoundCloud: right-click the player &rarr; Copy embed code &rarr; paste the URL from the src="..." part. For YouTube: Share &rarr; Embed &rarr; copy the src URL.</p>
+    </div>
+
+    <div class="submit-row">
+      <button class="btn-save" id="save-btn" onclick="saveProfile()">Save Changes</button>
+      <a id="preview-link" href="#" class="btn-preview" target="_blank">Preview Profile</a>
+      <span class="save-status" id="save-status"></span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var SUPABASE_URL = 'https://efylfnnshmaauhiwqaxj.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
+
+  var currentProfile = null;
+  var currentToken   = null;
+  var selectedDiscs  = [];
+
+  // Enter key on token field
+  document.getElementById('token-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') validateToken();
+  });
+
+  function validateToken() {
+    var token = document.getElementById('token-input').value.trim();
+    if (!token) return;
+    document.getElementById('gate-error').style.display = 'none';
+
+    fetch(SUPABASE_URL + '/rest/v1/crew_profiles?edit_token=eq.' + encodeURIComponent(token) + '&select=*&limit=1', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data || data.length === 0) {
+        var err = document.getElementById('gate-error');
+        err.textContent = 'Invalid token. Check with Gabe if you need yours.';
+        err.style.display = 'block';
+        return;
+      }
+      currentToken   = token;
+      currentProfile = data[0];
+      populateForm(data[0]);
+      document.getElementById('token-gate').style.display   = 'none';
+      document.getElementById('edit-form-wrap').style.display = 'block';
+    })
+    .catch(function() {
+      var err = document.getElementById('gate-error');
+      err.textContent = 'Connection error. Please try again.';
+      err.style.display = 'block';
+    });
+  }
+
+  function populateForm(p) {
+    document.getElementById('f-name').value      = p.display_name  || '';
+    document.getElementById('f-rank').value      = p.rank          || '';
+    document.getElementById('f-bio').value       = p.bio           || '';
+    document.getElementById('f-quote').value     = p.quote         || '';
+    document.getElementById('f-photo').value     = p.photo_url     || '';
+    document.getElementById('f-l1-label').value  = p.link_1_label  || '';
+    document.getElementById('f-l1-url').value    = p.link_1_url    || '';
+    document.getElementById('f-l2-label').value  = p.link_2_label  || '';
+    document.getElementById('f-l2-url').value    = p.link_2_url    || '';
+    document.getElementById('f-l3-label').value  = p.link_3_label  || '';
+    document.getElementById('f-l3-url').value    = p.link_3_url    || '';
+    document.getElementById('f-l4-label').value  = p.link_4_label  || '';
+    document.getElementById('f-l4-url').value    = p.link_4_url    || '';
+    document.getElementById('f-embed-type').value = p.embed_type   || '';
+    document.getElementById('f-embed-url').value  = p.embed_url    || '';
+
+    // Set preview link
+    document.getElementById('preview-link').href = p.slug + '.html';
+
+    // Disciplines
+    selectedDiscs = p.disciplines ? p.disciplines.slice() : [];
+    var wrap = document.getElementById('disciplines-wrap');
+    var tags = wrap.querySelectorAll('.disc-tag');
+    for (var i = 0; i < tags.length; i++) {
+      var val = tags[i].getAttribute('data-val');
+      if (selectedDiscs.indexOf(val) !== -1) tags[i].classList.add('active');
+      tags[i].addEventListener('click', toggleDisc);
+    }
+
+    // Add any custom disciplines that aren't in the preset list
+    var presets = [];
+    for (var j = 0; j < tags.length; j++) presets.push(tags[j].getAttribute('data-val'));
+    for (var k = 0; k < selectedDiscs.length; k++) {
+      if (presets.indexOf(selectedDiscs[k]) === -1) {
+        addCustomDiscTag(selectedDiscs[k]);
+      }
+    }
+  }
+
+  function toggleDisc() {
+    var val = this.getAttribute('data-val');
+    var idx = selectedDiscs.indexOf(val);
+    if (idx === -1) {
+      selectedDiscs.push(val);
+      this.classList.add('active');
+    } else {
+      selectedDiscs.splice(idx, 1);
+      this.classList.remove('active');
+    }
+  }
+
+  function addCustomDisc() {
+    var inp = document.getElementById('disc-custom-input');
+    var val = inp.value.trim();
+    if (!val) return;
+    if (selectedDiscs.indexOf(val) === -1) {
+      selectedDiscs.push(val);
+      addCustomDiscTag(val);
+    }
+    inp.value = '';
+  }
+
+  function addCustomDiscTag(val) {
+    var wrap = document.getElementById('disciplines-wrap');
+    var tag = document.createElement('span');
+    tag.className = 'disc-tag active';
+    tag.setAttribute('data-val', val);
+    tag.textContent = val;
+    tag.addEventListener('click', toggleDisc);
+    wrap.insertBefore(tag, wrap.querySelector('.disc-tag-custom'));
+  }
+
+  document.getElementById('disc-custom-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); addCustomDisc(); }
+  });
+
+  function saveProfile() {
+    if (!currentProfile || !currentToken) return;
+    var btn = document.getElementById('save-btn');
+    var status = document.getElementById('save-status');
+    btn.disabled = true;
+    status.className = 'save-status saving';
+    status.textContent = 'Saving\u2026';
+
+    var payload = {
+      display_name: document.getElementById('f-name').value.trim(),
+      rank:         document.getElementById('f-rank').value.trim(),
+      disciplines:  selectedDiscs,
+      bio:          document.getElementById('f-bio').value.trim(),
+      quote:        document.getElementById('f-quote').value.trim(),
+      photo_url:    document.getElementById('f-photo').value.trim(),
+      link_1_label: document.getElementById('f-l1-label').value.trim(),
+      link_1_url:   document.getElementById('f-l1-url').value.trim(),
+      link_2_label: document.getElementById('f-l2-label').value.trim(),
+      link_2_url:   document.getElementById('f-l2-url').value.trim(),
+      link_3_label: document.getElementById('f-l3-label').value.trim(),
+      link_3_url:   document.getElementById('f-l3-url').value.trim(),
+      link_4_label: document.getElementById('f-l4-label').value.trim(),
+      link_4_url:   document.getElementById('f-l4-url').value.trim(),
+      embed_type:   document.getElementById('f-embed-type').value,
+      embed_url:    document.getElementById('f-embed-url').value.trim(),
+      updated_at:   new Date().toISOString()
+    };
+
+    fetch(SUPABASE_URL + '/rest/v1/crew_profiles?edit_token=eq.' + encodeURIComponent(currentToken), {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(function(r) {
+      btn.disabled = false;
+      if (r.ok) {
+        status.className = 'save-status success';
+        status.textContent = 'Saved successfully!';
+        setTimeout(function() { status.textContent = ''; }, 3000);
+      } else {
+        status.className = 'save-status error';
+        status.textContent = 'Save failed. Please try again.';
+      }
+    })
+    .catch(function() {
+      btn.disabled = false;
+      status.className = 'save-status error';
+      status.textContent = 'Connection error. Please try again.';
+    });
+  }
+</script>
+</body>
+</html>
