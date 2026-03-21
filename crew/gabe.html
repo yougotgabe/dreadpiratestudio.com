@@ -258,6 +258,12 @@
         <p class="sidebar-label">Find Me Online</p>
         <ul class="link-list" id="p-links"></ul>
       </div>
+      <div class="sidebar-section" id="email-section" style="display:none">
+        <p class="sidebar-label">Contact</p>
+        <ul class="link-list">
+          <li><a href="#" id="p-email-link">&#9993; <span id="p-email-text"></span><span>&#8594;</span></a></li>
+        </ul>
+      </div>
       <div class="sidebar-section">
         <p class="sidebar-label">Dread Pirate Studio</p>
         <ul class="link-list">
@@ -332,6 +338,13 @@ function renderProfile(p, media){
     bioEl.innerHTML='<p style="color:var(--muted);font-style:italic;">Bio coming soon.</p>';
   }
 
+  // Email
+  if(p.email){
+    document.getElementById('p-email-text').textContent=p.email;
+    document.getElementById('p-email-link').href='mailto:'+p.email;
+    document.getElementById('email-section').style.display='block';
+  }
+
   // Links
   var links=[{l:p.link_1_label,u:p.link_1_url},{l:p.link_2_label,u:p.link_2_url},{l:p.link_3_label,u:p.link_3_url},{l:p.link_4_label,u:p.link_4_url}];
   var lHtml=links.filter(function(x){return x.l&&x.u;}).map(function(x){return '<li><a href="'+esc(x.u)+'" target="_blank" rel="noopener">'+esc(x.l)+'<span>&#8594;</span></a></li>';}).join('');
@@ -344,14 +357,14 @@ function renderProfile(p, media){
   }
 }
 
-var TYPE_ICONS={'soundcloud':'&#9835;','youtube':'&#9654;','spotify':'&#127925;','photo':'&#128247;','video':'&#127910;','instagram':'&#128247;','tiktok':'&#127909;','x':'&#120143;','link':'&#128279;'};
+var TYPE_ICONS={'soundcloud':'&#9835;','youtube':'&#9654;','spotify':'&#127925;','bandlab':'&#127908;','photo':'&#128247;','video':'&#127910;','instagram':'&#128247;','tiktok':'&#127909;','x':'&#120143;','link':'&#128279;'};
 
 function renderMedia(items){
   var grid=document.getElementById('media-grid');
   grid.innerHTML=items.map(function(item){
     var icon=TYPE_ICONS[item.type]||'&#128279;';
     var SOCIAL_TYPES=['instagram','tiktok','x','link'];
-    var EMBED_TYPES=['soundcloud','youtube','spotify','photo','video'];
+    var EMBED_TYPES=['soundcloud','youtube','spotify','bandlab','photo','video'];
     var hasExpand=(EMBED_TYPES.indexOf(item.type)!==-1||item.notes);
     var hasLink=(SOCIAL_TYPES.indexOf(item.type)!==-1&&item.url);
     var caption=item.caption?'<div class="media-card-caption">'+esc(item.caption)+'</div>':'';
@@ -371,6 +384,8 @@ function renderMedia(items){
       bodyContent='<div class="media-embed"><iframe height="166" scrolling="no" allow="autoplay" src="'+esc(item.url)+'"></iframe></div>';
     } else if(item.type==='youtube'&&item.url){
       bodyContent='<div class="media-embed"><div class="youtube-wrap"><iframe src="'+esc(item.url)+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div></div>';
+    } else if(item.type==='bandlab'&&item.url){
+      bodyContent='<div class="media-embed"><iframe width="100%" height="180" src="'+esc(item.url)+'" frameborder="0" allowtransparency></iframe></div>';
     } else if(item.type==='spotify'&&item.url){
       bodyContent='<div class="media-embed"><iframe style="border-radius:4px" src="'+esc(item.url)+'" width="100%" height="152" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe></div>';
     } else if(item.type==='photo'&&item.url){
@@ -466,8 +481,18 @@ load();
     tl.textContent='Playlist'; refBtn();
   }
   window.initCrewPlayer=function(url){
-    if(document.readyState==='complete')boot(url);
-    else window.addEventListener('load',function(){boot(url);});
+    // Wait for SC.Widget to be available — poll every 100ms up to 5 seconds
+    var attempts=0;
+    function tryBoot(){
+      attempts++;
+      if(window.SC&&SC.Widget){
+        boot(url);
+      } else if(attempts<50){
+        setTimeout(tryBoot,100);
+      }
+    }
+    if(document.readyState==='complete'){ tryBoot(); }
+    else { window.addEventListener('load', tryBoot); }
   };
 })();
 </script>
