@@ -161,6 +161,13 @@
       <p class="hint">Upload your image to Imgur, Google Drive, or Dropbox and paste the direct link here.</p>
     </div>
 
+    <p class="sec-label">Your Audio Player</p>
+    <div class="fg">
+      <label>SoundCloud Playlist URL</label>
+      <input type="url" id="f-playlist" placeholder="https://soundcloud.com/yourname/sets/your-playlist">
+      <p class="hint">Visitors to your profile page will hear this playlist in the floating audio player. Paste your SoundCloud profile URL or a specific set/playlist URL.</p>
+    </div>
+
     <p class="sec-label">Links</p>
     <div class="fg"><label>Link 1</label><div class="two-col"><input type="text" id="f-l1l" placeholder="Label (e.g. YouTube)"><input type="url" id="f-l1u" placeholder="https://..."></div></div>
     <div class="fg"><label>Link 2</label><div class="two-col"><input type="text" id="f-l2l" placeholder="Label"><input type="url" id="f-l2u" placeholder="https://..."></div></div>
@@ -229,6 +236,7 @@ function populateForm(p){
   document.getElementById('f-interests').value=p.interests||'';
   document.getElementById('f-hobbies').value=p.hobbies||'';
   document.getElementById('f-photo').value=p.photo_url||'';
+  document.getElementById('f-playlist').value=p.player_playlist_url||'';
   document.getElementById('f-l1l').value=p.link_1_label||'';document.getElementById('f-l1u').value=p.link_1_url||'';
   document.getElementById('f-l2l').value=p.link_2_label||'';document.getElementById('f-l2u').value=p.link_2_url||'';
   document.getElementById('f-l3l').value=p.link_3_label||'';document.getElementById('f-l3u').value=p.link_3_url||'';
@@ -344,6 +352,7 @@ function doSave(){
     interests:document.getElementById('f-interests').value.trim(),
     hobbies:document.getElementById('f-hobbies').value.trim(),
     photo_url:document.getElementById('f-photo').value.trim(),
+      player_playlist_url:document.getElementById('f-playlist').value.trim(),
     link_1_label:document.getElementById('f-l1l').value.trim(),link_1_url:document.getElementById('f-l1u').value.trim(),
     link_2_label:document.getElementById('f-l2l').value.trim(),link_2_url:document.getElementById('f-l2u').value.trim(),
     link_3_label:document.getElementById('f-l3l').value.trim(),link_3_url:document.getElementById('f-l3u').value.trim(),
