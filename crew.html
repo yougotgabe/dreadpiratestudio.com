@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Crew — Dread Pirate Studio</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black:    #080808;
+    --deep:     #0d0f14;
+    --surface:  #131620;
+    --gold:     #c9a84c;
+    --gold-dim: #8a6f2e;
+    --gold-glow:rgba(201,168,76,0.18);
+    --white:    #e8e0d0;
+    --muted:    #6b6355;
+    --border:   rgba(201,168,76,0.15);
+  }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { background:var(--black); color:var(--white); font-family:'Crimson Text',Georgia,serif; font-size:18px; overflow-x:hidden; }
+
+  nav { position:fixed; top:0; left:0; right:0; z-index:900; padding:0 2rem; height:72px; display:flex; align-items:center; justify-content:space-between; background:linear-gradient(to bottom,rgba(8,8,8,0.95),rgba(8,8,8,0.7)); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); }
+  .nav-logo { text-decoration:none; }
+  .nav-logo img { height:44px; width:auto; }
+  .nav-back { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); text-decoration:none; transition:color 0.3s; }
+  .nav-back:hover { color:var(--gold); }
+
+  .page-header { padding:8rem 2rem 3rem; text-align:center; background:linear-gradient(180deg,#080808 0%,#0a0c10 100%); border-bottom:1px solid var(--border); }
+  .page-label { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.5em; text-transform:uppercase; color:var(--gold); opacity:0.7; margin-bottom:0.75rem; }
+  .page-title { font-family:'Cinzel Decorative',serif; font-size:clamp(2rem,5vw,3.5rem); color:var(--white); }
+  .page-rule { width:80px; height:1px; background:linear-gradient(to right,transparent,var(--gold),transparent); margin:1rem auto; }
+  .page-sub { color:var(--muted); font-style:italic; max-width:500px; margin:0 auto; }
+
+  main { max-width:1100px; margin:0 auto; padding:4rem 2rem; }
+
+  .crew-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:2rem; }
+
+  .crew-card {
+    position:relative; background:var(--surface); border:1px solid var(--border);
+    border-radius:6px; overflow:hidden; text-decoration:none; display:block;
+    transition:transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    cursor:pointer;
+  }
+  .crew-card:hover { transform:translateY(-6px); border-color:rgba(201,168,76,0.4); box-shadow:0 0 30px rgba(201,168,76,0.1),0 20px 40px rgba(0,0,0,0.5); }
+
+  .crew-card-photo {
+    width:100%; aspect-ratio:1/1; background:var(--deep);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    border-bottom:1px solid var(--border);
+  }
+  .crew-card-photo img { width:100%; height:100%; object-fit:cover; }
+  .crew-card-photo .placeholder {
+    font-size:4rem; opacity:0.15;
+  }
+
+  .crew-card-body { padding:1.5rem; }
+  .crew-card-name { font-family:'Cinzel',serif; font-size:1.1rem; color:var(--gold); letter-spacing:0.08em; margin-bottom:0.2rem; }
+  .crew-card-rank { font-family:'Cinzel',serif; font-size:0.58rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--muted); margin-bottom:1rem; }
+  .crew-card-disciplines { display:flex; flex-wrap:wrap; gap:0.4rem; margin-bottom:1rem; }
+  .discipline-tag { padding:0.2rem 0.7rem; border:1px solid var(--border); font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold-dim); background:rgba(201,168,76,0.04); }
+  .crew-card-bio { font-size:0.9rem; color:var(--muted); line-height:1.6; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .crew-card-arrow { position:absolute; bottom:1.25rem; right:1.25rem; color:var(--gold-dim); font-size:0.8rem; font-family:'Cinzel',serif; transition:color 0.3s, transform 0.3s; }
+  .crew-card:hover .crew-card-arrow { color:var(--gold); transform:translateX(4px); }
+
+  /* Loading state */
+  .loading { text-align:center; padding:4rem 2rem; color:var(--muted); font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.3em; text-transform:uppercase; }
+  .error { text-align:center; padding:4rem 2rem; color:#8a3030; font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.2em; }
+
+  footer { border-top:1px solid var(--border); padding:2rem; text-align:center; background:var(--black); }
+  .footer-text { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.2em; color:var(--muted); text-transform:uppercase; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><img src="logo-horizontal.png" alt="Dread Pirate Studio"></a>
+  <a href="index.html#crew" class="nav-back">&#8592; Back to the Ship</a>
+</nav>
+
+<div class="page-header">
+  <p class="page-label">The Company</p>
+  <h1 class="page-title">The Crew</h1>
+  <div class="page-rule"></div>
+  <p class="page-sub">Every great voyage needs a worthy crew.</p>
+</div>
+
+<main>
+  <div id="crew-grid" class="crew-grid">
+    <div class="loading">Loading crew manifesto&hellip;</div>
+  </div>
+</main>
+
+<footer>
+  <p class="footer-text">&copy; 2026 Dread Pirate Studio &nbsp;&middot;&nbsp; dreadpiratestudio.com</p>
+</footer>
+
+<script>
+  var SUPABASE_URL = 'https://efylfnnshmaauhiwqaxj.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
+
+  function fetchCrew() {
+    var url = SUPABASE_URL + '/rest/v1/crew_profiles?published=eq.true&order=created_at.asc&select=slug,display_name,rank,disciplines,bio,photo_url';
+    fetch(url, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY
+      }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) { renderCrew(data); })
+    .catch(function(e) {
+      document.getElementById('crew-grid').innerHTML = '<div class="error">Could not load crew data. Please try again later.</div>';
+    });
+  }
+
+  function renderCrew(profiles) {
+    var grid = document.getElementById('crew-grid');
+    if (!profiles || profiles.length === 0) {
+      grid.innerHTML = '<div class="loading">No crew members found.</div>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < profiles.length; i++) {
+      var p = profiles[i];
+      var photo = p.photo_url
+        ? '<img src="' + esc(p.photo_url) + '" alt="' + esc(p.display_name) + '" loading="lazy">'
+        : '<div class="placeholder">&#9760;</div>';
+      var disciplines = '';
+      if (p.disciplines && p.disciplines.length) {
+        for (var d = 0; d < p.disciplines.length; d++) {
+          disciplines += '<span class="discipline-tag">' + esc(p.disciplines[d]) + '</span>';
+        }
+      }
+      var bio = p.bio ? '<p class="crew-card-bio">' + esc(p.bio) + '</p>' : '';
+      html += '<a href="crew/' + esc(p.slug) + '.html" class="crew-card">'
+        + '<div class="crew-card-photo">' + photo + '</div>'
+        + '<div class="crew-card-body">'
+        + '<p class="crew-card-name">' + esc(p.display_name) + '</p>'
+        + '<p class="crew-card-rank">' + esc(p.rank) + '</p>'
+        + '<div class="crew-card-disciplines">' + disciplines + '</div>'
+        + bio
+        + '</div>'
+        + '<span class="crew-card-arrow">View Profile &#8594;</span>'
+        + '</a>';
+    }
+    grid.innerHTML = html;
+  }
+
+  function esc(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+  }
+
+  fetchCrew();
+</script>
+</body>
+</html>
