@@ -3,420 +3,589 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edit Your Profile — Dread Pirate Studio</title>
+<title>Crew — Dread Pirate Studio</title>
 <link rel="icon" type="image/png" href="../icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --black:#080808;--deep:#0d0f14;--surface:#131620;
-    --gold:#c9a84c;--gold-dim:#8a6f2e;--gold-glow:rgba(201,168,76,0.18);
-    --white:#e8e0d0;--muted:#6b6355;--border:rgba(201,168,76,0.15);
-  }
+  :root{--black:#080808;--deep:#0d0f14;--surface:#131620;--gold:#c9a84c;--gold-dim:#8a6f2e;--gold-glow:rgba(201,168,76,0.18);--white:#e8e0d0;--muted:#6b6355;--border:rgba(201,168,76,0.15);}
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-  body{background:var(--black);color:var(--white);font-family:'Crimson Text',Georgia,serif;font-size:18px;min-height:100vh;}
-
-  nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:0 2rem;height:72px;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,8,0.97);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);}
-  .nav-logo{text-decoration:none;}
-  .nav-logo img{height:44px;width:auto;}
+  html{overflow-x:hidden;}
+  body{background:var(--black);color:var(--white);font-family:'Crimson Text',Georgia,serif;font-size:18px;}
+  nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:0 2rem;height:72px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(8,8,8,0.97),rgba(8,8,8,0.75));border-bottom:1px solid var(--border);backdrop-filter:blur(12px);}
+  .nav-logo{text-decoration:none;}.nav-logo img{height:44px;width:auto;}
   .nav-back{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.3s;}
   .nav-back:hover{color:var(--gold);}
+  .profile-hero{min-height:100vh;display:flex;align-items:flex-end;position:relative;padding-bottom:3rem;background:linear-gradient(180deg,#080808 0%,#0a0c10 60%,#080808 100%);overflow:hidden;}
+  .hero-glow{position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 40%,rgba(201,168,76,0.07) 0%,transparent 70%);pointer-events:none;}
+  .profile-hero-inner{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:8rem 2rem 0;width:100%;display:grid;grid-template-columns:280px 1fr;gap:3rem;align-items:end;}
+  .profile-photo{width:100%;aspect-ratio:1/1;border-radius:4px;background:var(--deep);border:1px solid var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 0 50px rgba(201,168,76,0.1);}
+  .profile-photo img{width:100%;height:100%;object-fit:cover;}.profile-photo .ph{font-size:5rem;opacity:0.1;}
+  .profile-rank{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);opacity:0.7;margin-bottom:0.5rem;}
+  .profile-name{font-family:'Cinzel Decorative',serif;font-size:clamp(2rem,5vw,3.8rem);color:var(--white);line-height:1.1;margin-bottom:1.5rem;}
+  .disciplines{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:2rem;}
+  .disc-tag{padding:0.3rem 0.9rem;border:1px solid var(--border);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-dim);background:rgba(201,168,76,0.04);}
+  .profile-quote{border-left:2px solid var(--gold-dim);padding-left:1.5rem;color:var(--muted);font-style:italic;font-size:1.15rem;line-height:1.6;max-width:520px;}
+  .info-accordion{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--deep);}
+  .info-accordion-inner{max-width:1100px;margin:0 auto;}
+  .info-tabs{display:flex;border-bottom:1px solid var(--border);}
+  .info-tab{flex:1;padding:1rem 1.5rem;font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all 0.2s;border:none;background:none;text-align:left;border-right:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .info-tab:last-child{border-right:none;}.info-tab:hover{color:var(--gold);background:rgba(201,168,76,0.03);}
+  .info-tab.active{color:var(--gold);background:rgba(201,168,76,0.06);}
+  .info-tab-arrow{font-size:0.7rem;transition:transform 0.3s;opacity:0.5;}
+  .info-tab.active .info-tab-arrow{transform:rotate(180deg);opacity:1;}
+  .info-panel{display:none;padding:2rem;max-height:400px;overflow-y:auto;animation:panelOpen 0.2s ease;}
+  .info-panel.active{display:block;}
+  @keyframes panelOpen{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+  .info-panel-text{color:var(--muted);line-height:1.9;font-size:1rem;white-space:pre-line;}
+  .page-body{max-width:1100px;margin:0 auto;padding:3rem 2rem;display:grid;grid-template-columns:1fr 280px;gap:3rem;}
+  .sidebar-section{margin-bottom:2rem;}
+  .sidebar-label{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);opacity:0.75;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);}
+  .link-list{list-style:none;}.link-list li{margin-bottom:0.5rem;}
+  .link-list a{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 1rem;border:1px solid var(--border);background:var(--surface);text-decoration:none;color:var(--muted);font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;transition:all 0.3s;}
+  .link-list a:hover{border-color:var(--gold-dim);color:var(--gold);background:rgba(201,168,76,0.04);}
+  .link-list a span.arr{margin-left:auto;opacity:0.4;}
+  .media-section h2{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);opacity:0.75;margin-bottom:1.25rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);}
+  .media-filters{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;}
+  .mf-btn{padding:0.35rem 1rem;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+  .mf-btn:hover{border-color:var(--gold-dim);color:var(--gold);}.mf-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,0.08);}
+  .media-grid{display:grid;gap:1.25rem;grid-template-columns:repeat(2,1fr);}
+  .mc{background:var(--surface);border:1px solid var(--border);border-radius:4px;overflow:hidden;transition:border-color 0.3s;}
+  .mc:hover{border-color:rgba(201,168,76,0.3);}
+  .mc-header{padding:0.85rem 1.1rem;display:flex;align-items:center;gap:0.65rem;}
+  .mc-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0;background:rgba(201,168,76,0.1);border:1px solid var(--border);}
+  .mc-title{font-family:'Cinzel',serif;font-size:0.72rem;color:var(--white);letter-spacing:0.04em;flex:1;min-width:0;}
+  .mc-caption{padding:0 1.1rem 0.75rem;font-size:0.88rem;color:var(--muted);line-height:1.5;}
+  .mc-embed{border-top:1px solid var(--border);}.mc-embed iframe{display:block;width:100%;border:none;}
+  .yt-wrap{position:relative;width:100%;padding-top:56.25%;}
+  .yt-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;}
+  .mc-notes-toggle{padding:0.6rem 1.1rem;border-top:1px solid var(--border);font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-dim);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:color 0.2s;}
+  .mc-notes-toggle:hover{color:var(--gold);}.mc-notes-arrow{transition:transform 0.3s;}
+  .mc-notes-toggle.open .mc-notes-arrow{transform:rotate(180deg);}
+  .mc-notes-body{display:none;padding:1.1rem;border-top:1px solid var(--border);font-size:0.95rem;color:var(--muted);line-height:1.8;white-space:pre-line;}
+  .mc-notes-body.open{display:block;}
+  .mc-link-btn{display:block;padding:1rem 1.1rem;font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);text-decoration:none;border-top:1px solid var(--border);transition:background 0.2s;text-align:center;}
+  .mc-link-btn:hover{background:rgba(201,168,76,0.06);}
+  .mc-playlist{grid-column:1/-1;}.mc-playlist .mc-embed iframe{height:500px;}
+  .mc-video{grid-column:1/-1;}.mc-photo img{width:100%;display:block;}
+  .mc-featured{grid-column:1/-1;}.mc-large{grid-column:1/-1;}
+  .empty-state{padding:3rem;text-align:center;color:var(--muted);font-style:italic;font-size:0.95rem;border:1px dashed var(--border);grid-column:1/-1;}
+  footer{border-top:1px solid var(--border);padding:2rem;text-align:center;background:var(--black);margin-top:4rem;}
+  .footer-text{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;}
+  .loading{text-align:center;padding:8rem 2rem;color:var(--muted);font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.3em;text-transform:uppercase;}
+  @media(max-width:768px){
+    .profile-hero-inner{grid-template-columns:1fr;gap:2rem;}.profile-photo{max-width:180px;}
+    .page-body{grid-template-columns:1fr;}.media-grid{grid-template-columns:1fr;}
+    .mc-video,.mc-playlist,.mc-featured,.mc-large{grid-column:1;}
+    .info-tabs{flex-wrap:wrap;}.info-tab{flex:none;width:50%;}
+  }
 
-  .wrap{max-width:700px;margin:0 auto;padding:6rem 2rem 5rem;}
+    /* Floating site audio player */
+    #site-audio-player {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 1400;
+      width: min(360px, calc(100vw - 24px));
+      background: rgba(13,15,20,0.92);
+      border: 1px solid rgba(201,168,76,0.28);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.45), 0 0 24px rgba(201,168,76,0.08);
+      backdrop-filter: blur(12px);
+      border-radius: 18px;
+      overflow: hidden;
+      user-select: none;
+      touch-action: none;
+    }
+    #site-audio-player.is-dragging { cursor: grabbing; }
+    .sap-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.8rem 0.9rem;
+      cursor: grab;
+    }
+    .sap-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      color: var(--black);
+      background: linear-gradient(135deg, var(--gold), #e0c36a);
+      font-size: 1rem;
+      box-shadow: 0 0 16px rgba(201,168,76,0.22);
+    }
+    .sap-meta { min-width: 0; flex: 1 1 auto; }
+    .sap-kicker {
+      font-family: 'Cinzel', serif;
+      font-size: 0.52rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.18rem;
+    }
+    .sap-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      color: var(--white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sap-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex: 0 0 auto;
+    }
+    .sap-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid rgba(201,168,76,0.22);
+      background: rgba(201,168,76,0.08);
+      color: var(--gold);
+      font-size: 0.95rem;
+      line-height: 1;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+    .sap-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(201,168,76,0.45);
+      background: rgba(201,168,76,0.14);
+    }
+    .sap-btn:active { transform: translateY(0); }
+    .sap-hidden-frame {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      left: -9999px;
+      top: -9999px;
+      opacity: 0;
+      pointer-events: none;
+    }
+    @media (max-width: 768px) {
+      #site-audio-player {
+        width: min(340px, calc(100vw - 16px));
+        right: 8px;
+        bottom: 8px;
+        z-index: 1600;
+      }
+      .sap-bar { padding: 0.75rem 0.8rem; }
+      .sap-title { font-size: 0.72rem; }
+    }
 
-  /* Token gate */
-  #token-gate{text-align:center;padding:4rem 0;}
-  .gate-title{font-family:'Cinzel Decorative',serif;font-size:2rem;color:var(--gold);margin-bottom:0.5rem;}
-  .gate-sub{color:var(--muted);font-style:italic;margin-bottom:2.5rem;}
-  .token-row{display:flex;gap:0.75rem;max-width:420px;margin:0 auto;}
-  .token-row input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--white);padding:0.75rem 1rem;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.1em;outline:none;transition:border-color 0.3s;}
-  .token-row input:focus{border-color:var(--gold-dim);}
-  .token-row button{background:var(--gold);color:var(--black);border:none;padding:0.75rem 1.5rem;font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:opacity 0.3s;}
-  .token-row button:hover{opacity:0.85;}
-  .gate-err{color:#8a3030;font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.1em;margin-top:1rem;}
-
-  /* Form sections */
-  #edit-wrap{display:none;}
-  .sec-label{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.45em;text-transform:uppercase;color:var(--gold);opacity:0.8;margin:2.5rem 0 1.25rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);}
-  .fg{margin-bottom:1.15rem;}
-  .fg label{display:block;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;}
-  .fg input,.fg textarea,.fg select{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--white);padding:0.65rem 0.9rem;font-family:'Crimson Text',Georgia,serif;font-size:1rem;outline:none;transition:border-color 0.3s;resize:vertical;}
-  .fg input:focus,.fg textarea:focus,.fg select:focus{border-color:var(--gold-dim);}
-  .fg textarea{min-height:100px;}
-  .hint{font-size:0.82rem;color:var(--muted);font-style:italic;margin-top:0.3rem;}
-  .two-col{display:grid;grid-template-columns:1fr 2fr;gap:0.75rem;}
-
-  /* Discipline tags */
-  .disc-wrap{display:flex;flex-wrap:wrap;gap:0.5rem;}
-  .dt{padding:0.3rem 0.85rem;border:1px solid var(--border);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);background:var(--surface);cursor:pointer;user-select:none;transition:all 0.2s;}
-  .dt.on{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,0.08);}
-  .dt-add{display:flex;gap:0.5rem;margin-top:0.5rem;width:100%;}
-  .dt-add input{flex:1;}
-  .dt-add button{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:0.4rem 0.8rem;font-family:'Cinzel',serif;font-size:0.6rem;cursor:pointer;transition:all 0.2s;}
-  .dt-add button:hover{border-color:var(--gold-dim);color:var(--gold);}
-
-  /* Media items */
-  .media-list{display:flex;flex-direction:column;gap:1rem;}
-  .media-item{background:var(--deep);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
-  .media-item-header{padding:0.75rem 1rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer;background:var(--surface);}
-  .media-item-num{font-family:'Cinzel',serif;font-size:0.65rem;color:var(--gold-dim);flex-shrink:0;}
-  .media-item-title-display{flex:1;font-family:'Cinzel',serif;font-size:0.8rem;color:var(--white);}
-  .media-item-actions{display:flex;gap:0.5rem;}
-  .mi-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:0.25rem 0.6rem;font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
-  .mi-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
-  .mi-btn.del:hover{border-color:#8a3030;color:#c05050;}
-  .media-item-body{padding:1rem;display:none;}
-  .media-item-body.open{display:block;}
-  .media-item-body .fg{margin-bottom:0.85rem;}
-
-  /* Add media button */
-  .add-media-btn{width:100%;padding:0.85rem;border:1px dashed var(--border);background:transparent;color:var(--muted);font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;transition:all 0.3s;margin-top:0.5rem;}
-  .add-media-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
-
-  /* Bottom save bar */
-  .save-bar{margin-top:2.5rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap;padding-top:1.5rem;border-top:1px solid var(--border);}
-  .btn-save{background:var(--gold);color:var(--black);border:none;padding:0.85rem 2.5rem;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;transition:opacity 0.3s;}
-  .btn-save:hover{opacity:0.85;}
-  .btn-save:disabled{opacity:0.4;cursor:not-allowed;}
-  .btn-preview{background:transparent;color:var(--gold);border:1px solid var(--gold-dim);padding:0.85rem 1.5rem;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:all 0.3s;display:inline-block;}
-  .btn-preview:hover{border-color:var(--gold);}
-  .save-status{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.15em;}
-  .save-status.ok{color:#4a9e64;}
-  .save-status.err{color:#8a3030;}
-  .save-status.saving{color:var(--muted);}
 </style>
 </head>
 <body>
-
 <nav>
   <a href="../index.html" class="nav-logo"><img src="../logo-horizontal.png" alt="Dread Pirate Studio"></a>
   <a href="../crew.html" class="nav-back">&#8592; The Crew</a>
 </nav>
-
-<div class="wrap">
-
-  <!-- TOKEN GATE -->
-  <div id="token-gate">
-    <h1 class="gate-title">Edit Your Profile</h1>
-    <p class="gate-sub">Enter your personal access token to continue.</p>
-    <div class="token-row">
-      <input type="password" id="tok-in" placeholder="Your access token" autocomplete="off">
-      <button onclick="doValidate()">Enter</button>
-    </div>
-    <p id="gate-err" class="gate-err" style="display:none"></p>
-  </div>
-
-  <!-- EDIT FORM -->
-  <div id="edit-wrap">
-
-    <p class="sec-label">Identity</p>
-    <div class="fg"><label>Display Name</label><input type="text" id="f-name" maxlength="60"></div>
-    <div class="fg"><label>Rank / Title</label><input type="text" id="f-rank" maxlength="60" placeholder="e.g. Captain, First Mate, Crew"></div>
-
-    <div class="fg">
-      <label>Email Address</label>
-      <input type="email" id="f-email" placeholder="yourname@dreadpiratestudio.com">
-      <p class="hint">Displayed on your profile page as a contact link. Pre-filled with your DPS address.</p>
-    </div>
-
-    <p class="sec-label">Disciplines</p>
-    <div class="fg">
-      <div class="disc-wrap" id="disc-wrap">
-        <span class="dt" data-v="Music Production">Music Production</span>
-        <span class="dt" data-v="Music">Music</span>
-        <span class="dt" data-v="Performance">Performance</span>
-        <span class="dt" data-v="Video">Video</span>
-        <span class="dt" data-v="Drone">Drone</span>
-        <span class="dt" data-v="Photography">Photography</span>
-        <span class="dt" data-v="Electronics">Electronics</span>
-        <span class="dt" data-v="3D Printing">3D Printing</span>
-        <span class="dt" data-v="Automation">Automation</span>
-        <span class="dt" data-v="Gaming">Gaming</span>
-        <span class="dt" data-v="Vocals">Vocals</span>
-        <span class="dt" data-v="Creative">Creative</span>
-        <span class="dt" data-v="Design">Design</span>
-        <span class="dt" data-v="Collab">Collab</span>
-      </div>
-      <div class="dt-add">
-        <input type="text" id="dt-custom" placeholder="Add a custom discipline...">
-        <button onclick="addDisc()">+ Add</button>
+<div id="pg-loading" class="loading">Loading&hellip;</div>
+<div id="pg-content" style="display:none">
+  <section class="profile-hero">
+    <div class="hero-glow"></div>
+    <div class="profile-hero-inner">
+      <div class="profile-photo" id="p-photo"><div class="ph">&#9760;</div></div>
+      <div>
+        <p class="profile-rank" id="p-rank"></p>
+        <h1 class="profile-name" id="p-name"></h1>
+        <div class="disciplines" id="p-disciplines"></div>
+        <blockquote class="profile-quote" id="p-quote" style="display:none"></blockquote>
       </div>
     </div>
-
-    <p class="sec-label">Your Story</p>
-    <div class="fg"><label>Bio</label><textarea id="f-bio" rows="7" placeholder="Tell your story. Separate paragraphs with a blank line."></textarea></div>
-    <div class="fg"><label>Personal Quote</label><input type="text" id="f-quote" maxlength="220" placeholder="A line that says it all."></div>
-
-    <p class="sec-label">About You</p>
-    <div class="fg">
-      <label>Talents</label>
-      <textarea id="f-talents" rows="3" placeholder="What are you skilled at? Music production, welding, building circuits..."></textarea>
-    </div>
-    <div class="fg">
-      <label>Interests</label>
-      <textarea id="f-interests" rows="3" placeholder="What are you into? Science fiction, vintage gear, local shows..."></textarea>
-    </div>
-    <div class="fg">
-      <label>Hobbies</label>
-      <textarea id="f-hobbies" rows="3" placeholder="What do you do for fun? Cooking, hiking, retro gaming..."></textarea>
-    </div>
-
-    <p class="sec-label">Photo</p>
-    <div class="fg">
-      <label>Photo URL</label>
-      <input type="url" id="f-photo" placeholder="https://... (paste a direct link to your image)">
-      <p class="hint">Upload your image to Imgur, Google Drive, or Dropbox and paste the direct link here.</p>
-    </div>
-
-    <p class="sec-label">Your Audio Player</p>
-    <div class="fg">
-      <label>SoundCloud Playlist URL</label>
-      <input type="url" id="f-playlist" placeholder="https://soundcloud.com/yourname/sets/your-playlist">
-      <p class="hint">Paste your full SoundCloud profile URL or playlist URL — e.g. <em>soundcloud.com/yourname</em> or <em>soundcloud.com/yourname/sets/playlist-name</em>. Do not use short share links (on.soundcloud.com/...) as those won't work in the player.</p>
-    </div>
-
-    <p class="sec-label">Links</p>
-    <div class="fg"><label>Link 1</label><div class="two-col"><input type="text" id="f-l1l" placeholder="Label (e.g. YouTube)"><input type="url" id="f-l1u" placeholder="https://..."></div></div>
-    <div class="fg"><label>Link 2</label><div class="two-col"><input type="text" id="f-l2l" placeholder="Label"><input type="url" id="f-l2u" placeholder="https://..."></div></div>
-    <div class="fg"><label>Link 3</label><div class="two-col"><input type="text" id="f-l3l" placeholder="Label"><input type="url" id="f-l3u" placeholder="https://..."></div></div>
-    <div class="fg"><label>Link 4</label><div class="two-col"><input type="text" id="f-l4l" placeholder="Label"><input type="url" id="f-l4u" placeholder="https://..."></div></div>
-
-    <p class="sec-label">Media Library</p>
-    <p class="hint" style="margin-bottom:1.25rem;">Add music, videos, photos, or links. Each item can have a title, caption, and notes (great for lyrics, credits, or backstory).</p>
-    <div class="media-list" id="media-list"></div>
-    <button class="add-media-btn" onclick="addMediaItem()">+ Add Media Item</button>
-
-    <div class="save-bar">
-      <button class="btn-save" id="save-btn" onclick="doSave()">Save Everything</button>
-      <a id="preview-link" href="#" class="btn-preview" target="_blank">Preview Profile</a>
-      <span class="save-status" id="save-status"></span>
+  </section>
+  <div class="info-accordion" id="info-accordion" style="display:none">
+    <div class="info-accordion-inner">
+      <div class="info-tabs" id="info-tabs">
+        <button class="info-tab" data-panel="about">About <span class="info-tab-arrow">&#8964;</span></button>
+        <button class="info-tab" data-panel="talents" id="tab-talents" style="display:none">Talents <span class="info-tab-arrow">&#8964;</span></button>
+        <button class="info-tab" data-panel="interests" id="tab-interests" style="display:none">Interests <span class="info-tab-arrow">&#8964;</span></button>
+        <button class="info-tab" data-panel="hobbies" id="tab-hobbies" style="display:none">Hobbies <span class="info-tab-arrow">&#8964;</span></button>
+      </div>
+      <div class="info-panel" id="panel-about"><div class="info-panel-text" id="p-about"></div></div>
+      <div class="info-panel" id="panel-talents"><div class="info-panel-text" id="p-talents"></div></div>
+      <div class="info-panel" id="panel-interests"><div class="info-panel-text" id="p-interests"></div></div>
+      <div class="info-panel" id="panel-hobbies"><div class="info-panel-text" id="p-hobbies"></div></div>
     </div>
   </div>
-
+  <div class="page-body">
+    <div>
+      <section class="media-section" id="media-section" style="display:none">
+        <h2>Media Library</h2>
+        <div class="media-filters" id="media-filters">
+          <button class="mf-btn active" data-filter="all">All</button>
+          <button class="mf-btn" data-filter="song">Songs</button>
+          <button class="mf-btn" data-filter="playlist">Playlists</button>
+          <button class="mf-btn" data-filter="video">Videos</button>
+          <button class="mf-btn" data-filter="photo">Photos</button>
+          <button class="mf-btn" data-filter="link">Links</button>
+        </div>
+        <div class="media-grid" id="media-grid"></div>
+      </section>
+    </div>
+    <aside>
+      <div class="sidebar-section" id="links-section" style="display:none">
+        <p class="sidebar-label">Find Me Online</p>
+        <ul class="link-list" id="p-links"></ul>
+      </div>
+      <div class="sidebar-section" id="email-section" style="display:none">
+        <p class="sidebar-label">Contact</p>
+        <ul class="link-list">
+          <li><a href="#" id="p-email-link">&#9993; <span id="p-email-text"></span><span class="arr">&#8594;</span></a></li>
+        </ul>
+      </div>
+      <div class="sidebar-section">
+        <p class="sidebar-label">Dread Pirate Studio</p>
+        <ul class="link-list">
+          <li><a href="../index.html">&#127754; Back to the Ship<span class="arr">&#8594;</span></a></li>
+          <li><a href="../crew.html">&#128100; The Full Crew<span class="arr">&#8594;</span></a></li>
+        </ul>
+      </div>
+    </aside>
+  </div>
 </div>
-
+<div id="pg-404" style="display:none;text-align:center;padding:8rem 2rem;">
+  <h2 style="font-family:'Cinzel Decorative',serif;color:var(--gold);margin-bottom:1rem;">Lost at Sea</h2>
+  <p style="color:var(--muted)">That crew member could not be found.</p><br>
+  <a href="../crew.html" style="color:var(--gold);font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.2em;">&#8592; Back to the Crew</a>
+</div>
+<footer><p class="footer-text">&copy; 2026 Dread Pirate Studio &nbsp;&middot;&nbsp; dreadpiratestudio.com</p></footer>
 <script>
 var SURL='https://efylfnnshmaauhiwqaxj.supabase.co';
 var SKEY='sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
-var profile=null, token=null, selDiscs=[], mediaItems=[];
-
-document.getElementById('tok-in').addEventListener('keydown',function(e){if(e.key==='Enter')doValidate();});
-
-function doValidate(){
-  var t=document.getElementById('tok-in').value.trim();
-  if(!t)return;
-  document.getElementById('gate-err').style.display='none';
-  fetch(SURL+'/rest/v1/crew_profiles?edit_token=eq.'+encodeURIComponent(t)+'&select=*&limit=1',{
-    headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}
-  }).then(function(r){return r.json();}).then(function(d){
-    if(!d||d.length===0){
-      var e=document.getElementById('gate-err');
-      e.textContent='Invalid token. Check with Gabe if you need yours.';
-      e.style.display='block';return;
-    }
-    token=t; profile=d[0];
-    loadMedia(d[0]);
-  }).catch(function(){
-    var e=document.getElementById('gate-err');
-    e.textContent='Connection error. Please try again.';
-    e.style.display='block';
-  });
-}
-
-function loadMedia(p){
-  fetch(SURL+'/rest/v1/crew_media?crew_slug=eq.'+encodeURIComponent(p.slug)+'&order=sort_order.asc,created_at.asc',{
-    headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}
-  }).then(function(r){return r.json();}).then(function(d){
-    mediaItems=(d||[]).map(function(m){return Object.assign({},m,{_id:m.id,_new:false});});
-    populateForm(p);
-    document.getElementById('token-gate').style.display='none';
-    document.getElementById('edit-wrap').style.display='block';
-  });
-}
-
-function populateForm(p){
-  document.getElementById('f-name').value=p.display_name||'';
-  document.getElementById('f-rank').value=p.rank||'';
-  document.getElementById('f-email').value=p.email||'';
-  document.getElementById('f-bio').value=p.bio||'';
-  document.getElementById('f-quote').value=p.quote||'';
-  document.getElementById('f-talents').value=p.talents||'';
-  document.getElementById('f-interests').value=p.interests||'';
-  document.getElementById('f-hobbies').value=p.hobbies||'';
-  document.getElementById('f-photo').value=p.photo_url||'';
-  document.getElementById('f-playlist').value=p.player_playlist_url||'';
-  document.getElementById('f-l1l').value=p.link_1_label||'';document.getElementById('f-l1u').value=p.link_1_url||'';
-  document.getElementById('f-l2l').value=p.link_2_label||'';document.getElementById('f-l2u').value=p.link_2_url||'';
-  document.getElementById('f-l3l').value=p.link_3_label||'';document.getElementById('f-l3u').value=p.link_3_url||'';
-  document.getElementById('f-l4l').value=p.link_4_label||'';document.getElementById('f-l4u').value=p.link_4_url||'';
-  document.getElementById('preview-link').href=p.slug+'.html';
-
-  selDiscs=p.disciplines?p.disciplines.slice():[];
-  var tags=document.querySelectorAll('.dt');
-  var presets=[];
-  for(var i=0;i<tags.length;i++){presets.push(tags[i].getAttribute('data-v'));if(selDiscs.indexOf(tags[i].getAttribute('data-v'))!==-1)tags[i].classList.add('on');tags[i].addEventListener('click',toggleDisc);}
-  for(var k=0;k<selDiscs.length;k++){if(presets.indexOf(selDiscs[k])===-1)addDiscTag(selDiscs[k]);}
-
-  renderMediaList();
-}
-
-function toggleDisc(){var v=this.getAttribute('data-v'),idx=selDiscs.indexOf(v);if(idx===-1){selDiscs.push(v);this.classList.add('on');}else{selDiscs.splice(idx,1);this.classList.remove('on');}}
-function addDisc(){var i=document.getElementById('dt-custom'),v=i.value.trim();if(!v)return;if(selDiscs.indexOf(v)===-1){selDiscs.push(v);addDiscTag(v);}i.value='';}
-function addDiscTag(v){var w=document.getElementById('disc-wrap'),t=document.createElement('span');t.className='dt on';t.setAttribute('data-v',v);t.textContent=v;t.addEventListener('click',toggleDisc);w.insertBefore(t,w.querySelector('.dt-add'));}
-document.getElementById('dt-custom').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addDisc();}});
-
-var mediaCounter=0;
-var openItems={};  // track which item indices are open
-
-function addMediaItem(init){
-  var item=init||{_uid:'new-'+(++mediaCounter),_new:true,type:'soundcloud',title:'',caption:'',notes:'',url:'',sort_order:mediaItems.length+1,published:true};
-  if(!init){
-    mediaItems.push(item);
-    openItems[mediaItems.length-1]=true;  // auto-open new item
-  }
-  renderMediaList();
-}
-
-function renderMediaList(){
-  var list=document.getElementById('media-list');
-  if(!mediaItems.length){list.innerHTML='<p style="color:var(--muted);font-style:italic;font-size:0.9rem;">No media items yet. Add your first one below.</p>';return;}
-  list.innerHTML=mediaItems.map(function(item,idx){
-    var uid=item._id||item._uid||idx;
-    return '<div class="media-item" data-uid="'+uid+'">'
-      +'<div class="media-item-header" onclick="toggleMediaBody(this)">'
-      +'<span class="media-item-num">#'+(idx+1)+'</span>'
-      +'<span class="media-item-title-display">'+(item.title||'Untitled Item')+'</span>'
-      +(item.published===false?'<span style="font-family:Cinzel,serif;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;color:#8a6f2e;border:1px solid #8a6f2e;padding:0.15rem 0.5rem;margin-right:0.5rem;">Draft</span>':'')
-      +'<div class="media-item-actions" onclick="event.stopPropagation()">'
-      +(idx>0?'<button class="mi-btn" onclick="moveItem('+idx+',-1)">&#8593;</button>':'')
-      +(idx<mediaItems.length-1?'<button class="mi-btn" onclick="moveItem('+idx+',1)">&#8595;</button>':'')
-      +'<button class="mi-btn del" onclick="removeItem('+idx+')">Remove</button>'
-      +'</div></div>'
-      +'<div class="media-item-body">'
-      +'<div class="fg"><label>Type</label>'
-      +'<select onchange="updateItemField('+idx+',\'type\',this.value)">'
-      +'<option value="soundcloud"'+(item.type==='soundcloud'?' selected':'')+'>SoundCloud</option>'
-      +'<option value="bandlab"'+(item.type==='bandlab'?' selected':'')+'>BandLab</option>'
-      +'<option value="youtube"'+(item.type==='youtube'?' selected':'')+'>YouTube</option>'
-      +'<option value="spotify"'+(item.type==='spotify'?' selected':'')+'>Spotify</option>'
-      +'<option value="photo"'+(item.type==='photo'?' selected':'')+'>Photo</option>'
-      +'<option value="video"'+(item.type==='video'?' selected':'')+'>Video</option>'
-      +'<option value="instagram"'+(item.type==='instagram'?' selected':'')+'>Instagram (link card)</option>'
-      +'<option value="tiktok"'+(item.type==='tiktok'?' selected':'')+'>TikTok (link card)</option>'
-      +'<option value="x"'+(item.type==='x'?' selected':'')+'>X / Twitter (link card)</option>'
-      +'<option value="link"'+(item.type==='link'?' selected':'')+'>Other Link</option>'
-      +'</select></div>'
-      +'<div class="fg"><label>Title</label><input type="text" value="'+esc(item.title)+'" oninput="updateItemField('+idx+',\'title\',this.value)" placeholder="Give this item a name"></div>'
-      +'<div class="fg"><label>URL / Embed Source</label><input type="url" value="'+esc(item.url)+'" oninput="updateItemField('+idx+',\'url\',this.value)" placeholder="https://..."><p class="hint">SoundCloud/YouTube/Spotify: paste the embed src URL from their Share &rarr; Embed menu. BandLab: paste the src URL from Share &rarr; Embed (looks like bandlab.com/embed/?id=...). For photos, paste a direct image link.</p></div>'
-      +'<div class="fg"><label>Caption</label><input type="text" value="'+esc(item.caption)+'" oninput="updateItemField('+idx+',\'caption\',this.value)" placeholder="Short description shown on the card"></div>'
-      +'<div class="fg"><label>Notes <span style="opacity:0.6;font-size:0.85rem;">(lyrics, backstory, credits — shown when expanded)</span></label>'
-      +'<textarea rows="6" oninput="updateItemField('+idx+',\'notes\',this.value)" placeholder="Add lyrics, the story behind this track, credits, anything you want...">'+esc(item.notes)+'</textarea></div>'
-      +'<div class="fg"><label>Published</label>'
-      +'<select onchange="updateItemField('+idx+',\'published\',this.value===\'true\')">'
-      +'<option value="true"'+(item.published?' selected':'')+'>Visible on profile</option>'
-      +'<option value="false"'+(!item.published?' selected':'')+'>Hidden (draft)</option>'
-      +'</select></div>'
-      +'</div>'
-      +'</div>';
-  }).join('');
-  // Restore open states
-  var bodies=document.querySelectorAll('.media-item-body');
-  for(var i=0;i<bodies.length;i++){
-    if(openItems[i]) bodies[i].classList.add('open');
-  }
-}
+var slug=window.location.pathname.split('/').pop().replace('.html','');
+var allMedia=[];
 
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function toggleMediaBody(h){
-  var body=h.nextElementSibling;
-  body.classList.toggle('open');
-  // find index of this item
-  var items=document.querySelectorAll('.media-item');
-  for(var i=0;i<items.length;i++){
-    if(items[i].querySelector('.media-item-header')===h){
-      openItems[i]=body.classList.contains('open');
-      break;
-    }
+function api(path){return fetch(SURL+'/rest/v1/'+path,{headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}}).then(function(r){return r.json();});}
+
+function load(){
+  Promise.all([
+    api('crew_profiles?slug=eq.'+encodeURIComponent(slug)+'&published=eq.true&select=*&limit=1'),
+    api('crew_media?crew_slug=eq.'+encodeURIComponent(slug)+'&published=eq.true&order=sort_order.asc,created_at.asc')
+  ]).then(function(r){
+    document.getElementById('pg-loading').style.display='none';
+    if(!r[0]||r[0].length===0){document.getElementById('pg-404').style.display='block';return;}
+    allMedia=r[1]||[];
+    renderProfile(r[0][0]);
+    renderMedia('all');
+    document.getElementById('pg-content').style.display='block';
+    if(window.initCrewPlayer) window.initCrewPlayer(r[0][0].player_playlist_url||'');
+  }).catch(function(){document.getElementById('pg-loading').textContent='Could not load profile.';});
+}
+
+function renderProfile(p){
+  document.title=(p.display_name||'Crew')+' — Dread Pirate Studio';
+  if(p.photo_url) document.getElementById('p-photo').innerHTML='<img src="'+esc(p.photo_url)+'" alt="'+esc(p.display_name)+'">';
+  document.getElementById('p-rank').textContent=p.rank||'';
+  document.getElementById('p-name').textContent=p.display_name||'';
+  if(p.disciplines&&p.disciplines.length){
+    document.getElementById('p-disciplines').innerHTML=p.disciplines.map(function(d){return'<span class="disc-tag">'+esc(d)+'</span>';}).join('');
   }
+  if(p.quote){var q=document.getElementById('p-quote');q.textContent=p.quote;q.style.display='block';}
+  document.getElementById('p-about').textContent=p.bio||'Bio coming soon.';
+  if(p.talents){document.getElementById('p-talents').textContent=p.talents;document.getElementById('tab-talents').style.display='flex';}
+  if(p.interests){document.getElementById('p-interests').textContent=p.interests;document.getElementById('tab-interests').style.display='flex';}
+  if(p.hobbies){document.getElementById('p-hobbies').textContent=p.hobbies;document.getElementById('tab-hobbies').style.display='flex';}
+  document.getElementById('info-accordion').style.display='block';
+  var links=[{l:p.link_1_label,u:p.link_1_url},{l:p.link_2_label,u:p.link_2_url},{l:p.link_3_label,u:p.link_3_url},{l:p.link_4_label,u:p.link_4_url}];
+  var lh=links.filter(function(x){return x.l&&x.u;}).map(function(x){return'<li><a href="'+esc(x.u)+'" target="_blank" rel="noopener">'+esc(x.l)+'<span class="arr">&#8594;</span></a></li>';}).join('');
+  if(lh){document.getElementById('p-links').innerHTML=lh;document.getElementById('links-section').style.display='block';}
+  if(p.email){document.getElementById('p-email-text').textContent=p.email;document.getElementById('p-email-link').href='mailto:'+p.email;document.getElementById('email-section').style.display='block';}
 }
-function updateItemField(idx,field,val){if(mediaItems[idx])mediaItems[idx][field]=val;if(field==='title')renderMediaList();}
-function moveItem(idx,dir){var ni=idx+dir;if(ni<0||ni>=mediaItems.length)return;var t=mediaItems[idx];mediaItems[idx]=mediaItems[ni];mediaItems[ni]=t;renderMediaList();}
-function removeItem(idx){mediaItems.splice(idx,1);renderMediaList();}
 
-function doSave(){
-  if(!profile||!token)return;
-  var btn=document.getElementById('save-btn');
-  var st=document.getElementById('save-status');
-  btn.disabled=true;
-  st.className='save-status saving';
-  st.textContent='Saving\u2026';
+var currentPanel=null;
+document.getElementById('info-tabs').addEventListener('click',function(e){
+  var btn=e.target.closest('.info-tab');if(!btn)return;
+  var pid='panel-'+btn.getAttribute('data-panel');
+  var panel=document.getElementById(pid);
+  document.querySelectorAll('.info-tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.info-panel').forEach(function(p){p.classList.remove('active');});
+  if(currentPanel===pid){currentPanel=null;}
+  else{btn.classList.add('active');panel.classList.add('active');currentPanel=pid;}
+});
+document.addEventListener('click',function(e){
+  if(currentPanel&&!e.target.closest('.info-accordion')){
+    document.querySelectorAll('.info-tab').forEach(function(t){t.classList.remove('active');});
+    document.querySelectorAll('.info-panel').forEach(function(p){p.classList.remove('active');});
+    currentPanel=null;
+  }
+});
 
-  var payload={
-    display_name:document.getElementById('f-name').value.trim(),
-    rank:document.getElementById('f-rank').value.trim(),
-      email:document.getElementById('f-email').value.trim(),
-    disciplines:selDiscs,
-    bio:document.getElementById('f-bio').value.trim(),
-    quote:document.getElementById('f-quote').value.trim(),
-    talents:document.getElementById('f-talents').value.trim(),
-    interests:document.getElementById('f-interests').value.trim(),
-    hobbies:document.getElementById('f-hobbies').value.trim(),
-    photo_url:document.getElementById('f-photo').value.trim(),
-      player_playlist_url:document.getElementById('f-playlist').value.trim(),
-    link_1_label:document.getElementById('f-l1l').value.trim(),link_1_url:document.getElementById('f-l1u').value.trim(),
-    link_2_label:document.getElementById('f-l2l').value.trim(),link_2_url:document.getElementById('f-l2u').value.trim(),
-    link_3_label:document.getElementById('f-l3l').value.trim(),link_3_url:document.getElementById('f-l3u').value.trim(),
-    link_4_label:document.getElementById('f-l4l').value.trim(),link_4_url:document.getElementById('f-l4u').value.trim(),
-    updated_at:new Date().toISOString()
+document.getElementById('media-filters').addEventListener('click',function(e){
+  var btn=e.target.closest('.mf-btn');if(!btn)return;
+  document.querySelectorAll('.mf-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  renderMedia(btn.getAttribute('data-filter'));
+});
+
+var ICONS={song:'&#9835;',playlist:'&#9835;&#9835;',video:'&#9654;',photo:'&#128247;',link:'&#128279;',bandlab:'&#127908;',soundcloud:'&#9835;',youtube:'&#9654;',spotify:'&#127925;',instagram:'&#128247;',tiktok:'&#127909;',x:'&#120143;'};
+var PLAT_LABELS={bandlab:'View on BandLab',soundcloud:'View on SoundCloud',youtube:'View on YouTube',spotify:'View on Spotify',instagram:'View on Instagram',tiktok:'View on TikTok',x:'View on X',link:'Visit Link'};
+
+function normType(t){
+  if(t==='soundcloud'||t==='spotify') return 'song';
+  if(t==='youtube') return 'video';
+  if(t==='instagram'||t==='tiktok'||t==='x') return 'link';
+  return t;
+}
+
+function renderMedia(filter){
+  var grid=document.getElementById('media-grid');
+  var items=filter==='all'?allMedia:allMedia.filter(function(m){
+    var nt=normType(m.type);
+    return nt===filter||m.type===filter;
+  });
+  if(!items||!items.length){
+    grid.innerHTML='<div class="empty-state">No '+(filter==='all'?'':filter+' ')+'content yet.</div>';
+    if(filter==='all') document.getElementById('media-section').style.display='none';
+    return;
+  }
+  document.getElementById('media-section').style.display='block';
+  grid.innerHTML=items.map(function(item,idx){
+    var nt=normType(item.type);
+    var raw=item.type;
+    var size=item.size||'medium';
+    var icon=ICONS[raw]||ICONS[nt]||'&#128279;';
+    var hasNotes=item.notes&&item.notes.trim();
+    var cls='mc mc-'+nt;
+    if(nt==='playlist') cls='mc mc-playlist';
+    else if(nt==='video') cls='mc mc-video';
+    else if(size==='featured') cls+=' mc-featured';
+    else if(size==='large') cls+=' mc-large';
+    var header='<div class="mc-header"><div class="mc-icon">'+icon+'</div><div class="mc-title">'+esc(item.title)+'</div></div>';
+    var caption=item.caption?'<div class="mc-caption">'+esc(item.caption)+'</div>':'';
+    var embed='';
+    if((nt==='song'||raw==='soundcloud'||raw==='spotify'||raw==='bandlab')&&item.url){
+      var h=raw==='spotify'?152:166;
+      embed='<div class="mc-embed"><iframe height="'+h+'" scrolling="no" allow="autoplay" src="'+esc(item.url)+'"></iframe></div>';
+    } else if(nt==='playlist'&&item.url){
+      var ph=(raw==='bandlab')?500:300;
+      embed='<div class="mc-embed"><iframe height="'+ph+'" scrolling="no" allow="autoplay" src="'+esc(item.url)+'"></iframe></div>';
+    } else if((nt==='video'||raw==='youtube')&&item.url){
+      embed='<div class="mc-embed"><div class="yt-wrap"><iframe src="'+esc(item.url)+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div></div>';
+    } else if(nt==='photo'&&item.url){
+      embed='<div class="mc-embed"><img src="'+esc(item.url)+'" alt="'+esc(item.title)+'" style="width:100%;display:block;"></div>';
+    } else if(nt==='link'&&item.url){
+      embed='<a class="mc-link-btn" href="'+esc(item.url)+'" target="_blank" rel="noopener">'+(PLAT_LABELS[raw]||'Visit Link')+' &#8594;</a>';
+    }
+    var notes='';
+    if(hasNotes){
+      notes='<div class="mc-notes-toggle" onclick="toggleNotes(this)">Notes / Lyrics <span class="mc-notes-arrow">&#8964;</span></div>'
+        +'<div class="mc-notes-body">'+esc(item.notes)+'</div>';
+    }
+    return '<div class="'+cls+'">'+header+caption+embed+notes+'</div>';
+  }).join('');
+}
+
+function toggleNotes(el){
+  el.classList.toggle('open');
+  el.nextElementSibling.classList.toggle('open');
+}
+
+load();
+</script>
+  <div id="site-audio-player" aria-label="Site audio player">
+    <div class="sap-bar" id="sap-drag-handle">
+      <div class="sap-badge">♫</div>
+      <div class="sap-meta">
+        <div class="sap-kicker">Now Playing</div>
+        <div class="sap-title" id="sap-title">Ready to set sail</div>
+      </div>
+      <div class="sap-controls">
+        <button class="sap-btn" id="sap-prev" type="button" aria-label="Previous track">⏮</button>
+        <button class="sap-btn" id="sap-play" type="button" aria-label="Play or pause">▶</button>
+        <button class="sap-btn" id="sap-next" type="button" aria-label="Next track">⏭</button>
+      </div>
+    </div>
+    <iframe id="sap-widget-frame" class="sap-hidden-frame" title="Hidden site audio player" allow="autoplay"></iframe>
+  </div>
+
+
+<script>
+  window.SITE_AUDIO_PLAYLIST_URL = 'https://soundcloud.com/yougotgabe/sets/dread-pirate-studio';
+</script>
+
+<script src="https://w.soundcloud.com/player/api.js"></script>
+<script>
+(function() {
+  function boot() {
+    if (!window.SC || !SC.Widget) { return; }
+    var playerEl = document.getElementById('site-audio-player');
+    var titleEl = document.getElementById('sap-title');
+    var prevBtn = document.getElementById('sap-prev');
+    var playBtn = document.getElementById('sap-play');
+    var nextBtn = document.getElementById('sap-next');
+    var dragHandle = document.getElementById('sap-drag-handle');
+    var frame = document.getElementById('sap-widget-frame');
+    if (!playerEl || !titleEl || !prevBtn || !playBtn || !nextBtn || !dragHandle || !frame) { return; }
+
+    var PLAYLIST_URL = window.SITE_AUDIO_PLAYLIST_URL || 'https://soundcloud.com/yougotgabe/sets/dread-pirate-studio';
+    var widget = null;
+    var isPlaying = false;
+
+    function buildSrc(url, autoPlay) {
+      return 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) + '&color=%23c9a84c&auto_play=' + (autoPlay ? 'true' : 'false') + '&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false';
+    }
+
+    function refreshButton() {
+      playBtn.textContent = isPlaying ? '❚❚' : '▶';
+      playBtn.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play');
+    }
+
+    function refreshTitle(fallback) {
+      if (!widget) {
+        titleEl.textContent = fallback || 'Dread Pirate Studio Playlist';
+        return;
+      }
+      widget.getCurrentSound(function(sound) {
+        var out = fallback || 'Dread Pirate Studio Playlist';
+        if (sound && sound.title) {
+          out = sound.user && sound.user.username ? (sound.title + ' — ' + sound.user.username) : sound.title;
+        }
+        titleEl.textContent = out;
+      });
+    }
+
+    function syncPausedState() {
+      if (!widget) { return; }
+      widget.isPaused(function(paused) {
+        isPlaying = !paused;
+        refreshButton();
+      });
+    }
+
+    function bindWidgetEvents() {
+      if (!widget) { return; }
+      widget.bind(SC.Widget.Events.READY, function() {
+        syncPausedState();
+        refreshTitle('Dread Pirate Studio Playlist');
+      });
+      widget.bind(SC.Widget.Events.PLAY, function() {
+        isPlaying = true;
+        refreshButton();
+        refreshTitle();
+      });
+      widget.bind(SC.Widget.Events.PAUSE, function() {
+        isPlaying = false;
+        refreshButton();
+        refreshTitle();
+      });
+      widget.bind(SC.Widget.Events.FINISH, function() {
+        setTimeout(function() {
+          syncPausedState();
+          refreshTitle();
+        }, 120);
+      });
+      widget.bind(SC.Widget.Events.PLAY_PROGRESS, function() {
+        refreshTitle();
+      });
+    }
+
+    function initWidget() {
+      frame.src = buildSrc(PLAYLIST_URL, false);
+      widget = SC.Widget(frame);
+      bindWidgetEvents();
+      titleEl.textContent = 'Dread Pirate Studio Playlist';
+      refreshButton();
+    }
+
+    prevBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (!widget) { return; }
+      widget.prev();
+      setTimeout(function() {
+        if (isPlaying) { widget.play(); }
+        refreshTitle();
+      }, 180);
+    });
+
+    nextBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (!widget) { return; }
+      widget.next();
+      setTimeout(function() {
+        if (isPlaying) { widget.play(); }
+        refreshTitle();
+      }, 180);
+    });
+
+    playBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (!widget) { return; }
+      widget.isPaused(function(paused) {
+        if (paused) {
+          widget.play();
+        } else {
+          widget.pause();
+        }
+      });
+    });
+
+    var drag = { active: false, startX: 0, startY: 0, originX: 0, originY: 0 };
+    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+    function pinToViewport(x, y) {
+      var maxX = window.innerWidth - playerEl.offsetWidth - 6;
+      var maxY = window.innerHeight - playerEl.offsetHeight - 6;
+      playerEl.style.left = clamp(x, 6, Math.max(6, maxX)) + 'px';
+      playerEl.style.top = clamp(y, 6, Math.max(6, maxY)) + 'px';
+      playerEl.style.right = 'auto';
+      playerEl.style.bottom = 'auto';
+    }
+    function startDrag(ev) {
+      if (ev.target.closest && ev.target.closest('.sap-controls')) { return; }
+      var pt = ev.touches ? ev.touches[0] : ev;
+      var rect = playerEl.getBoundingClientRect();
+      drag.active = true;
+      drag.startX = pt.clientX;
+      drag.startY = pt.clientY;
+      drag.originX = rect.left;
+      drag.originY = rect.top;
+      playerEl.classList.add('is-dragging');
+      if (ev.preventDefault) { ev.preventDefault(); }
+    }
+    function moveDrag(ev) {
+      if (!drag.active) { return; }
+      var pt = ev.touches ? ev.touches[0] : ev;
+      pinToViewport(drag.originX + (pt.clientX - drag.startX), drag.originY + (pt.clientY - drag.startY));
+      if (ev.preventDefault) { ev.preventDefault(); }
+    }
+    function endDrag() {
+      if (!drag.active) { return; }
+      drag.active = false;
+      playerEl.classList.remove('is-dragging');
+    }
+    dragHandle.addEventListener('mousedown', startDrag);
+    dragHandle.addEventListener('touchstart', startDrag, { passive: false });
+    window.addEventListener('mousemove', moveDrag);
+    window.addEventListener('touchmove', moveDrag, { passive: false });
+    window.addEventListener('mouseup', endDrag);
+    window.addEventListener('touchend', endDrag);
+    window.addEventListener('resize', function() {
+      var rect = playerEl.getBoundingClientRect();
+      pinToViewport(rect.left, rect.top);
+    });
+
+    initWidget();
+  }
+
+  window.initCrewPlayer=function(url){
+    var DEFAULT='https://soundcloud.com/yougotgabe/sets/dread-pirate-studio';
+    var attempts=0;
+    function tryBoot(){
+      attempts++;
+      if(window.SC&&SC.Widget){ boot(url||DEFAULT); }
+      else if(attempts<50){ setTimeout(tryBoot,100); }
+    }
+    if(document.readyState==='complete'){ tryBoot(); }
+    else { window.addEventListener('load',tryBoot); }
   };
-
-  // Save profile first, then save all media
-  fetch(SURL+'/rest/v1/crew_profiles?edit_token=eq.'+encodeURIComponent(token),{
-    method:'PATCH',
-    headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY,'Content-Type':'application/json','Prefer':'return=minimal'},
-    body:JSON.stringify(payload)
-  }).then(function(r){
-    if(!r.ok)throw new Error('Profile save failed');
-    return saveMedia();
-  }).then(function(){
-    btn.disabled=false;
-    st.className='save-status ok';
-    st.textContent='All saved!';
-    setTimeout(function(){st.textContent='';},3000);
-  }).catch(function(e){
-    btn.disabled=false;
-    st.className='save-status err';
-    st.textContent='Save failed. Please try again.';
-  });
-}
-
-function saveMedia(){
-  var slug=profile.slug;
-  // Delete all existing media for this crew member, then re-insert current list
-  // This is the simplest approach — avoids complex upsert logic
-  return fetch(SURL+'/rest/v1/crew_media?crew_slug=eq.'+encodeURIComponent(slug),{
-    method:'DELETE',
-    headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}
-  }).then(function(){
-    if(!mediaItems.length) return Promise.resolve();
-    var toInsert=mediaItems.map(function(item,idx){
-      return {
-        crew_slug:slug,
-        type:item.type||'link',
-        title:item.title||'',
-        caption:item.caption||'',
-        notes:item.notes||'',
-        url:item.url||'',
-        sort_order:idx+1,
-        published:item.published!==false
-      };
-    });
-    return fetch(SURL+'/rest/v1/crew_media',{
-      method:'POST',
-      headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify(toInsert)
-    });
-  });
-}
+})();
 </script>
 </body>
 </html>
