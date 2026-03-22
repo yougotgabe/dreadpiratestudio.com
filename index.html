@@ -28,6 +28,21 @@
     .nav-links { display:flex; gap:2rem; list-style:none; }
     .nav-links a { color:var(--muted); text-decoration:none; font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; transition:color 0.3s; }
     .nav-links a:hover { color:var(--gold); }
+    .nav-hamburger { display:none; flex-direction:column; gap:5px; background:none; border:none; cursor:pointer; padding:4px; z-index:1001; }
+    .nav-hamburger span { display:block; width:24px; height:2px; background:var(--muted); transition:all 0.3s; }
+    .nav-hamburger.open span:nth-child(1) { transform:rotate(45deg) translate(5px,5px); }
+    .nav-hamburger.open span:nth-child(2) { opacity:0; }
+    .nav-hamburger.open span:nth-child(3) { transform:rotate(-45deg) translate(5px,-5px); }
+    .mobile-only { display:none; }
+    @media (max-width:768px) {
+      .nav-hamburger { display:flex; }
+      .nav-links { display:none; flex-direction:column; position:absolute; top:72px; left:0; right:0; background:rgba(8,8,8,0.98); border-bottom:1px solid var(--border); padding:1rem 0; gap:0; }
+      .nav-links.open { display:flex; }
+      .nav-links li { border-bottom:1px solid var(--border); }
+      .nav-links li:last-child { border-bottom:none; }
+      .nav-links a { display:block; padding:0.85rem 2rem; font-size:0.75rem; }
+      .mobile-only { display:block; }
+    }
 
     #hero { position:relative; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:80px 2rem 4rem; }
     .hero-bg { position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(201,168,76,0.06) 0%,transparent 70%),radial-gradient(ellipse 60% 40% at 50% 80%,rgba(139,26,26,0.08) 0%,transparent 60%),linear-gradient(180deg,#080808 0%,#0a0c10 50%,#080808 100%); z-index:0; }
@@ -452,7 +467,7 @@
         width: min(340px, calc(100vw - 16px));
         right: 8px;
         bottom: 8px;
-        z-index: 1600;
+        z-index: 400;
       }
       .sap-bar { padding: 0.75rem 0.8rem; }
       .sap-title { font-size: 0.72rem; }
@@ -464,7 +479,7 @@
 
   <nav>
     <a href="#hero" class="nav-logo"><img src="logo-horizontal.png" alt="Dread Pirate Studio"></a>
-    <ul class="nav-links">
+    <ul class="nav-links" id="nav-links">
       <li><a href="#captain">The Captain</a></li>
       <li><a href="#crew">The Crew</a></li>
       <li><a href="plunder.html">The Plunder</a></li>
@@ -472,7 +487,12 @@
       <li><a href="#video">Video</a></li>
       <li><a href="#music">Music</a></li>
       <li><a href="#contact">Contact</a></li>
+      <li class="mobile-only"><a href="crew.html">The Crew Roster</a></li>
+      <li class="mobile-only"><a href="crew/edit.html">&#128273; Edit Profile</a></li>
     </ul>
+    <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu" onclick="toggleMobileNav()">
+      <span></span><span></span><span></span>
+    </button>
   </nav>
 
   <section id="hero">
@@ -826,8 +846,7 @@
         <h2 class="section-title">Set Sail Together</h2>
         <div class="section-rule"></div>
         <p class="contact-note">Collaborations, commissions, questions, or just a good conversation &mdash; the captain's door is open.</p>
-        <a href="#" class="contact-email" id="contact-email-link">gabe&#64;dreadpiratestudio&#46;com</a>
-        <script data-cfasync="false">document.getElementById("contact-email-link").href="mailto:"+"gabe"+"@"+"dreadpiratestudio"+"."+"com";</script>
+        <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#103;&#97;&#98;&#101;&#64;&#100;&#114;&#101;&#97;&#100;&#112;&#105;&#114;&#97;&#116;&#101;&#115;&#116;&#117;&#100;&#105;&#111;&#46;&#99;&#111;&#109;" class="contact-email">&#103;&#97;&#98;&#101;&#64;&#100;&#114;&#101;&#97;&#100;&#112;&#105;&#114;&#97;&#116;&#101;&#115;&#116;&#117;&#100;&#105;&#111;&#46;&#99;&#111;&#109;</a>
         <p class="contact-note" style="font-size:0.85rem;">Response time: usually within 24 hours</p>
       </div>
     </div>
@@ -879,6 +898,21 @@
         });
       })(cards[c]);
     }
+
+    // MOBILE NAV TOGGLE
+    function toggleMobileNav() {
+      var links = document.getElementById('nav-links');
+      var btn = document.getElementById('nav-hamburger');
+      links.classList.toggle('open');
+      btn.classList.toggle('open');
+    }
+    // Close mobile nav when a link is clicked
+    document.querySelectorAll('.nav-links a').forEach(function(a) {
+      a.addEventListener('click', function() {
+        document.getElementById('nav-links').classList.remove('open');
+        document.getElementById('nav-hamburger').classList.remove('open');
+      });
+    });
 
     // SMOOTH SCROLL — JS-based for Firefox compatibility
     // CSS scroll-behavior:smooth breaks anchor links in Firefox
