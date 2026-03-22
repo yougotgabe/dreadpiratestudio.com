@@ -51,6 +51,9 @@
   .pc-video{grid-column:1/-1;}.pc-live{grid-column:1/-1;}
   .pc-short .pc-embed{position:relative;width:100%;padding-top:177.78%;}
   .pc-short .pc-embed iframe{position:absolute;top:0;left:0;width:100%;height:100%;}
+  .pc-crew-tags{display:flex;flex-wrap:wrap;gap:0.4rem;padding:0.5rem 1.1rem;border-top:1px solid var(--border);}
+  .pc-crew-tag{font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold-dim);border:1px solid var(--border);padding:0.2rem 0.6rem;text-decoration:none;transition:all 0.2s;}
+  .pc-crew-tag:hover{border-color:var(--gold);color:var(--gold);}
   .empty-state{padding:4rem;text-align:center;color:var(--muted);font-style:italic;grid-column:1/-1;border:1px dashed var(--border);}
   .loading-state{padding:4rem;text-align:center;color:var(--muted);font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.3em;text-transform:uppercase;grid-column:1/-1;}
   .result-count{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);opacity:0.6;}
@@ -187,8 +190,19 @@ function renderGrid(){
     else if(nt==='video'||nt==='live') cls='pc pc-'+nt;
     else if(nt==='short') cls='pc pc-short';
     else if(size==='featured'||size==='large') cls+=' pc-video';
+    // Build crew attribution — primary + any tagged crew
+    var crewNames='<a href="crew/'+esc(item.crew_slug)+'.html" class="pc-crew-link" style="color:var(--gold-dim);text-decoration:none;">'+esc(prof.display_name)+'</a>';
+    if(item.crew_tags&&item.crew_tags.length>1){
+      var extras=item.crew_tags.filter(function(t){return t!==item.crew_slug;});
+      if(extras.length){
+        crewNames+=' <span style="opacity:0.4">&amp;</span> '+extras.map(function(t){
+          var ep=profiles[t]||{display_name:t};
+          return '<a href="crew/'+esc(t)+'.html" class="pc-crew-link" style="color:var(--gold-dim);text-decoration:none;">'+esc(ep.display_name||t)+'</a>';
+        }).join(', ');
+      }
+    }
     var crewBar='<div class="pc-crew">'
-      +'<span class="pc-crew-name">&#9760; '+esc(prof.display_name)+'</span>'
+      +'<span class="pc-crew-name">&#9760; '+crewNames+'</span>'
       +'<a href="crew/'+esc(item.crew_slug)+'.html" class="pc-crew-link">View Profile &#8594;</a>'
       +'</div>';
     var header='<div class="pc-header"><div class="pc-icon">'+icon+'</div><div class="pc-title">'+esc(item.title)+'</div></div>';
