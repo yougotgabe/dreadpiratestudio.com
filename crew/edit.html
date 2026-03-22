@@ -138,10 +138,9 @@
     </div>
 
     <p class="sec-label">Links</p>
-    <div class="fg"><label>Link 1</label><div class="two-col"><input type="text" id="f-l1l" placeholder="Label (e.g. YouTube)"><input type="url" id="f-l1u" placeholder="https://..."></div></div>
-    <div class="fg"><label>Link 2</label><div class="two-col"><input type="text" id="f-l2l" placeholder="Label"><input type="url" id="f-l2u" placeholder="https://..."></div></div>
-    <div class="fg"><label>Link 3</label><div class="two-col"><input type="text" id="f-l3l" placeholder="Label"><input type="url" id="f-l3u" placeholder="https://..."></div></div>
-    <div class="fg"><label>Link 4</label><div class="two-col"><input type="text" id="f-l4l" placeholder="Label"><input type="url" id="f-l4u" placeholder="https://..."></div></div>
+    <p class="hint" style="margin-bottom:1rem;">Add as many links as you want. Each needs a label and a URL.</p>
+    <div id="links-list"></div>
+    <button class="add-media-btn" onclick="addLink()" style="margin-bottom:0.5rem;">+ Add Link</button>
 
     <p class="sec-label">Media Library</p>
     <p class="hint" style="margin-bottom:1.25rem;">Add songs, playlists, videos, photos, or links. Use the Notes field for lyrics, backstory, or credits.</p>
@@ -200,10 +199,25 @@ function populateForm(p){
   document.getElementById('f-photo').value=p.photo_url||'';
   document.getElementById('f-banner').value=p.banner_url||'';
   document.getElementById('f-playlist').value=p.player_playlist_url||'';
-  document.getElementById('f-l1l').value=p.link_1_label||'';document.getElementById('f-l1u').value=p.link_1_url||'';
-  document.getElementById('f-l2l').value=p.link_2_label||'';document.getElementById('f-l2u').value=p.link_2_url||'';
-  document.getElementById('f-l3l').value=p.link_3_label||'';document.getElementById('f-l3u').value=p.link_3_url||'';
-  document.getElementById('f-l4l').value=p.link_4_label||'';document.getElementById('f-l4u').value=p.link_4_url||'';
+  // Build links array from profile — migrate from old 4-slot system
+  profileLinks=[];
+  var legacyLinks=[
+    {label:p.link_1_label||'',url:p.link_1_url||''},
+    {label:p.link_2_label||'',url:p.link_2_url||''},
+    {label:p.link_3_label||'',url:p.link_3_url||''},
+    {label:p.link_4_label||'',url:p.link_4_url||''}
+  ];
+  // Also parse extra_links JSON if present
+  var extraLinks=[];
+  try{ if(p.extra_links) extraLinks=JSON.parse(p.extra_links); }catch(e){}
+  // Merge: use extra_links if populated, else fall back to legacy
+  if(extraLinks.length){
+    profileLinks=extraLinks;
+  } else {
+    legacyLinks.forEach(function(l){if(l.label||l.url) profileLinks.push(l);});
+  }
+  if(!profileLinks.length) profileLinks=[{label:'',url:''}];
+  renderLinks();
   document.getElementById('preview-link').href=p.slug+'.html';
   selDiscs=p.disciplines?p.disciplines.slice():[];
   var tags=document.querySelectorAll('.dt');
@@ -249,6 +263,7 @@ function renderMediaList(){
     var typeOpts=[
       ['song','Song (single track)'],['playlist','Playlist / Collection'],
       ['video','Video'],['short','Short (vertical video)'],
+      ['live','Live / Gaming video'],
       ['bandlab','BandLab (single track)'],['soundcloud','SoundCloud (single track)'],
       ['spotify','Spotify'],['youtube','YouTube'],['photo','Photo'],
       ['instagram','Instagram (link card)'],['tiktok','TikTok (link card)'],
@@ -307,6 +322,24 @@ function renderMediaList(){
   }
 }
 
+var profileLinks=[];
+
+function renderLinks(){
+  var list=document.getElementById('links-list');
+  if(!profileLinks.length){list.innerHTML='';return;}
+  list.innerHTML=profileLinks.map(function(link,idx){
+    return '<div class="fg" style="display:flex;gap:0.5rem;align-items:flex-start;margin-bottom:0.5rem;">'
+      +'<div style="flex:1;display:grid;grid-template-columns:1fr 2fr;gap:0.5rem;">'
+      +'<input type="text" placeholder="Label (e.g. YouTube)" value="'+escAttr(link.label||'')+'" oninput="profileLinks['+idx+'].label=this.value" style="background:var(--surface);border:1px solid var(--border);color:var(--white);padding:0.65rem 0.9rem;font-family:'Crimson Text',Georgia,serif;font-size:1rem;outline:none;width:100%;">'
+      +'<input type="url" placeholder="https://..." value="'+escAttr(link.url||'')+'" oninput="profileLinks['+idx+'].url=this.value" style="background:var(--surface);border:1px solid var(--border);color:var(--white);padding:0.65rem 0.9rem;font-family:'Crimson Text',Georgia,serif;font-size:1rem;outline:none;width:100%;">'
+      +'</div>'
+      +'<button onclick="removeLink('+idx+')" style="background:none;border:1px solid var(--border);color:var(--muted);padding:0.65rem 0.75rem;cursor:pointer;font-family:'Cinzel',serif;font-size:0.6rem;flex-shrink:0;margin-top:0;" onmouseover="this.style.color='#c05050'" onmouseout="this.style.color='var(--muted)'">&#10005;</button>'
+      +'</div>';
+  }).join('');
+}
+function addLink(){ profileLinks.push({label:'',url:''}); renderLinks(); }
+function removeLink(idx){ profileLinks.splice(idx,1); renderLinks(); }
+
 function escAttr(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function toggleMediaBody(h){
   var body=h.nextElementSibling;body.classList.toggle('open');
@@ -347,10 +380,11 @@ function doSave(){
     photo_url:document.getElementById('f-photo').value.trim(),
       banner_url:document.getElementById('f-banner').value.trim(),
     player_playlist_url:document.getElementById('f-playlist').value.trim(),
-    link_1_label:document.getElementById('f-l1l').value.trim(),link_1_url:document.getElementById('f-l1u').value.trim(),
-    link_2_label:document.getElementById('f-l2l').value.trim(),link_2_url:document.getElementById('f-l2u').value.trim(),
-    link_3_label:document.getElementById('f-l3l').value.trim(),link_3_url:document.getElementById('f-l3u').value.trim(),
-    link_4_label:document.getElementById('f-l4l').value.trim(),link_4_url:document.getElementById('f-l4u').value.trim(),
+    extra_links:JSON.stringify(profileLinks.filter(function(l){return l.label||l.url;})),
+    link_1_label:profileLinks[0]?profileLinks[0].label:'',link_1_url:profileLinks[0]?profileLinks[0].url:'',
+    link_2_label:profileLinks[1]?profileLinks[1].label:'',link_2_url:profileLinks[1]?profileLinks[1].url:'',
+    link_3_label:profileLinks[2]?profileLinks[2].label:'',link_3_url:profileLinks[2]?profileLinks[2].url:'',
+    link_4_label:profileLinks[3]?profileLinks[3].label:'',link_4_url:profileLinks[3]?profileLinks[3].url:'',
     updated_at:new Date().toISOString()
   };
   fetch(SURL+'/rest/v1/crew_profiles?edit_token=eq.'+encodeURIComponent(token),{
