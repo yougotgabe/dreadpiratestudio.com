@@ -15,7 +15,7 @@
   .nav-logo{text-decoration:none;}.nav-logo img{height:44px;width:auto;}
   .nav-back{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.3s;}
   .nav-back:hover{color:var(--gold);}
-  .profile-hero{min-height:100vh;display:flex;align-items:flex-end;position:relative;padding-bottom:3rem;background:linear-gradient(180deg,#080808 0%,#0a0c10 60%,#080808 100%);overflow:hidden;}
+  .profile-hero{min-height:60vh;display:flex;align-items:flex-end;position:relative;padding-bottom:3rem;background:linear-gradient(180deg,#080808 0%,#0a0c10 60%,#080808 100%);overflow:hidden;}
   .hero-glow{position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 40%,rgba(201,168,76,0.07) 0%,transparent 70%);pointer-events:none;}
   .profile-hero-inner{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:8rem 2rem 0;width:100%;display:grid;grid-template-columns:280px 1fr;gap:3rem;align-items:end;}
   .profile-photo{width:100%;aspect-ratio:1/1;border-radius:4px;background:var(--deep);border:1px solid var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 0 50px rgba(201,168,76,0.1);}
@@ -66,6 +66,9 @@
   .mc-link-btn{display:block;padding:1rem 1.1rem;font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);text-decoration:none;border-top:1px solid var(--border);transition:background 0.2s;text-align:center;}
   .mc-link-btn:hover{background:rgba(201,168,76,0.06);}
   .mc-playlist{grid-column:1/-1;}.mc-playlist .mc-embed iframe{height:500px;}
+  .mc-short{}.mc-short .mc-embed iframe{aspect-ratio:9/16;height:auto;min-height:400px;}
+  .shorts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-top:1.5rem;}
+  .shorts-section-label{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);opacity:0.6;margin:2rem 0 0.5rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);}
   .mc-video{grid-column:1/-1;}.mc-photo img{width:100%;display:block;}
   .mc-featured{grid-column:1/-1;}.mc-large{grid-column:1/-1;}
   .empty-state{padding:3rem;text-align:center;color:var(--muted);font-style:italic;font-size:0.95rem;border:1px dashed var(--border);grid-column:1/-1;}
@@ -188,6 +191,7 @@
 </nav>
 <div id="pg-loading" class="loading">Loading&hellip;</div>
 <div id="pg-content" style="display:none">
+  <div id="p-banner" class="profile-banner" style="display:none"><div class="profile-banner-placeholder"></div></div>
   <section class="profile-hero">
     <div class="hero-glow"></div>
     <div class="profile-hero-inner">
@@ -225,6 +229,7 @@
           <button class="mf-btn" data-filter="video">Videos</button>
           <button class="mf-btn" data-filter="photo">Photos</button>
           <button class="mf-btn" data-filter="link">Links</button>
+          <button class="mf-btn" data-filter="short">Shorts</button>
         </div>
         <div class="media-grid" id="media-grid"></div>
       </section>
@@ -283,6 +288,7 @@ function load(){
 function renderProfile(p){
   document.title=(p.display_name||'Crew')+' — Dread Pirate Studio';
   if(p.photo_url) document.getElementById('p-photo').innerHTML='<img src="'+esc(p.photo_url)+'" alt="'+esc(p.display_name)+'">';
+  if(p.banner_url){var b=document.getElementById('p-banner');b.innerHTML='<img src="'+esc(p.banner_url)+'" alt="Banner">';b.style.display='block';}
   document.getElementById('p-rank').textContent=p.rank||'';
   document.getElementById('p-name').textContent=p.display_name||'';
   if(p.disciplines&&p.disciplines.length){
@@ -325,13 +331,14 @@ document.getElementById('media-filters').addEventListener('click',function(e){
   renderMedia(btn.getAttribute('data-filter'));
 });
 
-var ICONS={song:'&#9835;',playlist:'&#9835;&#9835;',video:'&#9654;',photo:'&#128247;',link:'&#128279;',bandlab:'&#127908;',soundcloud:'&#9835;',youtube:'&#9654;',spotify:'&#127925;',instagram:'&#128247;',tiktok:'&#127909;',x:'&#120143;'};
+var ICONS={song:'&#9835;',playlist:'&#9835;&#9835;',video:'&#9654;',short:'&#9654;&#8203;',photo:'&#128247;',link:'&#128279;',bandlab:'&#127908;',soundcloud:'&#9835;',youtube:'&#9654;',spotify:'&#127925;',instagram:'&#128247;',tiktok:'&#127909;',x:'&#120143;'};
 var PLAT_LABELS={bandlab:'View on BandLab',soundcloud:'View on SoundCloud',youtube:'View on YouTube',spotify:'View on Spotify',instagram:'View on Instagram',tiktok:'View on TikTok',x:'View on X',link:'Visit Link'};
 
 function normType(t){
   if(t==='soundcloud'||t==='spotify') return 'song';
   if(t==='youtube') return 'video';
   if(t==='instagram'||t==='tiktok'||t==='x') return 'link';
+  if(t==='short') return 'short';
   return t;
 }
 
@@ -356,6 +363,7 @@ function renderMedia(filter){
     var cls='mc mc-'+nt;
     if(nt==='playlist') cls='mc mc-playlist';
     else if(nt==='video') cls='mc mc-video';
+    else if(nt==='short') cls='mc mc-short';
     else if(size==='featured') cls+=' mc-featured';
     else if(size==='large') cls+=' mc-large';
     var header='<div class="mc-header"><div class="mc-icon">'+icon+'</div><div class="mc-title">'+esc(item.title)+'</div></div>';
@@ -367,6 +375,9 @@ function renderMedia(filter){
     } else if(nt==='playlist'&&item.url){
       var ph=(raw==='bandlab')?500:300;
       embed='<div class="mc-embed"><iframe height="'+ph+'" scrolling="no" allow="autoplay" src="'+esc(item.url)+'"></iframe></div>';
+    } else if(nt==='short'&&item.url){
+      // Vertical video — YouTube Shorts or similar
+      embed='<div class="mc-embed"><div style="position:relative;width:100%;padding-top:177.78%;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" src="'+esc(item.url)+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div></div>';
     } else if((nt==='video'||raw==='youtube')&&item.url){
       embed='<div class="mc-embed"><div class="yt-wrap"><iframe src="'+esc(item.url)+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div></div>';
     } else if(nt==='photo'&&item.url){
