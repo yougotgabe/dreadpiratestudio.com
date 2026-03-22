@@ -307,6 +307,9 @@ function renderMediaList(){
       +'<input type="text" value="'+escAttr(item.caption||'')+'" oninput="mediaItems['+idx+'].caption=this.value" placeholder="Short description shown on the card"></div>'
       +'<div class="fg"><label>Notes <span style="opacity:0.6;font-size:0.85rem;">(lyrics, backstory, credits)</span></label>'
       +'<textarea rows="6" oninput="mediaItems['+idx+'].notes=this.value" placeholder="Add lyrics, story, credits...">'+escAttr(item.notes||'')+'</textarea></div>'
+      +'<div class="fg"><label>Tag Other Crew Members</label>'
+      +'<input type="text" value="'+(item.crew_tags&&item.crew_tags.join?item.crew_tags.filter(function(t){return t!==profile.slug;}).join(', '):'')+'" onblur="updateItemTags('+idx+',this.value)" placeholder="e.g. ot, gabe (comma separated)" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--white);padding:0.65rem 0.9rem;font-family:Crimson Text,Georgia,serif;font-size:1rem;outline:none;">'
+      +'<p style="font-size:0.82rem;color:var(--muted);font-style:italic;margin-top:0.3rem;">Credit other crew: gabe, ot, zach, abram, jade</p></div>'
       +'<div class="fg"><label>Published</label>'
       +'<select onchange="mediaItems['+idx+'].published=this.value===\'true\'">'
       +'<option value="true"'+(item.published!==false?' selected':'')+'>Visible on profile</option>'
@@ -347,6 +350,13 @@ function toggleMediaBody(h){
   for(var i=0;i<items.length;i++){if(items[i].querySelector('.media-item-header')===h){openItems[i]=body.classList.contains('open');break;}}
 }
 // FIX: title only updates on blur, never on input — prevents renderMediaList() on every keystroke
+function updateItemTags(idx,val){
+  if(!mediaItems[idx]) return;
+  var tags=val.split(',').map(function(t){return t.trim().toLowerCase();}).filter(function(t){return t;});
+  // Always include the owner's slug
+  if(profile&&profile.slug&&tags.indexOf(profile.slug)===-1) tags.unshift(profile.slug);
+  mediaItems[idx].crew_tags=tags;
+}
 function updateItemTitle(idx,val){
   if(mediaItems[idx]) mediaItems[idx].title=val;
   // Update just the display text without full re-render
@@ -409,7 +419,8 @@ function saveMedia(){
   }).then(function(){
     if(!mediaItems.length) return Promise.resolve();
     var rows=mediaItems.map(function(item,idx){
-      return{crew_slug:slug,type:item.type||'song',title:item.title||'',caption:item.caption||'',notes:item.notes||'',url:item.url||'',sort_order:idx+1,published:item.published!==false,size:item.size||'medium'};
+      var tags=item.crew_tags&&item.crew_tags.length?item.crew_tags:[slug];
+      return{crew_slug:slug,type:item.type||'song',title:item.title||'',caption:item.caption||'',notes:item.notes||'',url:item.url||'',sort_order:idx+1,published:item.published!==false,size:item.size||'medium',crew_tags:tags};
     });
     return fetch(SURL+'/rest/v1/crew_media',{
       method:'POST',
