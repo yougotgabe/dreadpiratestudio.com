@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Plunder — Dread Pirate Studio</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{--black:#080808;--deep:#0d0f14;--surface:#131620;--gold:#c9a84c;--gold-dim:#8a6f2e;--white:#e8e0d0;--muted:#6b6355;--border:rgba(201,168,76,0.15);}
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  html{overflow-x:hidden;}
+  body{background:var(--black);color:var(--white);font-family:'Crimson Text',Georgia,serif;font-size:18px;}
+  nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:0 2rem;height:72px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(8,8,8,0.97),rgba(8,8,8,0.75));border-bottom:1px solid var(--border);backdrop-filter:blur(12px);}
+  .nav-logo{text-decoration:none;}.nav-logo img{height:44px;width:auto;}
+  .nav-back{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.3s;}
+  .nav-back:hover{color:var(--gold);}
+  .plunder-hero{padding:9rem 2rem 3rem;text-align:center;background:linear-gradient(180deg,#080808 0%,#0a0c10 100%);position:relative;}
+  .plunder-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 30%,rgba(201,168,76,0.07) 0%,transparent 70%);pointer-events:none;}
+  .plunder-kicker{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);opacity:0.7;margin-bottom:0.75rem;}
+  .plunder-title{font-family:'Cinzel Decorative',serif;font-size:clamp(2.5rem,6vw,4.5rem);color:var(--white);line-height:1.1;margin-bottom:1rem;}
+  .plunder-sub{color:var(--muted);font-style:italic;font-size:1.1rem;max-width:480px;margin:0 auto;}
+  .plunder-body{max-width:1200px;margin:0 auto;padding:3rem 2rem 5rem;}
+  .filter-row{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:1.5rem;}
+  .filter-group{display:flex;gap:0.5rem;flex-wrap:wrap;}
+  .fb{padding:0.35rem 1rem;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+  .fb:hover{border-color:var(--gold-dim);color:var(--gold);}.fb.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,0.08);}
+  .filter-label{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);opacity:0.6;}
+  .plunder-grid{display:grid;gap:1.5rem;grid-template-columns:repeat(2,1fr);}
+  .pc{background:var(--surface);border:1px solid var(--border);border-radius:4px;overflow:hidden;transition:border-color 0.3s;}
+  .pc:hover{border-color:rgba(201,168,76,0.3);}
+  .pc-crew{padding:0.5rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.5rem;}
+  .pc-crew-name{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold-dim);}
+  .pc-crew-link{margin-left:auto;font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.2s;}
+  .pc-crew-link:hover{color:var(--gold);}
+  .pc-header{padding:0.85rem 1.1rem;display:flex;align-items:center;gap:0.65rem;}
+  .pc-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0;background:rgba(201,168,76,0.1);border:1px solid var(--border);}
+  .pc-title{font-family:'Cinzel',serif;font-size:0.72rem;color:var(--white);letter-spacing:0.04em;flex:1;}
+  .pc-caption{padding:0 1.1rem 0.75rem;font-size:0.88rem;color:var(--muted);line-height:1.5;}
+  .pc-embed{border-top:1px solid var(--border);}.pc-embed iframe{display:block;width:100%;border:none;}
+  .yt-wrap{position:relative;width:100%;padding-top:56.25%;}
+  .yt-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;}
+  .pc-notes-toggle{padding:0.6rem 1.1rem;border-top:1px solid var(--border);font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-dim);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:color 0.2s;}
+  .pc-notes-toggle:hover{color:var(--gold);}.pc-notes-arrow{transition:transform 0.3s;}
+  .pc-notes-toggle.open .pc-notes-arrow{transform:rotate(180deg);}
+  .pc-notes-body{display:none;padding:1.1rem;border-top:1px solid var(--border);font-size:0.95rem;color:var(--muted);line-height:1.8;white-space:pre-line;}
+  .pc-notes-body.open{display:block;}
+  .pc-link-btn{display:block;padding:1rem 1.1rem;font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);text-decoration:none;border-top:1px solid var(--border);transition:background 0.2s;text-align:center;}
+  .pc-link-btn:hover{background:rgba(201,168,76,0.06);}
+  .pc-playlist{grid-column:1/-1;}.pc-playlist .pc-embed iframe{height:500px;}
+  .pc-video{grid-column:1/-1;}.pc-live{grid-column:1/-1;}
+  .pc-short .pc-embed{position:relative;width:100%;padding-top:177.78%;}
+  .pc-short .pc-embed iframe{position:absolute;top:0;left:0;width:100%;height:100%;}
+  .empty-state{padding:4rem;text-align:center;color:var(--muted);font-style:italic;grid-column:1/-1;border:1px dashed var(--border);}
+  .loading-state{padding:4rem;text-align:center;color:var(--muted);font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.3em;text-transform:uppercase;grid-column:1/-1;}
+  .result-count{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);opacity:0.6;}
+  footer{border-top:1px solid var(--border);padding:2rem;text-align:center;background:var(--black);margin-top:2rem;}
+  .footer-text{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;}
+  @media(max-width:768px){.plunder-grid{grid-template-columns:1fr;}.pc-video,.pc-playlist,.pc-live{grid-column:1;}.filter-row{flex-direction:column;gap:0.75rem;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo"><img src="logo-horizontal.png" alt="Dread Pirate Studio"></a>
+  <a href="crew.html" class="nav-back">&#128100; The Crew</a>
+</nav>
+
+<div class="plunder-hero">
+  <p class="plunder-kicker">Dread Pirate Studio</p>
+  <h1 class="plunder-title">The Plunder</h1>
+  <p class="plunder-sub">Everything the crew has brought aboard — music, video, art, and more.</p>
+</div>
+
+<div class="plunder-body">
+  <div class="filter-row">
+    <div style="display:flex;flex-direction:column;gap:0.75rem;flex:1;">
+      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <span class="filter-label">Type</span>
+        <div class="filter-group" id="type-filters">
+          <button class="fb active" data-type="all">All</button>
+          <button class="fb" data-type="song">Songs</button>
+          <button class="fb" data-type="playlist">Playlists</button>
+          <button class="fb" data-type="video">Videos</button>
+          <button class="fb" data-type="live">Live / Gaming</button>
+          <button class="fb" data-type="short">Shorts</button>
+          <button class="fb" data-type="photo">Photos</button>
+          <button class="fb" data-type="link">Links</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <span class="filter-label">Crew</span>
+        <div class="filter-group" id="crew-filters">
+          <button class="fb active" data-crew="all">All Crew</button>
+        </div>
+      </div>
+    </div>
+    <span class="result-count" id="result-count"></span>
+  </div>
+  <div class="plunder-grid" id="plunder-grid">
+    <div class="loading-state">Hauling the loot&hellip;</div>
+  </div>
+</div>
+
+<footer><p class="footer-text">&copy; 2026 Dread Pirate Studio &nbsp;&middot;&nbsp; dreadpiratestudio.com</p></footer>
+
+<script>
+var SURL='https://efylfnnshmaauhiwqaxj.supabase.co';
+var SKEY='sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
+var allItems=[], profiles={}, activeType='all', activeCrew='all';
+
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function api(path){return fetch(SURL+'/rest/v1/'+path,{headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}}).then(function(r){return r.json();});}
+
+function normType(t){
+  if(t==='soundcloud'||t==='spotify') return 'song';
+  if(t==='youtube') return 'video';
+  if(t==='instagram'||t==='tiktok'||t==='x') return 'link';
+  return t;
+}
+
+var ICONS={song:'&#9835;',playlist:'&#9835;&#9835;',video:'&#9654;',live:'&#128308;',short:'&#9654;',photo:'&#128247;',link:'&#128279;',bandlab:'&#127908;',soundcloud:'&#9835;',youtube:'&#9654;',spotify:'&#127925;',instagram:'&#128247;',tiktok:'&#127909;',x:'&#120143;'};
+var PLAT={bandlab:'View on BandLab',soundcloud:'View on SoundCloud',youtube:'View on YouTube',spotify:'View on Spotify',instagram:'View on Instagram',tiktok:'View on TikTok',x:'View on X',link:'Visit Link'};
+
+function load(){
+  Promise.all([
+    api('crew_profiles?published=eq.true&select=slug,display_name,rank'),
+    api('crew_media?published=eq.true&order=sort_order.asc,created_at.desc')
+  ]).then(function(r){
+    var profs=r[0]||[], media=r[1]||[];
+    profs.forEach(function(p){ profiles[p.slug]=p; });
+    allItems=media;
+    buildCrewFilters(profs);
+    renderGrid();
+  }).catch(function(){
+    document.getElementById('plunder-grid').innerHTML='<div class="empty-state">Could not load the plunder. Try again later.</div>';
+  });
+}
+
+function buildCrewFilters(profs){
+  var cf=document.getElementById('crew-filters');
+  profs.forEach(function(p){
+    var btn=document.createElement('button');
+    btn.className='fb';
+    btn.setAttribute('data-crew',p.slug);
+    btn.textContent=p.display_name||p.slug;
+    cf.appendChild(btn);
+  });
+  cf.addEventListener('click',function(e){
+    var btn=e.target.closest('.fb');if(!btn)return;
+    document.querySelectorAll('#crew-filters .fb').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+    activeCrew=btn.getAttribute('data-crew');
+    renderGrid();
+  });
+}
+
+document.getElementById('type-filters').addEventListener('click',function(e){
+  var btn=e.target.closest('.fb');if(!btn)return;
+  document.querySelectorAll('#type-filters .fb').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  activeType=btn.getAttribute('data-type');
+  renderGrid();
+});
+
+function renderGrid(){
+  var grid=document.getElementById('plunder-grid');
+  var items=allItems.filter(function(item){
+    var nt=normType(item.type);
+    var typeOk=activeType==='all'||nt===activeType||item.type===activeType;
+    var crewOk=activeCrew==='all'||item.crew_slug===activeCrew;
+    return typeOk&&crewOk;
+  });
+  document.getElementById('result-count').textContent=items.length+' item'+(items.length!==1?'s':'');
+  if(!items.length){
+    grid.innerHTML='<div class="empty-state">No plunder found for this filter.</div>';
+    return;
+  }
+  grid.innerHTML=items.map(function(item){
+    var nt=normType(item.type);
+    var raw=item.type;
+    var size=item.size||'medium';
+    var icon=ICONS[raw]||ICONS[nt]||'&#128279;';
+    var hasNotes=item.notes&&item.notes.trim();
+    var prof=profiles[item.crew_slug]||{display_name:item.crew_slug};
+    var cls='pc pc-'+nt;
+    if(nt==='playlist') cls='pc pc-playlist';
+    else if(nt==='video'||nt==='live') cls='pc pc-'+nt;
+    else if(nt==='short') cls='pc pc-short';
+    else if(size==='featured'||size==='large') cls+=' pc-video';
+    var crewBar='<div class="pc-crew">'
+      +'<span class="pc-crew-name">&#9760; '+esc(prof.display_name)+'</span>'
+      +'<a href="crew/'+esc(item.crew_slug)+'.html" class="pc-crew-link">View Profile &#8594;</a>'
+      +'</div>';
+    var header='<div class="pc-header"><div class="pc-icon">'+icon+'</div><div class="pc-title">'+esc(item.title)+'</div></div>';
+    var caption=item.caption?'<div class="pc-caption">'+esc(item.caption)+'</div>':'';
+    var embed='';
+    if((nt==='song'||raw==='soundcloud'||raw==='spotify'||raw==='bandlab')&&item.url){
+      var h=raw==='spotify'?152:166;
+      embed='<div class="pc-embed"><iframe height="'+h+'" scrolling="no" allow="autoplay" src="'+esc(item.url)+'"></iframe></div>';
+    } else if(nt==='playlist'&&item.url){
+      var ph=raw==='bandlab'?500:300;
+      embed='<div class="pc-embed"><iframe height="'+ph+'" scrolling="no" allow="autoplay" src="'+esc(item.url)+'"></iframe></div>';
+    } else if((nt==='video'||nt==='live')&&item.url){
+      embed='<div class="pc-embed"><div class="yt-wrap"><iframe src="'+esc(item.url)+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div></div>';
+    } else if(nt==='short'&&item.url){
+      embed='<div class="pc-embed"><iframe src="'+esc(item.url)+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>';
+    } else if(nt==='photo'&&item.url){
+      embed='<div class="pc-embed"><img src="'+esc(item.url)+'" alt="'+esc(item.title)+'" style="width:100%;display:block;"></div>';
+    } else if(nt==='link'&&item.url){
+      embed='<a class="pc-link-btn" href="'+esc(item.url)+'" target="_blank" rel="noopener">'+(PLAT[raw]||'Visit Link')+' &#8594;</a>';
+    }
+    var notes='';
+    if(hasNotes){
+      notes='<div class="pc-notes-toggle" onclick="toggleNotes(this)">Notes / Lyrics <span class="pc-notes-arrow">&#8964;</span></div>'
+        +'<div class="pc-notes-body">'+esc(item.notes)+'</div>';
+    }
+    return '<div class="'+cls+'">'+crewBar+header+caption+embed+notes+'</div>';
+  }).join('');
+}
+
+function toggleNotes(el){
+  el.classList.toggle('open');
+  el.nextElementSibling.classList.toggle('open');
+}
+
+load();
+</script>
+</body>
+</html>
