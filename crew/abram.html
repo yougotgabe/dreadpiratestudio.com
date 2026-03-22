@@ -230,6 +230,7 @@
           <button class="mf-btn" data-filter="photo">Photos</button>
           <button class="mf-btn" data-filter="link">Links</button>
           <button class="mf-btn" data-filter="short">Shorts</button>
+          <button class="mf-btn" data-filter="live">Live / Gaming</button>
         </div>
         <div class="media-grid" id="media-grid"></div>
       </section>
@@ -260,7 +261,8 @@
   <p style="color:var(--muted)">That crew member could not be found.</p><br>
   <a href="../crew.html" style="color:var(--gold);font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.2em;">&#8592; Back to the Crew</a>
 </div>
-<footer><p class="footer-text">&copy; 2026 Dread Pirate Studio &nbsp;&middot;&nbsp; dreadpiratestudio.com</p></footer>
+<footer><p class="footer-text">&copy; 2026 Dread Pirate Studio &nbsp;&middot;&nbsp; dreadpiratestudio.com</p>
+<p style="margin-top:0.75rem;"><a href="edit.html" style="font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;opacity:0.45;transition:opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.45'">&#128273; Edit Profile</a></p></footer>
 <script>
 var SURL='https://efylfnnshmaauhiwqaxj.supabase.co';
 var SKEY='sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
@@ -300,8 +302,14 @@ function renderProfile(p){
   if(p.interests){document.getElementById('p-interests').textContent=p.interests;document.getElementById('tab-interests').style.display='flex';}
   if(p.hobbies){document.getElementById('p-hobbies').textContent=p.hobbies;document.getElementById('tab-hobbies').style.display='flex';}
   document.getElementById('info-accordion').style.display='block';
-  var links=[{l:p.link_1_label,u:p.link_1_url},{l:p.link_2_label,u:p.link_2_url},{l:p.link_3_label,u:p.link_3_url},{l:p.link_4_label,u:p.link_4_url}];
-  var lh=links.filter(function(x){return x.l&&x.u;}).map(function(x){return'<li><a href="'+esc(x.u)+'" target="_blank" rel="noopener">'+esc(x.l)+'<span class="arr">&#8594;</span></a></li>';}).join('');
+  // Use extra_links JSON if available, fall back to legacy 4-slot system
+  var linkArr=[];
+  try{ if(p.extra_links&&p.extra_links!=='[]') linkArr=JSON.parse(p.extra_links); }catch(e){}
+  if(!linkArr.length){
+    var legacy=[{l:p.link_1_label,u:p.link_1_url},{l:p.link_2_label,u:p.link_2_url},{l:p.link_3_label,u:p.link_3_url},{l:p.link_4_label,u:p.link_4_url}];
+    linkArr=legacy.filter(function(x){return x.l&&x.u;}).map(function(x){return{label:x.l,url:x.u};});
+  }
+  var lh=linkArr.filter(function(x){return x.label&&x.url;}).map(function(x){return'<li><a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.label)+'<span class="arr">&#8594;</span></a></li>';}).join('');
   if(lh){document.getElementById('p-links').innerHTML=lh;document.getElementById('links-section').style.display='block';}
   if(p.email){document.getElementById('p-email-text').textContent=p.email;document.getElementById('p-email-link').href='mailto:'+p.email;document.getElementById('email-section').style.display='block';}
 }
@@ -331,7 +339,7 @@ document.getElementById('media-filters').addEventListener('click',function(e){
   renderMedia(btn.getAttribute('data-filter'));
 });
 
-var ICONS={song:'&#9835;',playlist:'&#9835;&#9835;',video:'&#9654;',short:'&#9654;&#8203;',photo:'&#128247;',link:'&#128279;',bandlab:'&#127908;',soundcloud:'&#9835;',youtube:'&#9654;',spotify:'&#127925;',instagram:'&#128247;',tiktok:'&#127909;',x:'&#120143;'};
+var ICONS={song:'&#9835;',playlist:'&#9835;&#9835;',video:'&#9654;',short:'&#9654;&#8203;',live:'&#128308;',photo:'&#128247;',link:'&#128279;',bandlab:'&#127908;',soundcloud:'&#9835;',youtube:'&#9654;',spotify:'&#127925;',instagram:'&#128247;',tiktok:'&#127909;',x:'&#120143;'};
 var PLAT_LABELS={bandlab:'View on BandLab',soundcloud:'View on SoundCloud',youtube:'View on YouTube',spotify:'View on Spotify',instagram:'View on Instagram',tiktok:'View on TikTok',x:'View on X',link:'Visit Link'};
 
 function normType(t){
@@ -339,6 +347,7 @@ function normType(t){
   if(t==='youtube') return 'video';
   if(t==='instagram'||t==='tiktok'||t==='x') return 'link';
   if(t==='short') return 'short';
+  if(t==='live') return 'live';
   return t;
 }
 
@@ -364,6 +373,7 @@ function renderMedia(filter){
     if(nt==='playlist') cls='mc mc-playlist';
     else if(nt==='video') cls='mc mc-video';
     else if(nt==='short') cls='mc mc-short';
+    else if(nt==='live') cls='mc mc-video';
     else if(size==='featured') cls+=' mc-featured';
     else if(size==='large') cls+=' mc-large';
     var header='<div class="mc-header"><div class="mc-icon">'+icon+'</div><div class="mc-title">'+esc(item.title)+'</div></div>';
@@ -375,6 +385,8 @@ function renderMedia(filter){
     } else if(nt==='playlist'&&item.url){
       var ph=(raw==='bandlab')?500:300;
       embed='<div class="mc-embed"><iframe height="'+ph+'" scrolling="no" allow="autoplay" src="'+esc(item.url)+'"></iframe></div>';
+    } else if(nt==='live'&&item.url){
+      embed='<div class="mc-embed"><div class="yt-wrap"><iframe src="'+esc(item.url)+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div></div>';
     } else if(nt==='short'&&item.url){
       // Vertical video — YouTube Shorts or similar
       embed='<div class="mc-embed"><div style="position:relative;width:100%;padding-top:177.78%;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" src="'+esc(item.url)+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div></div>';
