@@ -74,6 +74,10 @@
   .crew-tags{display:flex;flex-wrap:wrap;gap:0.4rem;padding:0.5rem 1.1rem;border-top:1px solid var(--border);}
   .crew-tag-link{font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold-dim);border:1px solid var(--border);padding:0.2rem 0.6rem;text-decoration:none;transition:all 0.2s;}
   .crew-tag-link:hover{border-color:var(--gold);color:var(--gold);}
+  .yt-section{margin-top:2.5rem;}
+  .yt-section h2{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);opacity:0.75;margin-bottom:1.25rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);}
+  .yt-live-card{border-color:rgba(255,0,0,0.35) !important;animation:livePulse 2s infinite;}
+  @keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(255,0,0,0.15);}50%{box-shadow:0 0 0 6px rgba(255,0,0,0);}}
   .empty-state{padding:3rem;text-align:center;color:var(--muted);font-style:italic;font-size:0.95rem;border:1px dashed var(--border);grid-column:1/-1;}
   footer{border-top:1px solid var(--border);padding:2rem;text-align:center;background:var(--black);margin-top:4rem;}
   .footer-text{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;}
@@ -179,7 +183,7 @@
         width: min(340px, calc(100vw - 16px));
         right: 8px;
         bottom: 8px;
-        z-index: 1600;
+        z-index: 400;
       }
       .sap-bar { padding: 0.75rem 0.8rem; }
       .sap-title { font-size: 0.72rem; }
@@ -238,6 +242,11 @@
         <div class="media-grid" id="media-grid"></div>
       </section>
     </div>
+    <section class="yt-section" id="yt-section" style="display:none">
+      <h2 id="yt-section-title">YouTube</h2>
+      <div class="media-grid" id="yt-grid"></div>
+    </section>
+
     <aside>
       <div class="sidebar-section" id="links-section" style="display:none">
         <p class="sidebar-label">Find Me Online</p>
@@ -315,6 +324,15 @@ function renderProfile(p){
   var lh=linkArr.filter(function(x){return x.label&&x.url;}).map(function(x){return'<li><a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.label)+'<span class="arr">&#8594;</span></a></li>';}).join('');
   if(lh){document.getElementById('p-links').innerHTML=lh;document.getElementById('links-section').style.display='block';}
   if(p.email){document.getElementById('p-email-text').textContent=p.email;document.getElementById('p-email-link').href='mailto:'+p.email;document.getElementById('email-section').style.display='block';}
+  if(p.youtube_channel_id){
+    var ytT=document.getElementById('yt-section-title');
+    if(ytT) ytT.textContent=(p.display_name||'')+'\u2019s YouTube';
+    fetchYouTubeChannel(p.youtube_channel_id,function(err,vids){
+      if(!vids||!vids.length) return;
+      var sec=document.getElementById('yt-section'),grid=document.getElementById('yt-grid');
+      if(sec&&grid){renderYTVideos(vids,grid);sec.style.display='block';}
+    });
+  }
 }
 
 var currentPanel=null;
@@ -423,6 +441,35 @@ function toggleNotes(el){
 }
 
 load();
+
+var YT_KEY='AIzaSyDEiPP3x0zqmyP__x9oarso-S9rQHsXtM4';
+function fetchYouTubeChannel(cid,cb){
+  if(!cid){cb(null,[]);return;}
+  var liveUrl='https://www.googleapis.com/youtube/v3/search?part=snippet&channelId='+encodeURIComponent(cid)+'&eventType=live&type=video&maxResults=1&key='+YT_KEY;
+  var vidUrl='https://www.googleapis.com/youtube/v3/search?part=snippet&channelId='+encodeURIComponent(cid)+'&order=date&type=video&maxResults=12&key='+YT_KEY;
+  var ld=null,vd=null,n=0;
+  function done(){n++;if(n<2)return;var r=[];
+    if(ld&&ld.items&&ld.items.length){var li=ld.items[0];r.push({id:li.id.videoId,title:li.snippet.title,isLive:true});}
+    if(vd&&vd.items){vd.items.forEach(function(v){if(!v.id.videoId)return;if(r.length&&r[0].id===v.id.videoId)return;r.push({id:v.id.videoId,title:v.snippet.title,isLive:false});});}
+    cb(null,r);}
+  fetch(liveUrl).then(function(r){return r.json();}).then(function(d){ld=d;done();}).catch(function(){ld={};done();});
+  fetch(vidUrl).then(function(r){return r.json();}).then(function(d){vd=d;done();}).catch(function(){vd={};done();});
+}
+function renderYTVideos(videos,el){
+  var base='https://www.youtube.com/embed/';
+  el.innerHTML=videos.map(function(v){
+    var live=v.isLive?'<span style="background:#f00;color:#fff;font-family:Cinzel,serif;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.2rem 0.5rem;margin-left:0.5rem;">\u{1F534} LIVE</span>':'';
+    var cls='mc mc-video'+(v.isLive?' yt-live-card':'');
+    var bdr=v.isLive?' style="border-color:rgba(255,0,0,0.4);"':'';
+    return '<div class="'+cls+'"'+bdr+'>'
+      +'<div class="mc-header"><div class="mc-icon">&#9654;</div>'
+      +'<div class="mc-title">'+esc(v.title)+live+'</div></div>'
+      +'<div class="mc-embed"><div class="yt-wrap">'
+      +'<iframe src="'+base+esc(v.id)+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>'
+      +'</div></div></div>';
+  }).join('');
+}
+
 </script>
   <div id="site-audio-player" aria-label="Site audio player">
     <div class="sap-bar" id="sap-drag-handle">
