@@ -237,55 +237,74 @@ function renderMediaList(){
     list.innerHTML='<p style="color:var(--muted);font-style:italic;font-size:0.9rem;">No media items yet. Add your first one below.</p>';
     return;
   }
-  list.innerHTML=mediaItems.map(function(item,idx){
-    var uid=item.id||item._uid||idx;
+  var html='';
+  for(var idx=0;idx<mediaItems.length;idx++){
+    var item=mediaItems[idx];
     var isDraft=item.published===false;
-    var moveUp=idx>0?'<button class="mi-btn" onclick="moveItem('+idx+',-1)">&#8593;</button>':''
+    var moveUp=idx>0?'<button class="mi-btn" onclick="moveItem('+idx+',-1)">&#8593;</button>':'';
     var moveDn=idx<mediaItems.length-1?'<button class="mi-btn" onclick="moveItem('+idx+',1)">&#8595;</button>':'';
-    return '<div class="media-item" data-uid="'+uid+'">'+
-      '<div class="media-item-header" onclick="toggleMediaBody(this)">'+
-      '<span class="media-item-num">#'+(idx+1)+'</span>'+
-      (isDraft?'<span class="media-draft-badge">Draft</span>':'')+
-      '<span class="media-item-title-display">'+(item.title||'Untitled Item')+'</span>'+
-      '<div class="media-item-actions" onclick="event.stopPropagation()">'+moveUp+moveDn+
-      '<button class="mi-btn del" onclick="removeItem('+idx+')">Remove</button>'+
-      '</div></div>'+
-      '<div class="media-item-body'+(openItems[idx]?' open':'')+'">'+
-      '<div class="fg"><label>Type</label>'+
-      '<select onchange="updateItemField('+idx+','+"'type'"+',this.value)">'+
-      '<option value="song"'+(item.type==='song'?' selected':'')+'>Song (single track)</option>'+
-      '<option value="playlist"'+(item.type==='playlist'?' selected':'')+'>Playlist / Collection</option>'+
-      '<option value="video"'+(item.type==='video'?' selected':'')+'>Video</option>'+'<option value="short"'+(item.type==='short'?' selected':'')+'>Short (vertical video)</option>'+
-      '<option value="bandlab"'+(item.type==='bandlab'?' selected':'')+'>BandLab (single track)</option>'+
-      '<option value="soundcloud"'+(item.type==='soundcloud'?' selected':'')+'>SoundCloud (single track)</option>'+
-      '<option value="spotify"'+(item.type==='spotify'?' selected':'')+'>Spotify</option>'+
-      '<option value="youtube"'+(item.type==='youtube'?' selected':'')+'>YouTube</option>'+
-      '<option value="photo"'+(item.type==='photo'?' selected':'')+'>Photo</option>'+
-      '<option value="instagram"'+(item.type==='instagram'?' selected':'')+'>Instagram (link card)</option>'+
-      '<option value="tiktok"'+(item.type==='tiktok'?' selected':'')+'>TikTok (link card)</option>'+
-      '<option value="x"'+(item.type==='x'?' selected':'')+'>X / Twitter (link card)</option>'+
-      '<option value="link"'+(item.type==='link'?' selected':'')+'>Other Link</option>'+
-      '</select></div>'+
-      '<div class="fg"><label>Size</label>'+
-      '<select onchange="updateItemField('+idx+','+"'size'"+',this.value)">'+
-      '<option value="medium"'+((!item.size||item.size==='medium')?' selected':'')+'>Medium (default)</option>'+
-      '<option value="large"'+(item.size==='large'?' selected':'')+'>Large (full width)</option>'+
-      '<option value="featured"'+(item.size==='featured'?' selected':'')+'>Featured (full width, prominent)</option>'+
-      '<option value="small"'+(item.size==='small'?' selected':'')+'>Small</option>'+
-      '</select></div>'+
-      '<div class="fg"><label>Title</label><input type="text" value="'+(item.title||'')+'" onblur="updateItemTitle('+idx+',this.value)" placeholder="Give this item a name"></div>'+
-      '<div class="fg"><label>URL / Embed Source</label><input type="url" value="'+(item.url||'')+'" oninput="mediaItems['+idx+'].url=this.value" placeholder="https://...">'+
-      '<p class="hint">SoundCloud/YouTube/Spotify: copy the src URL from Share &rarr; Embed. BandLab: use the embed src URL (bandlab.com/embed/?id=...). Photos: direct image link.</p></div>'+
-      '<div class="fg"><label>Caption</label><input type="text" value="'+(item.caption||'')+'" oninput="mediaItems['+idx+'].caption=this.value" placeholder="Short description shown on the card"></div>'+
-      '<div class="fg"><label>Notes <span style="opacity:0.6;font-size:0.85rem;">(lyrics, backstory, credits &mdash; shown when expanded)</span></label>'+
-      '<textarea rows="6" oninput="mediaItems['+idx+'].notes=this.value" placeholder="Add lyrics, story behind the track, credits...">'+escAttr(item.notes||'')+'</textarea></div>'+
-      '<div class="fg"><label>Published</label>'+
-      '<select onchange="updateItemField('+idx+','+"'published'"+',this.value==='+"'true'"+'')">'+
-      '<option value="true"'+(item.published!==false?' selected':'')+'>Visible on profile</option>'+
-      '<option value="false"'+(item.published===false?' selected':'')+'>Hidden (draft)</option>'+
-      '</select></div>'+
-      '</div></div>';
-  }).join('');
+    var draftBadge=isDraft?'<span class="media-draft-badge">Draft</span>':'';
+    var isOpen=openItems[idx]?' open':'';
+
+    var typeOpts=[
+      ['song','Song (single track)'],['playlist','Playlist / Collection'],
+      ['video','Video'],['short','Short (vertical video)'],
+      ['bandlab','BandLab (single track)'],['soundcloud','SoundCloud (single track)'],
+      ['spotify','Spotify'],['youtube','YouTube'],['photo','Photo'],
+      ['instagram','Instagram (link card)'],['tiktok','TikTok (link card)'],
+      ['x','X / Twitter (link card)'],['link','Other Link']
+    ];
+    var typeHtml='';
+    for(var t=0;t<typeOpts.length;t++){
+      typeHtml+='<option value="'+typeOpts[t][0]+'"'+(item.type===typeOpts[t][0]?' selected':'')+'>'+typeOpts[t][1]+'</option>';
+    }
+
+    var sizeOpts=[
+      ['medium','Medium (default)'],['large','Large (full width)'],
+      ['featured','Featured (full width, prominent)'],['small','Small']
+    ];
+    var sizeHtml='';
+    for(var s=0;s<sizeOpts.length;s++){
+      var sel=(!item.size&&sizeOpts[s][0]==='medium')||(item.size===sizeOpts[s][0]);
+      sizeHtml+='<option value="'+sizeOpts[s][0]+'"'+(sel?' selected':'')+'>'+sizeOpts[s][1]+'</option>';
+    }
+
+    html+='<div class="media-item">'
+      +'<div class="media-item-header" onclick="toggleMediaBody(this)">'
+      +'<span class="media-item-num">#'+(idx+1)+'</span>'
+      +draftBadge
+      +'<span class="media-item-title-display">'+(item.title||'Untitled Item')+'</span>'
+      +'<div class="media-item-actions" onclick="event.stopPropagation()">'
+      +moveUp+moveDn
+      +'<button class="mi-btn del" onclick="removeItem('+idx+')">Remove</button>'
+      +'</div></div>'
+      +'<div class="media-item-body'+isOpen+'">'
+      +'<div class="fg"><label>Type</label>'
+      +'<select onchange="updateItemField('+idx+',\'type\',this.value)">'+typeHtml+'</select></div>'
+      +'<div class="fg"><label>Size</label>'
+      +'<select onchange="updateItemField('+idx+',\'size\',this.value)">'+sizeHtml+'</select></div>'
+      +'<div class="fg"><label>Title</label>'
+      +'<input type="text" value="'+escAttr(item.title||'')+'" onblur="updateItemTitle('+idx+',this.value)" placeholder="Give this item a name"></div>'
+      +'<div class="fg"><label>URL / Embed Source</label>'
+      +'<input type="url" value="'+escAttr(item.url||'')+'" oninput="mediaItems['+idx+'].url=this.value" placeholder="https://...">'
+      +'<p class="hint">SoundCloud/YouTube/Spotify: copy the src from Share &rarr; Embed. BandLab: use bandlab.com/embed/?id=... Photos: direct image link.</p></div>'
+      +'<div class="fg"><label>Caption</label>'
+      +'<input type="text" value="'+escAttr(item.caption||'')+'" oninput="mediaItems['+idx+'].caption=this.value" placeholder="Short description shown on the card"></div>'
+      +'<div class="fg"><label>Notes <span style="opacity:0.6;font-size:0.85rem;">(lyrics, backstory, credits)</span></label>'
+      +'<textarea rows="6" oninput="mediaItems['+idx+'].notes=this.value" placeholder="Add lyrics, story, credits...">'+escAttr(item.notes||'')+'</textarea></div>'
+      +'<div class="fg"><label>Published</label>'
+      +'<select onchange="mediaItems['+idx+'].published=this.value===\'true\'">'
+      +'<option value="true"'+(item.published!==false?' selected':'')+'>Visible on profile</option>'
+      +'<option value="false"'+(item.published===false?' selected':'')+'>Hidden (draft)</option>'
+      +'</select></div>'
+      +'</div></div>';
+  }
+  list.innerHTML=html;
+  // Restore open states
+  var bodies=document.querySelectorAll('.media-item-body');
+  for(var i=0;i<bodies.length;i++){
+    if(openItems[i]) bodies[i].classList.add('open');
+  }
 }
 
 function escAttr(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
