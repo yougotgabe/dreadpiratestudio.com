@@ -124,6 +124,11 @@
       <input type="url" id="f-photo" placeholder="https://...">
       <p class="hint">Upload to Imgur, Discord, or GitHub issues. For Dropbox, change dl=0 to raw=1 at the end of the URL.</p>
     </div>
+    <div class="fg">
+      <label>Banner Image URL</label>
+      <input type="url" id="f-banner" placeholder="https://... (wide landscape image, ideally 1200x300px)">
+      <p class="hint">Full-width banner at the top of your profile, like a YouTube channel banner.</p>
+    </div>
 
     <p class="sec-label">Your Audio Player</p>
     <div class="fg">
@@ -193,6 +198,7 @@ function populateForm(p){
   document.getElementById('f-interests').value=p.interests||'';
   document.getElementById('f-hobbies').value=p.hobbies||'';
   document.getElementById('f-photo').value=p.photo_url||'';
+  document.getElementById('f-banner').value=p.banner_url||'';
   document.getElementById('f-playlist').value=p.player_playlist_url||'';
   document.getElementById('f-l1l').value=p.link_1_label||'';document.getElementById('f-l1u').value=p.link_1_url||'';
   document.getElementById('f-l2l').value=p.link_2_label||'';document.getElementById('f-l2u').value=p.link_2_url||'';
@@ -249,7 +255,7 @@ function renderMediaList(){
       '<select onchange="updateItemField('+idx+','+"'type'"+',this.value)">'+
       '<option value="song"'+(item.type==='song'?' selected':'')+'>Song (single track)</option>'+
       '<option value="playlist"'+(item.type==='playlist'?' selected':'')+'>Playlist / Collection</option>'+
-      '<option value="video"'+(item.type==='video'?' selected':'')+'>Video</option>'+
+      '<option value="video"'+(item.type==='video'?' selected':'')+'>Video</option>'+'<option value="short"'+(item.type==='short'?' selected':'')+'>Short (vertical video)</option>'+
       '<option value="bandlab"'+(item.type==='bandlab'?' selected':'')+'>BandLab (single track)</option>'+
       '<option value="soundcloud"'+(item.type==='soundcloud'?' selected':'')+'>SoundCloud (single track)</option>'+
       '<option value="spotify"'+(item.type==='spotify'?' selected':'')+'>Spotify</option>'+
@@ -320,6 +326,7 @@ function doSave(){
     interests:document.getElementById('f-interests').value.trim(),
     hobbies:document.getElementById('f-hobbies').value.trim(),
     photo_url:document.getElementById('f-photo').value.trim(),
+      banner_url:document.getElementById('f-banner').value.trim(),
     player_playlist_url:document.getElementById('f-playlist').value.trim(),
     link_1_label:document.getElementById('f-l1l').value.trim(),link_1_url:document.getElementById('f-l1u').value.trim(),
     link_2_label:document.getElementById('f-l2l').value.trim(),link_2_url:document.getElementById('f-l2u').value.trim(),
