@@ -71,6 +71,9 @@
   .shorts-section-label{font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);opacity:0.6;margin:2rem 0 0.5rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);}
   .mc-video{grid-column:1/-1;}.mc-photo img{width:100%;display:block;}
   .mc-featured{grid-column:1/-1;}.mc-large{grid-column:1/-1;}
+  .crew-tags{display:flex;flex-wrap:wrap;gap:0.4rem;padding:0.5rem 1.1rem;border-top:1px solid var(--border);}
+  .crew-tag-link{font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold-dim);border:1px solid var(--border);padding:0.2rem 0.6rem;text-decoration:none;transition:all 0.2s;}
+  .crew-tag-link:hover{border-color:var(--gold);color:var(--gold);}
   .empty-state{padding:3rem;text-align:center;color:var(--muted);font-style:italic;font-size:0.95rem;border:1px dashed var(--border);grid-column:1/-1;}
   footer{border-top:1px solid var(--border);padding:2rem;text-align:center;background:var(--black);margin-top:4rem;}
   .footer-text{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;}
@@ -401,6 +404,14 @@ function renderMedia(filter){
     if(hasNotes){
       notes='<div class="mc-notes-toggle" onclick="toggleNotes(this)">Notes / Lyrics <span class="mc-notes-arrow">&#8964;</span></div>'
         +'<div class="mc-notes-body">'+esc(item.notes)+'</div>';
+    }
+    var tagsHtml='';
+    if(item.crew_tags&&item.crew_tags.length>1){
+      tagsHtml='<div class=\"crew-tags\">&#9760; Also: '
+        +item.crew_tags.filter(function(t){return t!==slug;}).map(function(t){
+          return '<a href=\"'+esc(t)+'.html\" class=\"crew-tag-link\">'+esc(t)+'</a>';
+        }).join(' ')
+        +'</div>';
     }
     return '<div class="'+cls+'">'+header+caption+embed+notes+'</div>';
   }).join('');
