@@ -663,57 +663,10 @@
         <div class="section-rule"></div>
         <p class="section-sub">Every great voyage needs a worthy crew.</p>
       </div>
-      <div class="crew-grid">
-        <a href="crew/gabe.html" class="glow-card" style="text-decoration:none;">
-          <div class="glow-card__inner">
-            <div class="crew-icon">&#9760;</div>
-            <p class="crew-name">Gabe Nelson</p>
-            <p class="crew-role">Captain &nbsp;&middot;&nbsp; YouGotGabe</p>
-            <div class="crew-links">
-              <span class="crew-link">View Profile &#8594;</span>
-            </div>
-          </div>
-        </a>
-        <a href="crew/ot.html" class="glow-card" style="text-decoration:none;">
-          <div class="glow-card__inner">
-            <div class="crew-icon">&#127928;</div>
-            <p class="crew-name">OT</p>
-            <p class="crew-role">Music &nbsp;&middot;&nbsp; Performance</p>
-            <div class="crew-links">
-              <span class="crew-link">View Profile &#8594;</span>
-            </div>
-          </div>
-        </a>
-        <a href="crew/zach.html" class="glow-card" style="text-decoration:none;">
-          <div class="glow-card__inner">
-            <div class="crew-icon">&#127916;</div>
-            <p class="crew-name">Zach</p>
-            <p class="crew-role">Video &nbsp;&middot;&nbsp; Drone</p>
-            <div class="crew-links">
-              <span class="crew-link">View Profile &#8594;</span>
-            </div>
-          </div>
-        </a>
-        <a href="crew/abram.html" class="glow-card" style="text-decoration:none;">
-          <div class="glow-card__inner">
-            <div class="crew-icon">&#127908;</div>
-            <p class="crew-name">Abram</p>
-            <p class="crew-role">Original Music &nbsp;&middot;&nbsp; Vocals</p>
-            <div class="crew-links">
-              <span class="crew-link">View Profile &#8594;</span>
-            </div>
-          </div>
-        </a>
-        <a href="crew/jade.html" class="glow-card" style="text-decoration:none;">
-          <div class="glow-card__inner">
-            <div class="crew-icon">&#127912;</div>
-            <p class="crew-name">Jade</p>
-            <p class="crew-role">Creative &nbsp;&middot;&nbsp; Collab</p>
-            <div class="crew-links">
-              <span class="crew-link">View Profile &#8594;</span>
-            </div>
-          </div>
-        </a>
+      <div class="crew-grid" id="home-crew-grid">
+        <div class="glow-card" style="opacity:0.4;pointer-events:none;">
+          <div class="glow-card__inner"><div class="crew-icon">&#9760;</div><p class="crew-name">Loading&hellip;</p></div>
+        </div>
       </div>
       <div style="text-align:center;margin-top:2.5rem;">
         <a href="crew.html" class="btn btn-outline">View Full Crew Roster &#8594;</a>
@@ -1013,6 +966,32 @@
         applySiteConfig(r[0]);
         applySpacers(r[1]);
       }).catch(function(){/* fail silently */});
+    })();
+
+    // CREW GRID — populate from Supabase so disciplines stay in sync
+    (function() {
+      var SURL='https://efylfnnshmaauhiwqaxj.supabase.co';
+      var SKEY='sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
+      var ICONS={'gabe':'&#9760;','ot':'&#127928;','zach':'&#127916;','abram':'&#127908;','jade':'&#127912;'};
+
+      fetch(SURL+'/rest/v1/crew_profiles?published=eq.true&select=slug,display_name,rank,disciplines&order=created_at.asc',{
+        headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}
+      }).then(function(r){return r.json();}).then(function(profiles){
+        if(!profiles||!profiles.length) return;
+        var grid=document.getElementById('home-crew-grid');
+        if(!grid) return;
+        grid.innerHTML=profiles.map(function(p){
+          var icon=ICONS[p.slug]||'&#9760;';
+          var role=p.rank||(p.disciplines&&p.disciplines.length?p.disciplines.slice(0,2).join(' &middot; '):'Crew');
+          return '<a href="crew/'+p.slug+'.html" class="glow-card" style="text-decoration:none;">'
+            +'<div class="glow-card__inner">'
+            +'<div class="crew-icon" id="home-card-'+p.slug+'">'+icon+'</div>'
+            +'<p class="crew-name">'+p.display_name+'</p>'
+            +'<p class="crew-role">'+role+'</p>'
+            +'<div class="crew-links"><span class="crew-link">View Profile &#8594;</span></div>'
+            +'</div></a>';
+        }).join('');
+      }).catch(function(){/* fail silently — hardcoded fallback already gone, just show nothing */});
     })();
 
     // MOBILE NAV TOGGLE
