@@ -432,7 +432,7 @@ function renderMedia(filter){
         }).join(' ')
         +'</div>';
     }
-    return '<div class="'+cls+'">'+header+caption+embed+notes+'</div>';
+    return '<div class="'+cls+'">'+header+caption+embed+notes+tagsHtml+'</div>';
   }).join('');
 }
 
@@ -496,7 +496,7 @@ function renderYTVideos(videos,el){
 <script src="https://w.soundcloud.com/player/api.js"></script>
 <script>
 (function() {
-  function boot() {
+  function boot(playlistUrl) {
     if (!window.SC || !SC.Widget) { return; }
     var playerEl = document.getElementById('site-audio-player');
     var titleEl = document.getElementById('sap-title');
@@ -507,7 +507,7 @@ function renderYTVideos(videos,el){
     var frame = document.getElementById('sap-widget-frame');
     if (!playerEl || !titleEl || !prevBtn || !playBtn || !nextBtn || !dragHandle || !frame) { return; }
 
-    var PLAYLIST_URL = window.SITE_AUDIO_PLAYLIST_URL || 'https://soundcloud.com/yougotgabe/sets/dread-pirate-studio';
+    var PLAYLIST_URL = playlistUrl || window.SITE_AUDIO_PLAYLIST_URL || 'https://soundcloud.com/yougotgabe/sets/dread-pirate-studio';
     var widget = null;
     var isPlaying = false;
 
