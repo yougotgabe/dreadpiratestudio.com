@@ -282,6 +282,7 @@ var slug=window.location.pathname.split('/').pop().replace('.html','');
 var allMedia=[];
 
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+    function escT(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function api(path){return fetch(SURL+'/rest/v1/'+path,{headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}}).then(function(r){return r.json();});}
 
 function load(){
@@ -301,7 +302,7 @@ function load(){
 
 function renderProfile(p){
   document.title=(p.display_name||'Crew')+' — Dread Pirate Studio';
-  if(p.photo_url) document.getElementById('p-photo').innerHTML='<img src="'+esc(p.photo_url)+'" alt="'+esc(p.display_name)+'">';
+  if(p.photo_url) document.getElementById('p-photo').innerHTML='<img src="'+esc(p.photo_url)+'" alt="'+escT(p.display_name)+'">';
   if(p.banner_url){var b=document.getElementById('p-banner');b.innerHTML='<img src="'+esc(p.banner_url)+'" alt="Banner">';b.style.display='block';}
   document.getElementById('p-rank').textContent=p.rank||'';
   document.getElementById('p-name').textContent=p.display_name||'';
@@ -397,8 +398,8 @@ function renderMedia(filter){
     else if(nt==='live') cls='mc mc-video';
     else if(size==='featured') cls+=' mc-featured';
     else if(size==='large') cls+=' mc-large';
-    var header='<div class="mc-header"><div class="mc-icon">'+icon+'</div><div class="mc-title">'+esc(item.title)+'</div></div>';
-    var caption=item.caption?'<div class="mc-caption">'+esc(item.caption)+'</div>':'';
+    var header='<div class="mc-header"><div class="mc-icon">'+icon+'</div><div class="mc-title">'+escT(item.title)+'</div></div>';
+    var caption=item.caption?'<div class="mc-caption">'+escT(item.caption)+'</div>':'';
     var embed='';
     if((nt==='song'||raw==='soundcloud'||raw==='spotify'||raw==='bandlab')&&item.url){
       var h=raw==='spotify'?152:166;
@@ -414,14 +415,14 @@ function renderMedia(filter){
     } else if((nt==='video'||raw==='youtube')&&item.url){
       embed='<div class="mc-embed"><div class="yt-wrap"><iframe src="'+esc(item.url)+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div></div>';
     } else if(nt==='photo'&&item.url){
-      embed='<div class="mc-embed"><img src="'+esc(item.url)+'" alt="'+esc(item.title)+'" style="width:100%;display:block;"></div>';
+      embed='<div class="mc-embed"><img src="'+esc(item.url)+'" alt="'+escT(item.title)+'" style="width:100%;display:block;"></div>';
     } else if(nt==='link'&&item.url){
       embed='<a class="mc-link-btn" href="'+esc(item.url)+'" target="_blank" rel="noopener">'+(PLAT_LABELS[raw]||'Visit Link')+' &#8594;</a>';
     }
     var notes='';
     if(hasNotes){
       notes='<div class="mc-notes-toggle" onclick="toggleNotes(this)">Notes / Lyrics <span class="mc-notes-arrow">&#8964;</span></div>'
-        +'<div class="mc-notes-body">'+esc(item.notes)+'</div>';
+        +'<div class="mc-notes-body">'+escT(item.notes)+'</div>';
     }
     var tagsHtml='';
     if(item.crew_tags&&item.crew_tags.length>1){
@@ -446,7 +447,7 @@ var YT_KEY='AIzaSyDEiPP3x0zqmyP__x9oarso-S9rQHsXtM4';
 function fetchYouTubeChannel(cid,cb){
   if(!cid){cb(null,[]);return;}
   var liveUrl='https://www.googleapis.com/youtube/v3/search?part=snippet&channelId='+encodeURIComponent(cid)+'&eventType=live&type=video&maxResults=1&key='+YT_KEY;
-  var vidUrl='https://www.googleapis.com/youtube/v3/search?part=snippet&channelId='+encodeURIComponent(cid)+'&order=date&type=video&maxResults=12&key='+YT_KEY;
+  var vidUrl='https://www.googleapis.com/youtube/v3/search?part=snippet&channelId='+encodeURIComponent(cid)+'&order=date&type=video&maxResults=4&key='+YT_KEY;
   var ld=null,vd=null,n=0;
   function done(){n++;if(n<2)return;var r=[];
     if(ld&&ld.items&&ld.items.length){var li=ld.items[0];r.push({id:li.id.videoId,title:li.snippet.title,isLive:true});}
