@@ -397,6 +397,8 @@
       padding: 0.8rem 0.9rem;
       cursor: grab;
     }
+    @keyframes sapSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+    .sap-spinning{animation:sapSpin 2s linear infinite;}
     .sap-badge {
       width: 38px;
       height: 38px;
@@ -1505,8 +1507,16 @@
     }
 
     function refreshButton() {
-      playBtn.textContent = isPlaying ? '❚❚' : '▶';
-      playBtn.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play');
+      var badge = document.querySelector('.sap-badge');
+      if (isPlaying) {
+        playBtn.innerHTML = '&#10074;&#10074;';
+        playBtn.setAttribute('aria-label', 'Pause');
+        if (badge) badge.classList.add('sap-spinning');
+      } else {
+        playBtn.textContent = '▶';
+        playBtn.setAttribute('aria-label', 'Play');
+        if (badge) badge.classList.remove('sap-spinning');
+      }
     }
 
     function refreshTitle(fallback) {
@@ -1540,7 +1550,8 @@
       widget.bind(SC.Widget.Events.PLAY, function() {
         isPlaying = true;
         refreshButton();
-        refreshTitle();
+        // Delay slightly so widget has loaded new track metadata
+        setTimeout(function() { refreshTitle(); }, 300);
       });
       widget.bind(SC.Widget.Events.PAUSE, function() {
         isPlaying = false;
@@ -1592,9 +1603,12 @@
       widget.isPaused(function(paused) {
         if (paused) {
           widget.play();
+          isPlaying = true;
         } else {
           widget.pause();
+          isPlaying = false;
         }
+        refreshButton();
       });
     });
 

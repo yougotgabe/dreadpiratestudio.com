@@ -35,6 +35,8 @@
   .info-tab.active .info-tab-arrow{transform:rotate(180deg);opacity:1;}
   .info-panel{display:none;padding:2rem;max-height:400px;overflow-y:auto;animation:panelOpen 0.2s ease;}
   .info-panel.active{display:block;}
+  @keyframes sapSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+  .sap-spinning{animation:sapSpin 2s linear infinite;}
   @keyframes panelOpen{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
   .info-panel-text{color:var(--muted);line-height:1.9;font-size:1rem;white-space:pre-line;}
   .page-body{max-width:1100px;margin:0 auto;padding:3rem 2rem;display:grid;grid-template-columns:1fr 280px;gap:3rem;}
@@ -516,8 +518,16 @@ function renderYTVideos(videos,el){
     }
 
     function refreshButton() {
-      playBtn.textContent = isPlaying ? '❚❚' : '▶';
-      playBtn.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play');
+      var badge = document.querySelector('.sap-badge');
+      if (isPlaying) {
+        playBtn.innerHTML = '&#10074;&#10074;';
+        playBtn.setAttribute('aria-label', 'Pause');
+        if (badge) badge.classList.add('sap-spinning');
+      } else {
+        playBtn.textContent = '▶';
+        playBtn.setAttribute('aria-label', 'Play');
+        if (badge) badge.classList.remove('sap-spinning');
+      }
     }
 
     function refreshTitle(fallback) {
@@ -551,7 +561,8 @@ function renderYTVideos(videos,el){
       widget.bind(SC.Widget.Events.PLAY, function() {
         isPlaying = true;
         refreshButton();
-        refreshTitle();
+        // Delay slightly so widget has loaded new track metadata
+        setTimeout(function() { refreshTitle(); }, 300);
       });
       widget.bind(SC.Widget.Events.PAUSE, function() {
         isPlaying = false;
@@ -603,9 +614,12 @@ function renderYTVideos(videos,el){
       widget.isPaused(function(paused) {
         if (paused) {
           widget.play();
+          isPlaying = true;
         } else {
           widget.pause();
+          isPlaying = false;
         }
+        refreshButton();
       });
     });
 
