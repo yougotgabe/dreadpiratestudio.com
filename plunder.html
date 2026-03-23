@@ -54,12 +54,29 @@
   .pc-crew-tags{display:flex;flex-wrap:wrap;gap:0.4rem;padding:0.5rem 1.1rem;border-top:1px solid var(--border);}
   .pc-crew-tag{font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold-dim);border:1px solid var(--border);padding:0.2rem 0.6rem;text-decoration:none;transition:all 0.2s;}
   .pc-crew-tag:hover{border-color:var(--gold);color:var(--gold);}
+  .yt-live-card{border-color:rgba(255,0,0,0.35) !important;animation:livePulse 2s infinite;}
+  @keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(255,0,0,0.15);}50%{box-shadow:0 0 0 6px rgba(255,0,0,0);}}
   .empty-state{padding:4rem;text-align:center;color:var(--muted);font-style:italic;grid-column:1/-1;border:1px dashed var(--border);}
   .loading-state{padding:4rem;text-align:center;color:var(--muted);font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.3em;text-transform:uppercase;grid-column:1/-1;}
   .result-count{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);opacity:0.6;}
+  .load-more-wrap{margin-top:1.5rem;display:flex;justify-content:center;}
+  .load-more-btn{padding:0.7rem 1.4rem;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+  .load-more-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
+  .media-shell{display:flex;align-items:center;justify-content:center;min-height:150px;background:linear-gradient(180deg,rgba(201,168,76,0.05),rgba(13,15,20,0.65));}
+  .media-shell.tall{min-height:220px;}
+  .media-shell.playlist{min-height:180px;}
+  .media-shell.short{min-height:360px;}
+  .media-shell.photo{min-height:220px;padding:0;overflow:hidden;}
+  .media-shell img{display:block;width:100%;height:auto;}
+  .media-shell.photo img{width:100%;height:100%;object-fit:cover;}
+  .media-shell-inner{padding:1rem;text-align:center;max-width:460px;}
+  .media-shell-kicker{font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);opacity:0.8;margin-bottom:0.65rem;}
+  .media-shell-text{font-size:0.92rem;line-height:1.6;color:var(--muted);margin-bottom:0.9rem;}
+  .media-load-btn{padding:0.65rem 1.1rem;border:1px solid var(--border);background:rgba(201,168,76,0.06);color:var(--gold);font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.16em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+  .media-load-btn:hover{border-color:var(--gold);background:rgba(201,168,76,0.1);}
   footer{border-top:1px solid var(--border);padding:2rem;text-align:center;background:var(--black);margin-top:2rem;}
   .footer-text{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;}
-  @media(max-width:768px){.plunder-grid{grid-template-columns:1fr;}.pc-video,.pc-playlist,.pc-live{grid-column:1;}.filter-row{flex-direction:column;gap:0.75rem;}}
+  @media(max-width:768px){.plunder-grid{grid-template-columns:1fr;}.pc-video,.pc-playlist,.pc-live{grid-column:1;}.filter-row{flex-direction:column;gap:0.75rem;}.media-shell.short{min-height:320px;}}
 </style>
 </head>
 <body>
@@ -88,6 +105,7 @@
           <button class="fb" data-type="short">Shorts</button>
           <button class="fb" data-type="photo">Photos</button>
           <button class="fb" data-type="link">Links</button>
+          <button class="fb" data-type="youtube_live">&#128308; Live Now</button>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
@@ -99,8 +117,15 @@
     </div>
     <span class="result-count" id="result-count"></span>
   </div>
+  <div id="yt-live-section" style="display:none;margin-bottom:2rem;">
+    <div style="font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.4em;text-transform:uppercase;color:#f00;opacity:0.9;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid rgba(255,0,0,0.2);">&#128308; Live Now</div>
+    <div class="plunder-grid" id="yt-live-grid"></div>
+  </div>
   <div class="plunder-grid" id="plunder-grid">
     <div class="loading-state">Hauling the loot&hellip;</div>
+  </div>
+  <div class="load-more-wrap" id="load-more-wrap" style="display:none;">
+    <button class="load-more-btn" id="load-more-btn">Load More</button>
   </div>
 </div>
 
@@ -109,7 +134,10 @@
 <script>
 var SURL='https://efylfnnshmaauhiwqaxj.supabase.co';
 var SKEY='sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
-var allItems=[], profiles={}, activeType='all', activeCrew='all';
+var YT_KEY='AIzaSyDEiPP3x0zqmyP__x9oarso-S9rQHsXtM4';
+var PAGE_SIZE=18;
+var allItems=[], profiles={}, activeType='all', activeCrew='all', filteredItems=[], visibleCount=PAGE_SIZE;
+var ytLiveItems=[];
 
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function api(path){return fetch(SURL+'/rest/v1/'+path,{headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}}).then(function(r){return r.json();});}
@@ -117,23 +145,25 @@ function api(path){return fetch(SURL+'/rest/v1/'+path,{headers:{'apikey':SKEY,'A
 function normType(t){
   if(t==='soundcloud'||t==='spotify') return 'song';
   if(t==='youtube') return 'video';
+  if(t==='youtube_live') return 'youtube_live';
   if(t==='instagram'||t==='tiktok'||t==='x') return 'link';
   return t;
 }
 
-var ICONS={song:'&#9835;',playlist:'&#9835;&#9835;',video:'&#9654;',live:'&#128308;',short:'&#9654;',photo:'&#128247;',link:'&#128279;',bandlab:'&#127908;',soundcloud:'&#9835;',youtube:'&#9654;',spotify:'&#127925;',instagram:'&#128247;',tiktok:'&#127909;',x:'&#120143;'};
+var ICONS={song:'&#9835;',playlist:'&#9835;&#9835;',video:'&#9654;',live:'&#128308;',short:'&#9654;',photo:'&#128247;',link:'&#128279;',bandlab:'&#127908;',soundcloud:'&#9835;',youtube:'&#9654;',youtube_live:'&#128308;',spotify:'&#127925;',instagram:'&#128247;',tiktok:'&#127909;',x:'&#120143;'};
 var PLAT={bandlab:'View on BandLab',soundcloud:'View on SoundCloud',youtube:'View on YouTube',spotify:'View on Spotify',instagram:'View on Instagram',tiktok:'View on TikTok',x:'View on X',link:'Visit Link'};
 
 function load(){
   Promise.all([
-    api('crew_profiles?published=eq.true&select=slug,display_name,rank'),
+    api('crew_profiles?published=eq.true&select=slug,display_name,rank,youtube_channel_id'),
     api('crew_media?published=eq.true&order=sort_order.asc,created_at.desc')
   ]).then(function(r){
     var profs=r[0]||[], media=r[1]||[];
     profs.forEach(function(p){ profiles[p.slug]=p; });
-    allItems=media;
+    allItems=media.map(function(item){item._normType=normType(item.type);return item;});
     buildCrewFilters(profs);
-    renderGrid();
+    renderGrid(true);
+    profs.forEach(function(p){ if(p.youtube_channel_id) fetchAndRenderYT(p); });
   }).catch(function(){
     document.getElementById('plunder-grid').innerHTML='<div class="empty-state">Could not load the plunder. Try again later.</div>';
   });
@@ -153,7 +183,8 @@ function buildCrewFilters(profs){
     document.querySelectorAll('#crew-filters .fb').forEach(function(b){b.classList.remove('active');});
     btn.classList.add('active');
     activeCrew=btn.getAttribute('data-crew');
-    renderGrid();
+    visibleCount=PAGE_SIZE;
+    renderGrid(true);
   });
 }
 
@@ -162,79 +193,213 @@ document.getElementById('type-filters').addEventListener('click',function(e){
   document.querySelectorAll('#type-filters .fb').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
   activeType=btn.getAttribute('data-type');
-  renderGrid();
+  visibleCount=PAGE_SIZE;
+  renderGrid(true);
 });
 
-function renderGrid(){
+document.getElementById('load-more-btn').addEventListener('click',function(){
+  visibleCount+=PAGE_SIZE;
+  renderVisibleItems();
+});
+
+document.getElementById('plunder-grid').addEventListener('click',function(e){
+  var btn=e.target.closest('.media-load-btn');
+  if(!btn) return;
+  loadDeferredEmbed(btn);
+});
+
+document.getElementById('yt-live-grid').addEventListener('click',function(e){
+  var btn=e.target.closest('.media-load-btn');
+  if(!btn) return;
+  loadDeferredEmbed(btn);
+});
+
+function shouldDisplayType(item){
+  var nt=item._normType||normType(item.type);
+  if(activeType==='all') return true;
+  if(activeType==='live') return nt==='live'||item.type==='live'||item.type==='youtube_live';
+  if(activeType==='video') return nt==='video'||item.type==='video'||item.type==='youtube';
+  if(activeType==='youtube_live') return item.type==='youtube_live'||nt==='youtube_live';
+  return nt===activeType||item.type===activeType;
+}
+
+function renderGrid(recompute){
   var grid=document.getElementById('plunder-grid');
-  var items=allItems.filter(function(item){
-    var nt=normType(item.type);
-    var typeOk=activeType==='all'||nt===activeType||item.type===activeType;
-    var crewOk=activeCrew==='all'||item.crew_slug===activeCrew;
-    return typeOk&&crewOk;
-  });
-  document.getElementById('result-count').textContent=items.length+' item'+(items.length!==1?'s':'');
-  if(!items.length){
+  if(recompute){
+    filteredItems=allItems.filter(function(item){
+      var crewOk=activeCrew==='all'||item.crew_slug===activeCrew||(item.crew_tags&&item.crew_tags.indexOf(activeCrew)!==-1);
+      return crewOk&&shouldDisplayType(item);
+    });
+  }
+  document.getElementById('result-count').textContent=filteredItems.length+' item'+(filteredItems.length!==1?'s':'');
+  if(!filteredItems.length){
     grid.innerHTML='<div class="empty-state">No plunder found for this filter.</div>';
+    document.getElementById('load-more-wrap').style.display='none';
     return;
   }
-  grid.innerHTML=items.map(function(item){
-    var nt=normType(item.type);
-    var raw=item.type;
-    var size=item.size||'medium';
-    var icon=ICONS[raw]||ICONS[nt]||'&#128279;';
-    var hasNotes=item.notes&&item.notes.trim();
-    var prof=profiles[item.crew_slug]||{display_name:item.crew_slug};
-    var cls='pc pc-'+nt;
-    if(nt==='playlist') cls='pc pc-playlist';
-    else if(nt==='video'||nt==='live') cls='pc pc-'+nt;
-    else if(nt==='short') cls='pc pc-short';
-    else if(size==='featured'||size==='large') cls+=' pc-video';
-    // Build crew attribution — primary + any tagged crew
-    var crewNames='<a href="crew/'+esc(item.crew_slug)+'.html" class="pc-crew-link" style="color:var(--gold-dim);text-decoration:none;">'+esc(prof.display_name)+'</a>';
-    if(item.crew_tags&&item.crew_tags.length>1){
-      var extras=item.crew_tags.filter(function(t){return t!==item.crew_slug;});
-      if(extras.length){
-        crewNames+=' <span style="opacity:0.4">&amp;</span> '+extras.map(function(t){
-          var ep=profiles[t]||{display_name:t};
-          return '<a href="crew/'+esc(t)+'.html" class="pc-crew-link" style="color:var(--gold-dim);text-decoration:none;">'+esc(ep.display_name||t)+'</a>';
-        }).join(', ');
-      }
+  renderVisibleItems();
+}
+
+function renderVisibleItems(){
+  var grid=document.getElementById('plunder-grid');
+  var items=filteredItems.slice(0,visibleCount);
+  grid.innerHTML=items.map(renderCard).join('');
+  document.getElementById('load-more-wrap').style.display=filteredItems.length>visibleCount?'flex':'none';
+}
+
+function renderCard(item){
+  var nt=item._normType||normType(item.type);
+  var raw=item.type;
+  var size=item.size||'medium';
+  var icon=ICONS[raw]||ICONS[nt]||'&#128279;';
+  var hasNotes=item.notes&&item.notes.trim();
+  var prof=profiles[item.crew_slug]||{display_name:item.crew_slug};
+  var cls='pc pc-'+nt;
+  if(nt==='playlist') cls='pc pc-playlist';
+  else if(nt==='video'||nt==='live'||raw==='youtube_live') cls='pc pc-video';
+  else if(nt==='short') cls='pc pc-short';
+  else if(size==='featured'||size==='large') cls+=' pc-video';
+  if(raw==='youtube_live') cls+=' yt-live-card';
+
+  var crewNames='<a href="crew/'+esc(item.crew_slug)+'.html" class="pc-crew-link" style="color:var(--gold-dim);text-decoration:none;">'+esc(prof.display_name)+'</a>';
+  if(item.crew_tags&&item.crew_tags.length>1){
+    var extras=item.crew_tags.filter(function(t){return t!==item.crew_slug;});
+    if(extras.length){
+      crewNames+=' <span style="opacity:0.4">&amp;</span> '+extras.map(function(t){
+        var ep=profiles[t]||{display_name:t};
+        return '<a href="crew/'+esc(t)+'.html" class="pc-crew-link" style="color:var(--gold-dim);text-decoration:none;">'+esc(ep.display_name||t)+'</a>';
+      }).join(', ');
     }
-    var crewBar='<div class="pc-crew">'
-      +'<span class="pc-crew-name">&#9760; '+crewNames+'</span>'
-      +'<a href="crew/'+esc(item.crew_slug)+'.html" class="pc-crew-link">View Profile &#8594;</a>'
-      +'</div>';
-    var header='<div class="pc-header"><div class="pc-icon">'+icon+'</div><div class="pc-title">'+esc(item.title)+'</div></div>';
-    var caption=item.caption?'<div class="pc-caption">'+esc(item.caption)+'</div>':'';
-    var embed='';
-    if((nt==='song'||raw==='soundcloud'||raw==='spotify'||raw==='bandlab')&&item.url){
-      var h=raw==='spotify'?152:166;
-      embed='<div class="pc-embed"><iframe height="'+h+'" scrolling="no" allow="autoplay" src="'+esc(item.url)+'"></iframe></div>';
-    } else if(nt==='playlist'&&item.url){
-      var ph=raw==='bandlab'?500:300;
-      embed='<div class="pc-embed"><iframe height="'+ph+'" scrolling="no" allow="autoplay" src="'+esc(item.url)+'"></iframe></div>';
-    } else if((nt==='video'||nt==='live')&&item.url){
-      embed='<div class="pc-embed"><div class="yt-wrap"><iframe src="'+esc(item.url)+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div></div>';
-    } else if(nt==='short'&&item.url){
-      embed='<div class="pc-embed"><iframe src="'+esc(item.url)+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>';
-    } else if(nt==='photo'&&item.url){
-      embed='<div class="pc-embed"><img src="'+esc(item.url)+'" alt="'+esc(item.title)+'" style="width:100%;display:block;"></div>';
-    } else if(nt==='link'&&item.url){
-      embed='<a class="pc-link-btn" href="'+esc(item.url)+'" target="_blank" rel="noopener">'+(PLAT[raw]||'Visit Link')+' &#8594;</a>';
-    }
-    var notes='';
-    if(hasNotes){
-      notes='<div class="pc-notes-toggle" onclick="toggleNotes(this)">Notes / Lyrics <span class="pc-notes-arrow">&#8964;</span></div>'
-        +'<div class="pc-notes-body">'+esc(item.notes)+'</div>';
-    }
-    return '<div class="'+cls+'">'+crewBar+header+caption+embed+notes+'</div>';
-  }).join('');
+  }
+  var crewBar='<div class="pc-crew">'
+    +'<span class="pc-crew-name">&#9760; '+crewNames+'</span>'
+    +'<a href="crew/'+esc(item.crew_slug)+'.html" class="pc-crew-link">View Profile &#8594;</a>'
+    +'</div>';
+  var header='<div class="pc-header"><div class="pc-icon">'+icon+'</div><div class="pc-title">'+esc(item.title)+'</div></div>';
+  var caption=item.caption?'<div class="pc-caption">'+esc(item.caption)+'</div>':'';
+  var embed=renderDeferredMedia(item, nt, raw);
+  var notes='';
+  if(hasNotes){
+    notes='<div class="pc-notes-toggle" onclick="toggleNotes(this)">Notes / Lyrics <span class="pc-notes-arrow">&#8964;</span></div>'
+      +'<div class="pc-notes-body">'+esc(item.notes)+'</div>';
+  }
+  return '<div class="'+cls+'">'+crewBar+header+caption+embed+notes+'</div>';
+}
+
+function renderDeferredMedia(item, nt, raw){
+  if(nt==='photo'&&item.url){
+    return '<div class="pc-embed"><div class="media-shell photo"><img src="'+esc(item.url)+'" alt="'+esc(item.title)+'"></div></div>';
+  }
+  if(nt==='link'&&item.url){
+    return '<a class="pc-link-btn" href="'+esc(item.url)+'" target="_blank" rel="noopener">'+(PLAT[raw]||'Visit Link')+' &#8594;</a>';
+  }
+  if(!item.url) return '';
+  var shellClass='media-shell';
+  if(nt==='short') shellClass+=' short';
+  else if(nt==='playlist') shellClass+=' playlist';
+  else if(nt==='video'||nt==='live'||raw==='youtube_live') shellClass+=' tall';
+  var label='Load Media';
+  if(nt==='song') label='Load Player';
+  else if(nt==='playlist') label='Load Playlist';
+  else if(nt==='video'||nt==='live'||raw==='youtube_live') label='Load Video';
+  else if(nt==='short') label='Load Short';
+  return '<div class="pc-embed"><div class="'+shellClass+'"><div class="media-shell-inner">'
+    +'<div class="media-shell-kicker">'+esc((raw==='youtube_live'?'Live Stream':(nt==='song'?'Audio Embed':(nt==='playlist'?'Playlist':(nt==='short'?'Short Video':'Video Embed')))))+'</div>'
+    +'<div class="media-shell-text">This media loads on demand to keep The Plunder fast and lighter to browse.</div>'
+    +'<button class="media-load-btn" data-embed-type="'+esc(nt)+'" data-raw-type="'+esc(raw)+'" data-url="'+esc(item.url)+'">'+label+'</button>'
+    +'</div></div></div>';
+}
+
+function loadDeferredEmbed(btn){
+  var url=btn.getAttribute('data-url');
+  var type=btn.getAttribute('data-embed-type');
+  var raw=btn.getAttribute('data-raw-type');
+  var wrapper=btn.closest('.pc-embed');
+  if(!wrapper||!url) return;
+  if(type==='song'||raw==='soundcloud'||raw==='spotify'||raw==='bandlab'){
+    var h=raw==='spotify'?152:166;
+    wrapper.innerHTML='<iframe height="'+h+'" scrolling="no" allow="autoplay" src="'+url+'"></iframe>';
+    return;
+  }
+  if(type==='playlist'){
+    var ph=raw==='bandlab'?500:300;
+    wrapper.innerHTML='<iframe height="'+ph+'" scrolling="no" allow="autoplay" src="'+url+'"></iframe>';
+    return;
+  }
+  if(type==='video'||type==='live'||raw==='youtube_live'){
+    wrapper.innerHTML='<div class="yt-wrap"><iframe src="'+url+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>';
+    return;
+  }
+  if(type==='short'){
+    wrapper.innerHTML='<iframe src="'+url+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>';
+  }
 }
 
 function toggleNotes(el){
   el.classList.toggle('open');
   el.nextElementSibling.classList.toggle('open');
+}
+
+function fetchAndRenderYT(prof){
+  var cid=prof.youtube_channel_id;
+  if(!cid) return;
+  var liveUrl='https://www.googleapis.com/youtube/v3/search?part=snippet&channelId='+encodeURIComponent(cid)+'&eventType=live&type=video&maxResults=1&key='+YT_KEY;
+  var vidUrl='https://www.googleapis.com/youtube/v3/search?part=snippet&channelId='+encodeURIComponent(cid)+'&order=date&type=video&maxResults=6&key='+YT_KEY;
+  var ld=null,vd=null,n=0;
+  function done(){
+    n++;if(n<2)return;
+    var items=[];
+    if(ld&&ld.items&&ld.items.length){
+      var li=ld.items[0];
+      items.push({id:li.id.videoId,title:li.snippet.title,isLive:true,crew_slug:prof.slug});
+    }
+    if(vd&&vd.items){
+      vd.items.forEach(function(v){
+        if(!v.id.videoId)return;
+        if(items.length&&items[0].id===v.id.videoId)return;
+        items.push({id:v.id.videoId,title:v.snippet.title,isLive:false,crew_slug:prof.slug});
+      });
+    }
+    var liveVids=items.filter(function(v){return v.isLive;});
+    if(liveVids.length){
+      ytLiveItems=ytLiveItems.concat(liveVids);
+      renderLiveSection();
+    }
+    items.forEach(function(v){
+      allItems.push({
+        type:v.isLive?'youtube_live':'youtube',
+        _normType:v.isLive?'youtube_live':'video',
+        title:v.title,
+        url:'https://www.youtube.com/embed/'+v.id,
+        crew_slug:v.crew_slug,
+        caption:v.isLive?'Live now on YouTube':'YouTube',
+        notes:'',size:'large',published:true,crew_tags:[]
+      });
+    });
+    if(activeType==='all'||activeType==='video'||activeType==='youtube_live'||activeType==='live') renderGrid(true);
+  }
+  fetch(liveUrl).then(function(r){return r.json();}).then(function(d){ld=d;done();}).catch(function(){ld={};done();});
+  fetch(vidUrl).then(function(r){return r.json();}).then(function(d){vd=d;done();}).catch(function(){vd={};done();});
+}
+
+function renderLiveSection(){
+  if(!ytLiveItems.length) return;
+  var sec=document.getElementById('yt-live-section');
+  var grid=document.getElementById('yt-live-grid');
+  sec.style.display='block';
+  grid.innerHTML=ytLiveItems.map(function(v){
+    var prof=profiles[v.crew_slug]||{display_name:v.crew_slug};
+    return '<div class="pc pc-video yt-live-card" style="border-color:rgba(255,0,0,0.4);">'
+      +'<div class="pc-crew"><span class="pc-crew-name">&#9760; '+esc(prof.display_name)+'</span>'
+      +'<a href="crew/'+esc(v.crew_slug)+'.html" class="pc-crew-link">View Profile &#8594;</a></div>'
+      +'<div class="pc-header"><div class="pc-icon">&#128308;</div>'
+      +'<div class="pc-title">'+esc(v.title)+'<span style="background:#f00;color:#fff;font-family:Cinzel,serif;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.2rem 0.5rem;margin-left:0.5rem;">LIVE</span></div></div>'
+      +'<div class="pc-embed"><div class="media-shell tall"><div class="media-shell-inner">'
+      +'<div class="media-shell-kicker">Live Stream</div>'
+      +'<div class="media-shell-text">Load this stream on demand to keep the page responsive.</div>'
+      +'<button class="media-load-btn" data-embed-type="video" data-raw-type="youtube_live" data-url="https://www.youtube.com/embed/'+esc(v.id)+'">Load Live Stream</button>'
+      +'</div></div></div></div>';
+  }).join('');
 }
 
 load();
