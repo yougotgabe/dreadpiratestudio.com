@@ -570,12 +570,12 @@
 
     <div class="hero-content">
       <img src="logo.png" alt="Dread Pirate Studio" class="hero-logo">
-      <p class="hero-tagline">Music &nbsp;&middot;&nbsp; Technology &nbsp;&middot;&nbsp; Creation</p>
+      <p class="hero-tagline" id="hero-tagline">Music &nbsp;&middot;&nbsp; Technology &nbsp;&middot;&nbsp; Creation</p>
       <div class="hero-divider"></div>
-      <p class="hero-desc">A creative collective built at the intersection of craft and technology. Music, maker projects, gaming, content &mdash; all sailing under one flag.</p>
+      <p class="hero-desc" id="hero-description">A creative collective built at the intersection of craft and technology. Music, maker projects, gaming, content &mdash; all sailing under one flag.</p>
       <div class="hero-cta-group">
-        <a href="#hold" class="btn btn-gold">Explore the Hold</a>
-        <a href="#crew" class="btn btn-outline">Meet the Crew</a>
+        <a href="#hold" class="btn btn-gold" id="hero-cta-primary">Explore the Hold</a>
+        <a href="#crew" class="btn btn-outline" id="hero-cta-secondary">Meet the Crew</a>
       </div>
     </div>
 
@@ -627,20 +627,20 @@
   <section id="captain">
     <div class="section-inner">
       <div class="section-header">
-        <p class="section-label">At the Helm</p>
-        <h2 class="section-title">The Captain</h2>
+        <p class="section-label" id="captain-label">At the Helm</p>
+        <h2 class="section-title" id="captain-title">The Captain</h2>
         <div class="section-rule"></div>
       </div>
       <div class="captain-grid">
         <div class="captain-img-wrap">
-          <img src="icon.png" alt="Captain Gabe Nelson">
+          <img src="icon.png" alt="Captain Gabe Nelson" id="captain-image">
         </div>
         <div class="captain-text">
-          <h3>Gabe Nelson</h3>
-          <p class="rank">Captain &nbsp;/&nbsp; YouGotGabe</p>
-          <p>Builder, musician, maker, and technologist based in Willmar, Minnesota. The creative force behind Dread Pirate Studio &mdash; a brand that refuses to be defined by a single discipline.</p>
-          <p>From electronics and 3D printing to music production, video creation, automation systems, and content &mdash; if it can be built, it gets built.</p>
-          <div class="skills-list">
+          <h3 id="captain-name">Gabe Nelson</h3>
+          <p class="rank" id="captain-rank">Captain &nbsp;/&nbsp; YouGotGabe</p>
+          <p id="captain-bio-1">Builder, musician, maker, and technologist based in Willmar, Minnesota. The creative force behind Dread Pirate Studio &mdash; a brand that refuses to be defined by a single discipline.</p>
+          <p id="captain-bio-2">From electronics and 3D printing to music production, video creation, automation systems, and content &mdash; if it can be built, it gets built.</p>
+          <div class="skills-list" id="captain-skills">
             <span class="skill-tag">Music Production</span>
             <span class="skill-tag">Electronics</span>
             <span class="skill-tag">3D Printing</span>
@@ -658,10 +658,10 @@
   <section id="crew">
     <div class="section-inner">
       <div class="section-header">
-        <p class="section-label">The Company</p>
-        <h2 class="section-title">The Crew</h2>
+        <p class="section-label" id="crew-label">The Company</p>
+        <h2 class="section-title" id="crew-title">The Crew</h2>
         <div class="section-rule"></div>
-        <p class="section-sub">Every great voyage needs a worthy crew.</p>
+        <p class="section-sub" id="crew-subtitle">Every great voyage needs a worthy crew.</p>
       </div>
       <div class="crew-grid" id="home-crew-grid">
         <div class="glow-card" style="opacity:0.4;pointer-events:none;">
@@ -679,10 +679,10 @@
   <section id="hold">
     <div class="section-inner">
       <div class="section-header">
-        <p class="section-label">The Archive</p>
-        <h2 class="section-title">The Hold</h2>
+        <p class="section-label" id="hold-label">The Archive</p>
+        <h2 class="section-title" id="hold-title">The Hold</h2>
         <div class="section-rule"></div>
-        <p class="section-sub">Content, projects, and things we've made.</p>
+        <p class="section-sub" id="hold-subtitle">Content, projects, and things we've made.</p>
       </div>
       <div class="hold-grid">
         <a href="https://www.youtube.com/@DreadPirateStudio" target="_blank" class="hold-card">
@@ -734,10 +734,10 @@
   <section id="video">
     <div class="section-inner">
       <div class="section-header">
-        <p class="section-label">From the Vault</p>
-        <h2 class="section-title">Video</h2>
+        <p class="section-label" id="video-label">From the Vault</p>
+        <h2 class="section-title" id="video-title">Video</h2>
         <div class="section-rule"></div>
-        <p class="section-sub">Live recordings and original performances from the crew.</p>
+        <p class="section-sub" id="video-subtitle">Live recordings and original performances from the crew.</p>
       </div>
       <div class="video-grid">
         <div class="video-card">
@@ -765,8 +765,8 @@
   <section id="music">
     <div class="section-inner">
       <div class="section-header">
-        <p class="section-label">From the Hold</p>
-        <h2 class="section-title">Music</h2>
+        <p class="section-label" id="music-label">From the Hold</p>
+        <h2 class="section-title" id="music-title">Music</h2>
         <div class="section-rule"></div>
       </div>
       <div class="music-grid">
@@ -795,12 +795,12 @@
   <section id="contact">
     <div class="section-inner">
       <div class="contact-inner">
-        <p class="section-label">Join the Crew</p>
-        <h2 class="section-title">Set Sail Together</h2>
+        <p class="section-label" id="contact-label">Join the Crew</p>
+        <h2 class="section-title" id="contact-title">Set Sail Together</h2>
         <div class="section-rule"></div>
-        <p class="contact-note">Collaborations, commissions, questions, or just a good conversation &mdash; the captain's door is open.</p>
-        <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#103;&#97;&#98;&#101;&#64;&#100;&#114;&#101;&#97;&#100;&#112;&#105;&#114;&#97;&#116;&#101;&#115;&#116;&#117;&#100;&#105;&#111;&#46;&#99;&#111;&#109;" class="contact-email">&#103;&#97;&#98;&#101;&#64;&#100;&#114;&#101;&#97;&#100;&#112;&#105;&#114;&#97;&#116;&#101;&#115;&#116;&#117;&#100;&#105;&#111;&#46;&#99;&#111;&#109;</a>
-        <p class="contact-note" style="font-size:0.85rem;">Response time: usually within 24 hours</p>
+        <p class="contact-note" id="contact-note-main">Collaborations, commissions, questions, or just a good conversation &mdash; the captain's door is open.</p>
+        <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#103;&#97;&#98;&#101;&#64;&#100;&#114;&#101;&#97;&#100;&#112;&#105;&#114;&#97;&#116;&#101;&#115;&#116;&#117;&#100;&#105;&#111;&#46;&#99;&#111;&#109;" class="contact-email" id="contact-email">&#103;&#97;&#98;&#101;&#64;&#100;&#114;&#101;&#97;&#100;&#112;&#105;&#114;&#97;&#116;&#101;&#115;&#116;&#117;&#100;&#105;&#111;&#46;&#99;&#111;&#109;</a>
+        <p class="contact-note" style="font-size:0.85rem;" id="contact-response">Response time: usually within 24 hours</p>
       </div>
     </div>
   </section>
@@ -867,6 +867,74 @@
         if (!rows || !rows.length) return;
         var cfg = {};
         rows.forEach(function(r){ cfg[r.key] = r.value; });
+
+
+      function setText(id, val) {
+        var el = document.getElementById(id);
+        if (el && val !== undefined && val !== null && val !== '') el.textContent = val;
+      }
+      function setHTML(id, val) {
+        var el = document.getElementById(id);
+        if (el && val !== undefined && val !== null && val !== '') el.innerHTML = val;
+      }
+      function setLink(id, href, label) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        if (href) el.setAttribute('href', href);
+        if (label) el.textContent = label;
+      }
+      function htmlEncode(str){
+        if(str===undefined||str===null) return '';
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      }
+      function applyHomepageContent(cfg){
+        setHTML('hero-tagline', cfg.hero_tagline ? htmlEncode(cfg.hero_tagline).replace(/ · /g,' &middot; ') : '');
+        setHTML('hero-description', cfg.hero_description ? htmlEncode(cfg.hero_description).replace(/—/g,'&mdash;') : '');
+        setLink('hero-cta-primary', cfg.hero_cta_primary_link, cfg.hero_cta_primary_label);
+        setLink('hero-cta-secondary', cfg.hero_cta_secondary_link, cfg.hero_cta_secondary_label);
+        setText('captain-label', cfg.captain_label);
+        setText('captain-title', cfg.captain_title);
+        setText('captain-name', cfg.captain_name);
+        setHTML('captain-rank', cfg.captain_rank ? htmlEncode(cfg.captain_rank).replace(/ \/ /g,' &nbsp;/&nbsp; ') : '');
+        setHTML('captain-bio-1', cfg.captain_bio_1 ? htmlEncode(cfg.captain_bio_1).replace(/—/g,'&mdash;') : '');
+        setHTML('captain-bio-2', cfg.captain_bio_2 ? htmlEncode(cfg.captain_bio_2).replace(/—/g,'&mdash;') : '');
+        if (cfg.captain_image) { var ci=document.getElementById('captain-image'); if(ci) ci.src=cfg.captain_image; }
+        if (cfg.captain_skills) {
+          var skillsEl=document.getElementById('captain-skills');
+          if(skillsEl){
+            var skills=String(cfg.captain_skills).split(',').map(function(x){return x.replace(/^\s+|\s+$/g,'');}).filter(function(x){return x;});
+            if(skills.length){ skillsEl.innerHTML=skills.map(function(skill){return '<span class="skill-tag">'+htmlEncode(skill)+'</span>';}).join(''); }
+          }
+        }
+        setText('crew-label', cfg.crew_label);
+        setText('crew-title', cfg.crew_title);
+        setText('crew-subtitle', cfg.crew_subtitle);
+        setText('hold-label', cfg.hold_label);
+        setText('hold-title', cfg.hold_title);
+        setText('hold-subtitle', cfg.hold_subtitle);
+        setText('video-label', cfg.video_label);
+        setText('video-title', cfg.video_title);
+        setText('video-subtitle', cfg.video_subtitle);
+        setText('music-label', cfg.music_label);
+        setText('music-title', cfg.music_title);
+        setText('contact-label', cfg.contact_label);
+        setText('contact-title', cfg.contact_title);
+        setText('contact-note-main', cfg.contact_note);
+        if(cfg.contact_email){
+          var em=document.getElementById('contact-email');
+          if(em){ em.setAttribute('href','mailto:'+cfg.contact_email); em.textContent=cfg.contact_email; }
+        }
+        setText('contact-response', cfg.contact_response);
+      }
+      function applyThemeConfig(cfg){
+        var root=document.documentElement;
+        if(cfg.theme_gold) root.style.setProperty('--gold', cfg.theme_gold);
+        if(cfg.theme_gold_dim) root.style.setProperty('--gold-dim', cfg.theme_gold_dim);
+        if(cfg.theme_muted) root.style.setProperty('--muted', cfg.theme_muted);
+      }
+
+        applyThemeConfig(cfg);
+        applyHomepageContent(cfg);
 
         // Section backgrounds
         var sections = ['hero','captain','crew','hold','video','music','contact'];

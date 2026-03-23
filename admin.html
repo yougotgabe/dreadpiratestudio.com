@@ -58,8 +58,9 @@
   .slideshow-add:hover{border-color:var(--gold-dim);color:var(--gold);}
   .fg{margin-bottom:0.85rem;}
   .fg label{display:block;font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.35rem;}
-  .fg input,.fg select{width:100%;background:var(--deep);border:1px solid var(--border);color:var(--white);padding:0.6rem 0.85rem;font-family:'Crimson Text',Georgia,serif;font-size:0.95rem;outline:none;transition:border-color 0.3s;}
-  .fg input:focus,.fg select:focus{border-color:var(--gold-dim);}
+  .fg input,.fg select,.fg textarea{width:100%;background:var(--deep);border:1px solid var(--border);color:var(--white);padding:0.6rem 0.85rem;font-family:'Crimson Text',Georgia,serif;font-size:0.95rem;outline:none;transition:border-color 0.3s;}
+  .fg textarea{min-height:110px;resize:vertical;}
+  .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold-dim);}
   .url-row{display:flex;gap:0.5rem;}
   .url-row input{flex:1;}
   .btn-clear{background:none;border:1px solid var(--border);color:var(--muted);padding:0.6rem 0.75rem;font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:all 0.2s;}
@@ -133,6 +134,64 @@
     <p class="hint" style="margin-bottom:1.25rem;">Insert visual breaks between sections — single images, GIFs, or auto-advancing slideshows.</p>
     <div class="spacers-list" id="spacers-list"></div>
 
+    
+
+    <p class="sec-label">Homepage Content</p>
+    <p class="hint" style="margin-bottom:1.25rem;">These fields use the current homepage text as defaults. Nothing changes on the live site until you click Save All Changes.</p>
+    <div class="sections-grid">
+      <div class="section-admin">
+        <div class="section-admin-name">Hero</div>
+        <div class="fg"><label>Tagline</label><input id="cfg-hero_tagline" type="text" oninput="setCfg('hero_tagline',this.value)"></div>
+        <div class="fg"><label>Description</label><textarea id="cfg-hero_description" oninput="setCfg('hero_description',this.value)"></textarea></div>
+        <div class="fg"><label>Primary Button Label</label><input id="cfg-hero_cta_primary_label" type="text" oninput="setCfg('hero_cta_primary_label',this.value)"></div>
+        <div class="fg"><label>Primary Button Link</label><input id="cfg-hero_cta_primary_link" type="text" oninput="setCfg('hero_cta_primary_link',this.value)"></div>
+        <div class="fg"><label>Secondary Button Label</label><input id="cfg-hero_cta_secondary_label" type="text" oninput="setCfg('hero_cta_secondary_label',this.value)"></div>
+        <div class="fg"><label>Secondary Button Link</label><input id="cfg-hero_cta_secondary_link" type="text" oninput="setCfg('hero_cta_secondary_link',this.value)"></div>
+      </div>
+      <div class="section-admin">
+        <div class="section-admin-name">The Captain</div>
+        <div class="fg"><label>Name</label><input id="cfg-captain_name" type="text" oninput="setCfg('captain_name',this.value)"></div>
+        <div class="fg"><label>Rank / Subheading</label><input id="cfg-captain_rank" type="text" oninput="setCfg('captain_rank',this.value)"></div>
+        <div class="fg"><label>Image URL</label><input id="cfg-captain_image" type="text" oninput="setCfg('captain_image',this.value)"></div>
+        <div class="fg"><label>Bio Paragraph 1</label><textarea id="cfg-captain_bio_1" oninput="setCfg('captain_bio_1',this.value)"></textarea></div>
+        <div class="fg"><label>Bio Paragraph 2</label><textarea id="cfg-captain_bio_2" oninput="setCfg('captain_bio_2',this.value)"></textarea></div>
+        <div class="fg"><label>Skills (comma-separated)</label><textarea id="cfg-captain_skills" oninput="setCfg('captain_skills',this.value)"></textarea></div>
+      </div>
+      <div class="section-admin">
+        <div class="section-admin-name">Section Headings</div>
+        <div class="fg"><label>Crew Label</label><input id="cfg-crew_label" type="text" oninput="setCfg('crew_label',this.value)"></div>
+        <div class="fg"><label>Crew Title</label><input id="cfg-crew_title" type="text" oninput="setCfg('crew_title',this.value)"></div>
+        <div class="fg"><label>Crew Subtitle</label><textarea id="cfg-crew_subtitle" oninput="setCfg('crew_subtitle',this.value)"></textarea></div>
+        <div class="fg"><label>Hold Label</label><input id="cfg-hold_label" type="text" oninput="setCfg('hold_label',this.value)"></div>
+        <div class="fg"><label>Hold Title</label><input id="cfg-hold_title" type="text" oninput="setCfg('hold_title',this.value)"></div>
+        <div class="fg"><label>Hold Subtitle</label><textarea id="cfg-hold_subtitle" oninput="setCfg('hold_subtitle',this.value)"></textarea></div>
+        <div class="fg"><label>Video Label</label><input id="cfg-video_label" type="text" oninput="setCfg('video_label',this.value)"></div>
+        <div class="fg"><label>Video Title</label><input id="cfg-video_title" type="text" oninput="setCfg('video_title',this.value)"></div>
+        <div class="fg"><label>Video Subtitle</label><textarea id="cfg-video_subtitle" oninput="setCfg('video_subtitle',this.value)"></textarea></div>
+        <div class="fg"><label>Music Label</label><input id="cfg-music_label" type="text" oninput="setCfg('music_label',this.value)"></div>
+        <div class="fg"><label>Music Title</label><input id="cfg-music_title" type="text" oninput="setCfg('music_title',this.value)"></div>
+      </div>
+      <div class="section-admin">
+        <div class="section-admin-name">Contact</div>
+        <div class="fg"><label>Label</label><input id="cfg-contact_label" type="text" oninput="setCfg('contact_label',this.value)"></div>
+        <div class="fg"><label>Title</label><input id="cfg-contact_title" type="text" oninput="setCfg('contact_title',this.value)"></div>
+        <div class="fg"><label>Main Note</label><textarea id="cfg-contact_note" oninput="setCfg('contact_note',this.value)"></textarea></div>
+        <div class="fg"><label>Email Address</label><input id="cfg-contact_email" type="text" oninput="setCfg('contact_email',this.value)"></div>
+        <div class="fg"><label>Response Note</label><input id="cfg-contact_response" type="text" oninput="setCfg('contact_response',this.value)"></div>
+      </div>
+    </div>
+
+    <p class="sec-label">Theme Settings</p>
+    <p class="hint" style="margin-bottom:1.25rem;">Optional color overrides. Leave as the defaults unless you want to shift the site palette.</p>
+    <div class="sections-grid">
+      <div class="section-admin">
+        <div class="section-admin-name">Core Colors</div>
+        <div class="fg"><label>Gold Accent</label><input id="cfg-theme_gold" type="text" oninput="setCfg('theme_gold',this.value)" placeholder="#c9a84c"></div>
+        <div class="fg"><label>Gold Dim</label><input id="cfg-theme_gold_dim" type="text" oninput="setCfg('theme_gold_dim',this.value)" placeholder="#8a6f2e"></div>
+        <div class="fg"><label>Muted Text</label><input id="cfg-theme_muted" type="text" oninput="setCfg('theme_muted',this.value)" placeholder="#6b6355"></div>
+      </div>
+    </div>
+
     <div style="height:5rem;"></div>
   </div>
 
@@ -198,6 +257,8 @@ async function loadAll(){
   renderSections();
   renderParallax();
   renderSpacers();
+  loadHomeSettings();
+  loadThemeSettings();
 }
 
 // CREW CARDS
@@ -369,6 +430,50 @@ function rmSpacerImg(si,ii){spacers[si]._images.splice(ii,1);renderSpacers();}
 function promptSpImg(idx){
   var url=prompt('Paste image URL:');
   if(url&&url.trim()){spacers[idx]._images.push(url.trim());renderSpacers();var b=document.querySelectorAll('.spacer-body');if(b[idx])b[idx].classList.add('open');}
+}
+
+
+// HOMEPAGE CONTENT DEFAULTS
+var HOME_DEFAULTS={
+  hero_tagline:'Music · Technology · Creation',
+  hero_description:'A creative collective built at the intersection of craft and technology. Music, maker projects, gaming, content — all sailing under one flag.',
+  hero_cta_primary_label:'Explore the Hold',
+  hero_cta_primary_link:'#hold',
+  hero_cta_secondary_label:'Meet the Crew',
+  hero_cta_secondary_link:'#crew',
+  captain_name:'Gabe Nelson',
+  captain_rank:'Captain / YouGotGabe',
+  captain_image:'icon.png',
+  captain_bio_1:'Builder, musician, maker, and technologist based in Willmar, Minnesota. The creative force behind Dread Pirate Studio — a brand that refuses to be defined by a single discipline.',
+  captain_bio_2:'From electronics and 3D printing to music production, video creation, automation systems, and content — if it can be built, it gets built.',
+  captain_skills:'Music Production, Electronics, 3D Printing, Video Production, Automation, Content Creation, Ukulele / Guitar, Gaming',
+  crew_label:'The Company',
+  crew_title:'The Crew',
+  crew_subtitle:'Every great voyage needs a worthy crew.',
+  hold_label:'The Archive',
+  hold_title:'The Hold',
+  hold_subtitle:'Content, projects, and things we've made.',
+  video_label:'From the Vault',
+  video_title:'Video',
+  video_subtitle:'Live recordings and original performances from the crew.',
+  music_label:'From the Hold',
+  music_title:'Music',
+  contact_label:'Join the Crew',
+  contact_title:'Set Sail Together',
+  contact_note:'Collaborations, commissions, questions, or just a good conversation — the captain's door is open.',
+  contact_email:'gabe@dreadpiratestudio.com',
+  contact_response:'Response time: usually within 24 hours'
+};
+var THEME_DEFAULTS={theme_gold:'#c9a84c',theme_gold_dim:'#8a6f2e',theme_muted:'#6b6355'};
+function cfgOrDefault(key, defaults){
+  return (config.hasOwnProperty(key) && config[key]!==null && config[key]!==undefined && config[key]!=='' ) ? config[key] : defaults[key];
+}
+function setFieldValue(id,val){var el=document.getElementById(id);if(el)el.value=val||'';}
+function loadHomeSettings(){
+  Object.keys(HOME_DEFAULTS).forEach(function(key){ setFieldValue('cfg-'+key, cfgOrDefault(key, HOME_DEFAULTS)); });
+}
+function loadThemeSettings(){
+  Object.keys(THEME_DEFAULTS).forEach(function(key){ setFieldValue('cfg-'+key, cfgOrDefault(key, THEME_DEFAULTS)); });
 }
 
 // HELPERS
