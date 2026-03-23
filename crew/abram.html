@@ -284,7 +284,13 @@ var slug=window.location.pathname.split('/').pop().replace('.html','');
 var allMedia=[];
 
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-    function escT(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    function escT(s){
+      if(!s)return'';
+      var d=document.createElement('textarea');
+      d.innerHTML=String(s);
+      var t=d.value;
+      return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
 function api(path){return fetch(SURL+'/rest/v1/'+path,{headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}}).then(function(r){return r.json();});}
 
 function load(){
