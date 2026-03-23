@@ -174,9 +174,12 @@ function doValidate(){
       e.style.display='block';return;
     }
     token=t;profile=d[0];
-    fetch(SURL+'/rest/v1/crew_media?crew_slug=eq.'+encodeURIComponent(d[0].slug)+'&order=sort_order.asc,created_at.asc',{
+    return fetch(SURL+'/rest/v1/crew_media?crew_slug=eq.'+encodeURIComponent(d[0].slug)+'&order=sort_order.asc,created_at.asc',{
       headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}
-    }).then(function(r){return r.json();}).then(function(m){
+    }).then(function(r){
+      if(!r.ok) throw new Error('Could not load media');
+      return r.json();
+    }).then(function(m){
       mediaItems=(m||[]).map(function(x){return Object.assign({},x);});
       populateForm(d[0]);
       document.getElementById('token-gate').style.display='none';
@@ -308,7 +311,7 @@ function renderMediaList(){
       +'<div class="fg"><label>Notes <span style="opacity:0.6;font-size:0.85rem;">(lyrics, backstory, credits)</span></label>'
       +'<textarea rows="6" oninput="mediaItems['+idx+'].notes=this.value" placeholder="Add lyrics, story, credits...">'+escAttr(item.notes||'')+'</textarea></div>'
       +'<div class="fg"><label>Tag Other Crew Members</label>'
-      +'<input type="text" value="'+(item.crew_tags&&item.crew_tags.join?item.crew_tags.filter(function(t){return t!==profile.slug;}).join(', '):'')+'" onblur="updateItemTags('+idx+',this.value)" placeholder="e.g. ot, gabe (comma separated)" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--white);padding:0.65rem 0.9rem;font-family:Crimson Text,Georgia,serif;font-size:1rem;outline:none;">'
+      +'<input type="text" value="'+(item.crew_tags&&item.crew_tags.join?item.crew_tags.filter(function(t){return t!==profile.slug;}).join(', '):'')+'" oninput="updateItemTags('+idx+',this.value)" onblur="updateItemTags('+idx+',this.value)" placeholder="e.g. ot, gabe (comma separated)" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--white);padding:0.65rem 0.9rem;font-family:Crimson Text,Georgia,serif;font-size:1rem;outline:none;">'
       +'<p style="font-size:0.82rem;color:var(--muted);font-style:italic;margin-top:0.3rem;">Credit other crew: gabe, ot, zach, abram, jade</p></div>'
       +'<div class="fg"><label>Published</label>'
       +'<select onchange="mediaItems['+idx+'].published=this.value===\'true\'">'
@@ -370,7 +373,16 @@ function moveItem(idx,dir){
   var ot=openItems[idx];openItems[idx]=openItems[ni];openItems[ni]=ot;
   renderMediaList();
 }
-function removeItem(idx){mediaItems.splice(idx,1);delete openItems[idx];renderMediaList();}
+function removeItem(idx){
+  mediaItems.splice(idx,1);
+  var nextOpen={};
+  for(var i=0;i<mediaItems.length;i++){
+    if(i<idx && openItems[i]) nextOpen[i]=true;
+    if(i>=idx && openItems[i+1]) nextOpen[i]=true;
+  }
+  openItems=nextOpen;
+  renderMediaList();
+}
 
 function doSave(){
   if(!profile||!token)return;
@@ -416,7 +428,8 @@ function saveMedia(){
   var slug=profile.slug;
   return fetch(SURL+'/rest/v1/crew_media?crew_slug=eq.'+encodeURIComponent(slug),{
     method:'DELETE',headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}
-  }).then(function(){
+  }).then(function(r){
+    if(!r.ok) throw new Error('Media delete failed');
     if(!mediaItems.length) return Promise.resolve();
     var rows=mediaItems.map(function(item,idx){
       var tags=item.crew_tags&&item.crew_tags.length?item.crew_tags:[slug];
@@ -426,6 +439,8 @@ function saveMedia(){
       method:'POST',
       headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY,'Content-Type':'application/json','Prefer':'return=minimal'},
       body:JSON.stringify(rows)
+    }).then(function(pr){
+      if(!pr.ok) throw new Error('Media insert failed');
     });
   });
 }
