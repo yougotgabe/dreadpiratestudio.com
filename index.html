@@ -857,6 +857,8 @@
     <p class="footer-text">&copy; 2026 Dread Pirate Studio &nbsp;&middot;&nbsp; dreadpiratestudio.com &nbsp;&middot;&nbsp; All Rights Reserved</p>
     <p style="margin-top:1rem;">
       <a href="crew/edit.html" style="font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;opacity:0.5;transition:opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">&#128273; Crew Profile Access</a>
+    &nbsp;&nbsp;&nbsp;
+    <a href="admin.html" style="font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;opacity:0.5;transition:opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">&#9875; Admin</a>
     </p>
   </footer>
 
@@ -898,6 +900,120 @@
         });
       })(cards[c]);
     }
+
+    // SITE CONFIG LOADER — fetches visual settings from Supabase
+    (function() {
+      var SURL='https://efylfnnshmaauhiwqaxj.supabase.co';
+      var SKEY='sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
+
+      function apiFetch(path) {
+        return fetch(SURL+'/rest/v1/'+path,{headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}}).then(function(r){return r.json();});
+      }
+
+      function applySiteConfig(rows) {
+        if (!rows || !rows.length) return;
+        var cfg = {};
+        rows.forEach(function(r){ cfg[r.key] = r.value; });
+
+        // Section backgrounds
+        var sections = ['hero','captain','crew','hold','video','music','contact'];
+        sections.forEach(function(s) {
+          var val = cfg['section_'+s+'_bg'];
+          if (val) {
+            var el = document.getElementById(s);
+            if (el) {
+              el.style.backgroundImage = 'url('+val+')';
+              el.style.backgroundSize = 'cover';
+              el.style.backgroundPosition = 'center';
+              el.style.backgroundBlendMode = 'overlay';
+            }
+          }
+        });
+
+        // Crew card images
+        var crew = ['gabe','ot','zach','abram','jade'];
+        crew.forEach(function(slug) {
+          var val = cfg['crew_card_'+slug+'_image'];
+          if (val) {
+            // Find the crew card icon for this slug
+            var card = document.querySelector('a[href="crew/'+slug+'.html"] .crew-icon');
+            if (card) {
+              card.innerHTML = '<img src="'+val+'" alt="'+slug+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+              card.style.padding = '0';
+              card.style.overflow = 'hidden';
+            }
+          }
+        });
+
+        // Parallax objects
+        for (var n=1; n<=8; n++) {
+          var val = cfg['parallax_'+n+'_image'];
+          if (val) {
+            var objs = document.querySelectorAll('.obj');
+            var obj = objs[n-1];
+            if (obj) {
+              obj.style.backgroundImage = 'url('+val+')';
+              obj.style.backgroundSize = 'contain';
+              obj.style.backgroundRepeat = 'no-repeat';
+              obj.style.backgroundPosition = 'center';
+              // Hide inner SVG if any
+              var svg = obj.querySelector('svg');
+              if (svg) svg.style.display = 'none';
+            }
+          }
+        }
+      }
+
+      function applySpacers(rows) {
+        if (!rows || !rows.length) return;
+        // Group spacers by position
+        var byPos = {};
+        rows.forEach(function(sp) {
+          if (!byPos[sp.position]) byPos[sp.position] = [];
+          byPos[sp.position].push(sp);
+        });
+        Object.keys(byPos).forEach(function(pos) {
+          var targetSection = document.getElementById(pos);
+          if (!targetSection) return;
+          byPos[pos].forEach(function(sp) {
+            var imgs = [];
+            try { imgs = JSON.parse(sp.images||'[]'); } catch(e) {}
+            if (!imgs.length && sp.type !== 'blank') return;
+            var div = document.createElement('div');
+            div.style.cssText = 'width:100%;height:'+sp.height+'px;overflow:hidden;position:relative;';
+            if (sp.type === 'blank') {
+              div.style.background = 'var(--black)';
+            } else if (sp.type === 'slideshow' && imgs.length > 1) {
+              // Build slideshow
+              div.innerHTML = imgs.map(function(url,i){
+                return '<img src="'+url+'" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;transition:opacity 1s;opacity:'+(i===0?'1':'0')+'" data-slide="'+i+'">';
+              }).join('');
+              var speed = (sp.transition_speed||4)*1000;
+              var current = 0;
+              var slideImgs = div.querySelectorAll('img');
+              setInterval(function(){
+                slideImgs[current].style.opacity='0';
+                current=(current+1)%slideImgs.length;
+                slideImgs[current].style.opacity='1';
+              }, speed);
+            } else if (imgs.length) {
+              div.style.backgroundImage = 'url('+imgs[0]+')';
+              div.style.backgroundSize = 'cover';
+              div.style.backgroundPosition = 'center';
+            }
+            targetSection.parentNode.insertBefore(div, targetSection.nextSibling);
+          });
+        });
+      }
+
+      Promise.all([
+        apiFetch('site_config?select=key,value'),
+        apiFetch('site_sections?published=eq.true&order=position.asc,sort_order.asc')
+      ]).then(function(r){
+        applySiteConfig(r[0]);
+        applySpacers(r[1]);
+      }).catch(function(){/* fail silently */});
+    })();
 
     // MOBILE NAV TOGGLE
     function toggleMobileNav() {
