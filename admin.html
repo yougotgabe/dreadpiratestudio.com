@@ -6,7 +6,7 @@
 <title>Admin — Dread Pirate Studio</title>
 <link rel="icon" type="image/png" href="icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script data-cfasync="false" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{--black:#080808;--deep:#0d0f14;--surface:#131620;--gold:#c9a84c;--gold-dim:#8a6f2e;--white:#e8e0d0;--muted:#6b6355;--border:rgba(201,168,76,0.15);}
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -240,7 +240,7 @@ function showAdmin(email){
   loadAll();
 }
 async function signInGoogle(){
-  await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.href}});
+  await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin + '/admin.html'}});
 }
 async function signOut(){ await sb.auth.signOut(); showLogin(); }
 
@@ -452,7 +452,7 @@ var HOME_DEFAULTS={
   crew_subtitle:'Every great voyage needs a worthy crew.',
   hold_label:'The Archive',
   hold_title:'The Hold',
-  hold_subtitle:'Content, projects, and things we've made.',
+  hold_subtitle:'Content, projects, and things we\'ve made.',
   video_label:'From the Vault',
   video_title:'Video',
   video_subtitle:'Live recordings and original performances from the crew.',
@@ -460,7 +460,7 @@ var HOME_DEFAULTS={
   music_title:'Music',
   contact_label:'Join the Crew',
   contact_title:'Set Sail Together',
-  contact_note:'Collaborations, commissions, questions, or just a good conversation — the captain's door is open.',
+  contact_note:'Collaborations, commissions, questions, or just a good conversation — the captain\'s door is open.',
   contact_email:'gabe@dreadpiratestudio.com',
   contact_response:'Response time: usually within 24 hours'
 };
