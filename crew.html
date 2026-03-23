@@ -102,7 +102,7 @@
   var SUPABASE_KEY = 'sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
 
   function fetchCrew() {
-    var url = SUPABASE_URL + '/rest/v1/crew_profiles?published=eq.true&order=created_at.asc&select=slug,display_name,rank,disciplines,bio,photo_url';
+    var url = SUPABASE_URL + '/rest/v1/crew_profiles?published=eq.true&order=sort_order.asc&select=slug,display_name,rank,disciplines,bio,photo_url';
     fetch(url, {
       headers: {
         'apikey': SUPABASE_KEY,

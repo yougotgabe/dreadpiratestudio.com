@@ -1042,7 +1042,7 @@
       var SKEY='sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
       var ICONS={'gabe':'&#9760;','ot':'&#127928;','zach':'&#127916;','abram':'&#127908;','jade':'&#127912;'};
 
-      fetch(SURL+'/rest/v1/crew_profiles?published=eq.true&select=slug,display_name,rank,disciplines&order=created_at.asc',{
+      fetch(SURL+'/rest/v1/crew_profiles?published=eq.true&select=slug,display_name,rank,disciplines&order=sort_order.asc',{
         headers:{'apikey':SKEY,'Authorization':'Bearer '+SKEY}
       }).then(function(r){return r.json();}).then(function(profiles){
         if(!profiles||!profiles.length) return;
