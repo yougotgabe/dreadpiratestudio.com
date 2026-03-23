@@ -464,7 +464,7 @@ function renderYTVideos(videos,el){
     var bdr=v.isLive?' style="border-color:rgba(255,0,0,0.4);"':'';
     return '<div class="'+cls+'"'+bdr+'>'
       +'<div class="mc-header"><div class="mc-icon">&#9654;</div>'
-      +'<div class="mc-title">'+esc(v.title)+live+'</div></div>'
+      +'<div class="mc-title">'+escT(v.title)+live+'</div></div>'
       +'<div class="mc-embed"><div class="yt-wrap">'
       +'<iframe src="'+base+esc(v.id)+'" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>'
       +'</div></div></div>';
