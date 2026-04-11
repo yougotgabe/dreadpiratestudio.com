@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dread Pirate Studio — Web Design &amp; Digital Services</title>
+  <meta name="description" content="Custom websites and digital retainer services for local businesses. Based in Willmar, MN.">
+  <link rel="logo" type="image/png" href="logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black:     #080808;
+      --deep:      #0d0f14;
+      --surface:   #131620;
+      --surface2:  #1a1e2a;
+      --gold:      #c9a84c;
+      --gold-dim:  #8a6f2e;
+      --gold-glow: rgba(201,168,76,0.18);
+      --white:     #e8e0d0;
+      --muted:     #6b6355;
+      --muted2:    #3e3930;
+      --border:    rgba(201,168,76,0.15);
+      --border2:   rgba(201,168,76,0.07);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { overflow-x:hidden; scroll-behavior:smooth; }
+    body { background:var(--black); color:var(--white); font-family:'Crimson Text',Georgia,serif; font-size:18px; }
+
+    /* NAV */
+    nav { position:fixed; top:0; left:0; right:0; z-index:900; padding:0 2.5rem; height:68px; display:flex; align-items:center; justify-content:space-between; background:linear-gradient(to bottom,rgba(8,8,8,0.97),rgba(8,8,8,0.75)); border-bottom:1px solid var(--border); backdrop-filter:blur(14px); opacity:0; transform:translateY(-10px); transition:opacity 0.6s ease,transform 0.6s ease; }
+    nav.visible { opacity:1; transform:translateY(0); }
+    .nav-brand { display:flex; align-items:center; gap:0.75rem; text-decoration:none; }
+    .nav-brand img { height:36px; width:auto; }
+    .nav-brand-sub { font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted); }
+    .nav-links { display:flex; gap:1.75rem; list-style:none; align-items:center; }
+    .nav-links a { color:var(--muted); text-decoration:none; font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; transition:color 0.3s; }
+    .nav-links a:hover { color:var(--gold); }
+    .nav-cta { padding:0.4rem 1.1rem !important; border:1px solid var(--gold-dim) !important; color:var(--gold) !important; }
+    .nav-cta:hover { border-color:var(--gold) !important; background:var(--gold-glow) !important; }
+    .nav-hamburger { display:none; flex-direction:column; gap:5px; background:none; border:none; cursor:pointer; padding:4px; }
+    .nav-hamburger span { display:block; width:22px; height:1.5px; background:var(--muted); transition:all 0.3s; }
+    .nav-hamburger.open span:nth-child(1) { transform:rotate(45deg) translate(4px,4px); }
+    .nav-hamburger.open span:nth-child(2) { opacity:0; }
+    .nav-hamburger.open span:nth-child(3) { transform:rotate(-45deg) translate(4px,-4px); }
+    @media (max-width:768px) {
+      nav { padding:0 1.25rem; }
+      .nav-hamburger { display:flex; }
+      .nav-links { display:none; flex-direction:column; position:absolute; top:68px; left:0; right:0; background:rgba(8,8,8,0.99); border-bottom:1px solid var(--border); padding:1rem 0; gap:0; }
+      .nav-links.open { display:flex; }
+      .nav-links li { border-bottom:1px solid var(--border2); }
+      .nav-links li:last-child { border-bottom:none; }
+      .nav-links a { display:block; padding:0.85rem 1.5rem; }
+    }
+
+    /* SHARED */
+    section { padding:6rem 2rem; position:relative; }
+    .section-inner { max-width:1060px; margin:0 auto; }
+    .section-header { text-align:center; margin-bottom:4rem; }
+    .section-label { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.5em; text-transform:uppercase; color:var(--gold); opacity:0.7; margin-bottom:0.75rem; }
+    .section-title { font-family:'Cinzel Decorative',serif; font-size:clamp(1.5rem,4vw,2.6rem); color:var(--white); line-height:1.2; }
+    .section-rule { width:70px; height:1px; background:linear-gradient(to right,transparent,var(--gold),transparent); margin:1rem auto; }
+    .section-sub { color:var(--muted); font-style:italic; max-width:500px; margin:0 auto; line-height:1.7; }
+    .btn { display:inline-block; padding:0.75rem 2.2rem; font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; text-decoration:none; border-radius:2px; transition:all 0.3s; }
+    .btn-gold { background:var(--gold); color:var(--black); border:1px solid var(--gold); }
+    .btn-gold:hover { background:transparent; color:var(--gold); box-shadow:0 0 24px var(--gold-glow); }
+    .btn-outline { background:transparent; color:var(--gold); border:1px solid var(--gold-dim); }
+    .btn-outline:hover { border-color:var(--gold); box-shadow:0 0 24px var(--gold-glow); }
+    /* === SCROLL ANIMATION SYSTEM ===
+       Enter: elements slide in from their assigned direction
+       Exit:  elements continue in the SAME direction (flow through, not snap back)
+       Threshold near 0 + rootMargin fires as soon as element hits viewport edge */
+    .reveal {
+      opacity:0;
+      transform:translateY(24px);
+      transition:opacity 0.55s cubic-bezier(0.25,0.46,0.45,0.94),
+                 transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+    /* exit: continue upward (don't snap back down) */
+    .reveal.exiting { opacity:0; transform:translateY(-18px); }
+
+    .reveal-left {
+      opacity:0;
+      transform:translateX(-48px);
+      transition:opacity 0.6s cubic-bezier(0.25,0.46,0.45,0.94),
+                 transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .reveal-left.visible { opacity:1; transform:translateX(0); }
+    /* exit: continue rightward */
+    .reveal-left.exiting { opacity:0; transform:translateX(32px); }
+
+    .reveal-right {
+      opacity:0;
+      transform:translateX(48px);
+      transition:opacity 0.6s cubic-bezier(0.25,0.46,0.45,0.94),
+                 transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .reveal-right.visible { opacity:1; transform:translateX(0); }
+    /* exit: continue leftward */
+    .reveal-right.exiting { opacity:0; transform:translateX(-32px); }
+
+    /* Stagger siblings automatically via nth-child delays */
+    .stagger > *:nth-child(1) { transition-delay:0s; }
+    .stagger > *:nth-child(2) { transition-delay:0.08s; }
+    .stagger > *:nth-child(3) { transition-delay:0.16s; }
+    .stagger > *:nth-child(4) { transition-delay:0.24s; }
+    .stagger > *:nth-child(5) { transition-delay:0.32s; }
+    .stagger > *:nth-child(6) { transition-delay:0.40s; }
+
+    /* Voyage stops: visual panel slides from outside, body fades up — tied to scroll */
+    .voyage-visual { transition:opacity 0.65s ease, transform 0.65s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .voyage-body   { transition:opacity 0.65s ease, transform 0.65s cubic-bezier(0.25,0.46,0.45,0.94); }
+
+    /* HERO */
+    #hero { position:relative; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:100px 2rem 5rem; overflow:hidden; }
+    .hero-bg { position:absolute; inset:0; background:radial-gradient(ellipse 80% 55% at 50% 45%,rgba(201,168,76,0.06) 0%,transparent 65%),radial-gradient(ellipse 50% 35% at 15% 85%,rgba(100,50,10,0.08) 0%,transparent 60%),linear-gradient(180deg,#080808 0%,#0a0c10 60%,#080808 100%); z-index:0; }
+    #hero-parallax { position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
+    .p-obj { position:absolute; opacity:1; will-change:transform; }
+    @media (max-width:768px) { .p-obj { display:none; } }
+    #hero-content { position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; gap:0.25rem; }
+    .hero-eyebrow { font-family:'Cinzel',serif; font-size:0.62rem; letter-spacing:0.45em; text-transform:uppercase; color:var(--gold); opacity:0; animation:fadeUp 1s 0.2s ease forwards; }
+    .hero-logo { width:min(720px,95vw); opacity:0; animation:fadeUp 1s 0.05s ease forwards; display:block; margin:-3rem 0; }
+    .hero-logo video { width:100%; height:auto; display:block; }
+    .hero-title { font-family:'Cinzel Decorative',serif; font-size:clamp(1.7rem,5vw,3.6rem); color:var(--white); line-height:1.1; opacity:0; animation:fadeUp 1s 0.3s ease forwards; }
+    .hero-title em { font-style:normal; color:var(--gold); }
+    .hero-rule { width:200px; height:1px; background:linear-gradient(to right,transparent,var(--gold-dim),transparent); opacity:0; animation:fadeUp 1s 0.45s ease forwards; }
+    .hero-sub { max-width:480px; color:var(--muted); font-size:0.92rem; line-height:1.65; font-style:italic; opacity:0; animation:fadeUp 1s 0.55s ease forwards; }
+    .hero-cta-group { display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; opacity:0; animation:fadeUp 1s 0.7s ease forwards; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+    .scroll-hint { position:absolute; bottom:2.5rem; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:0.5rem; color:var(--muted); font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.2em; text-transform:uppercase; z-index:2; opacity:0; animation:fadeUp 1s 1.8s ease forwards; }
+    .scroll-hint span { display:block; width:1px; height:34px; background:linear-gradient(to bottom,var(--gold-dim),transparent); animation:scrollLine 2s ease-in-out infinite; }
+    @keyframes scrollLine { 0%,100%{opacity:0.3} 50%{opacity:0.9} }
+
+    /* STATS */
+    #stats { background:var(--deep); padding:5rem 2rem; overflow:hidden; }
+    .stats-axis-wrap { position:relative; max-width:900px; margin:0 auto 3.5rem; }
+    .stats-axis-line { height:1px; background:linear-gradient(to right,transparent,var(--gold-dim),transparent); transform:scaleX(0); transform-origin:left; transition:transform 1.2s cubic-bezier(0.4,0,0.2,1); }
+    .stats-axis-line.drawn { transform:scaleX(1); }
+    .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:2rem; max-width:900px; margin:0 auto; text-align:center; }
+    .stat-item { opacity:0; transform:translateY(20px); transition:opacity 0.5s ease,transform 0.5s ease; }
+    .stat-item.visible { opacity:1; transform:translateY(0); }
+    .stat-number { font-family:'Cinzel Decorative',serif; font-size:clamp(2.2rem,5vw,3.5rem); color:var(--gold); line-height:1; margin-bottom:0.75rem; }
+    .stat-label { font-family:'Cinzel',serif; font-size:0.58rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); line-height:1.6; }
+    .stat-source { font-size:0.7rem; color:var(--muted2); font-style:italic; margin-top:0.4rem; }
+    @media (max-width:640px) { .stats-grid { grid-template-columns:repeat(2,1fr); } }
+
+
+    /* NEON CHECKBOX — diff section icons */
+    .neon-checkbox { --primary:#c9a84c; --size:18px; position:relative; width:var(--size); height:var(--size); flex-shrink:0; margin-top:3px; display:inline-block; }
+    .neon-checkbox input { display:none; }
+    .neon-checkbox__frame { position:relative; width:100%; height:100%; }
+    .neon-checkbox__box { position:absolute; inset:0; background:rgba(0,0,0,0.6); border-radius:3px; border:1.5px solid var(--primary); }
+    .neon-checkbox__check-container { position:absolute; inset:2px; display:flex; align-items:center; justify-content:center; }
+    .neon-checkbox__check { width:80%; height:80%; fill:none; stroke:var(--primary); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:40; stroke-dashoffset:40; transition:stroke-dashoffset 0.4s cubic-bezier(0.16,1,0.3,1); }
+    .neon-checkbox__glow { position:absolute; inset:-2px; border-radius:5px; background:var(--primary); opacity:0; filter:blur(6px); transform:scale(1.2); transition:opacity 0.4s ease; }
+    .neon-checkbox__borders { position:absolute; inset:0; border-radius:3px; overflow:hidden; }
+    .neon-checkbox__borders span { position:absolute; background:var(--primary); opacity:0; }
+    .neon-checkbox__borders span:nth-child(1) { width:30px; height:1px; top:0; left:-100%; }
+    .neon-checkbox__borders span:nth-child(2) { width:1px; height:30px; top:-100%; right:0; }
+    .neon-checkbox__borders span:nth-child(3) { width:30px; height:1px; bottom:0; right:-100%; }
+    .neon-checkbox__borders span:nth-child(4) { width:1px; height:30px; bottom:-100%; left:0; }
+    /* checked state */
+    .neon-checkbox.is-checked .neon-checkbox__check { stroke-dashoffset:0; }
+    .neon-checkbox.is-checked .neon-checkbox__glow { opacity:0.18; }
+    .neon-checkbox.is-checked .neon-checkbox__borders span { opacity:1; }
+    .neon-checkbox.is-checked .neon-checkbox__borders span:nth-child(1) { animation:ncbf1 2s linear infinite; }
+    .neon-checkbox.is-checked .neon-checkbox__borders span:nth-child(2) { animation:ncbf2 2s linear infinite; }
+    .neon-checkbox.is-checked .neon-checkbox__borders span:nth-child(3) { animation:ncbf3 2s linear infinite; }
+    .neon-checkbox.is-checked .neon-checkbox__borders span:nth-child(4) { animation:ncbf4 2s linear infinite; }
+    @keyframes ncbf1 { 0%{transform:translateX(0)} 100%{transform:translateX(200%)} }
+    @keyframes ncbf2 { 0%{transform:translateY(0)} 100%{transform:translateY(200%)} }
+    @keyframes ncbf3 { 0%{transform:translateX(0)} 100%{transform:translateX(-200%)} }
+    @keyframes ncbf4 { 0%{transform:translateY(0)} 100%{transform:translateY(-200%)} }
+    /* unchecked (them column) — just the empty box, muted */
+    .neon-checkbox.is-unchecked .neon-checkbox__box { border-color:rgba(255,255,255,0.15); background:rgba(0,0,0,0.3); }
+    .neon-checkbox.is-unchecked .neon-checkbox__check { stroke:rgba(255,255,255,0.12); }
+
+    /* DIFFERENCE */
+    #difference { background:linear-gradient(180deg,var(--black) 0%,var(--deep) 50%,var(--black) 100%); }
+    .diff-wrap { display:grid; grid-template-columns:1fr 1fr; border:1px solid var(--border); border-radius:4px; overflow:hidden; margin-top:2rem; }
+    .diff-col { padding:2.5rem 2rem; }
+    .diff-col--them { background:var(--deep); }
+    .diff-col--us { background:var(--surface); }
+    .diff-col-head { font-family:'Cinzel',serif; font-size:0.62rem; letter-spacing:0.3em; text-transform:uppercase; padding-bottom:1rem; margin-bottom:1.5rem; border-bottom:1px solid var(--border2); }
+    .diff-col--them .diff-col-head { color:var(--muted2); }
+    .diff-col--us .diff-col-head { color:var(--gold); }
+    .diff-item { display:flex; gap:0.75rem; margin-bottom:1.1rem; font-size:0.95rem; line-height:1.6; }
+    .diff-col--them .diff-item { color:var(--muted2); }
+    .diff-col--us .diff-item { color:var(--muted); }
+    .diff-icon { flex-shrink:0; margin-top:2px; }
+    .diff-col--us .diff-icon { color:var(--gold); }
+    .diff-callout { margin-top:2.5rem; padding:1rem 1.25rem; background:rgba(201,168,76,0.04); border-left:2px solid var(--gold-dim); font-size:0.85rem; color:var(--muted); font-style:italic; line-height:1.6; }
+    @media (max-width:640px) { .diff-wrap { grid-template-columns:1fr; } }
+
+    /* VOYAGE — sticky + spacer scroll-jack
+       The sticky CSS does all the positioning work.
+       JS reads scrollY in a rAF loop and maps it to progress.
+       No wheel capture, no overflow:hidden, no engagement logic. */
+    #voyage { background:var(--black); padding:0; }
+    .voyage-header { text-align:center; padding:6rem 2rem 4rem; }
+
+    /* Outer creates the scroll distance. Height set by JS on load. */
+    #voyage-outer { position:relative; }
+    #voyage-spacer { width:100%; pointer-events:none; }
+
+    /* Stage sticks to viewport while outer scrolls past */
+    #voyage-stage {
+      position:sticky;
+      top:0;
+      height:100vh;
+      overflow:hidden;
+      background:var(--deep);
+    }
+
+    /* Each stop fills the stage, absolutely positioned */
+    .voyage-stop {
+      position:absolute;
+      inset:0;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+    }
+
+    /* Progress dots */
+    #voyage-dots {
+      position:absolute; right:1.5rem; top:50%;
+      transform:translateY(-50%);
+      display:flex; flex-direction:column; gap:0.6rem; z-index:10;
+    }
+    .voyage-dot {
+      width:6px; height:6px; border-radius:50%;
+      background:var(--muted2); border:1px solid var(--border);
+      transition:background 0.3s, transform 0.3s;
+    }
+    .voyage-dot.active { background:var(--gold); transform:scale(1.4); }
+
+    /* Stage background */
+    #voyage-stage { background: var(--deep); }
+
+    /* Stop grid — equal columns, full height centering */
+    .voyage-stop {
+      position:absolute;
+      inset:0;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      align-items:center;
+      gap:2rem;
+      padding:2.5rem 3rem;
+      box-sizing:border-box;
+    }
+
+    /* Both panels are transparent centering wrappers */
+    .voyage-visual,
+    .voyage-body {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      height:100%;
+      transition:transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94),
+                 opacity  0.35s ease;
+      will-change:transform,opacity;
+    }
+
+    /* The actual card — same fixed height for both sides */
+    .voyage-card {
+      width:100%;
+      height:clamp(360px, 58vh, 520px);
+      border:1px solid var(--border);
+      border-radius:6px;
+      overflow:hidden;
+      box-shadow:0 16px 48px rgba(0,0,0,0.45);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    /* Visual card uses deep background to frame the mock browser */
+    .voyage-visual .voyage-card {
+      background:var(--surface2);
+      padding:2rem;
+    }
+
+    /* Body card holds the text content */
+    .voyage-body .voyage-card {
+      background:var(--surface);
+      padding:2.5rem 2.75rem;
+      flex-direction:column;
+      align-items:flex-start;
+      justify-content:center;
+    }
+
+    .voyage-num { font-family:'Cinzel Decorative',serif; font-size:3rem; line-height:1; margin-bottom:0.6rem; background:linear-gradient(to bottom,rgba(201,168,76,0.22),rgba(201,168,76,0.03)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .voyage-stop-label { font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.4em; text-transform:uppercase; color:var(--gold); opacity:0.7; margin-bottom:0.4rem; }
+    .voyage-stop-title { font-family:'Cinzel Decorative',serif; font-size:clamp(1rem,2.2vw,1.5rem); color:var(--white); margin-bottom:1rem; line-height:1.25; }
+    .voyage-stop-desc { color:var(--muted); font-size:0.92rem; line-height:1.8; }
+    .voyage-tags { display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:1.1rem; }
+    .voyage-tag { padding:0.18rem 0.6rem; border:1px solid var(--border); font-family:'Cinzel',serif; font-size:0.5rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold-dim); }
+
+    @media (max-width:768px) {
+      .voyage-stop { grid-template-columns:1fr; grid-template-rows:1fr 1fr; padding:1rem; gap:1rem; }
+      .voyage-card { height:clamp(220px,38vh,340px); }
+      .voyage-body .voyage-card { padding:1.5rem; }
+    }
+
+    /* mock browser base */
+    .mock-browser { background:var(--surface2); border:1px solid var(--border); border-radius:6px; overflow:hidden; box-shadow:0 12px 48px rgba(0,0,0,0.6); width:100%; }
+    .mock-bar { background:var(--deep); padding:0.5rem 0.75rem; display:flex; align-items:center; gap:0.5rem; border-bottom:1px solid var(--border2); }
+    .mock-dots { display:flex; gap:4px; }
+    .mock-dot { width:8px; height:8px; border-radius:50%; background:var(--muted2); }
+    .mock-url { flex:1; background:var(--black); border-radius:3px; padding:0.2rem 0.5rem; font-family:'Cinzel',serif; font-size:0.5rem; color:var(--muted2); letter-spacing:0.05em; }
+    .mock-body { padding:1rem; }
+
+    /* stop 1 menu */
+    .menu-mock-cat { font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--gold); opacity:0.6; margin-bottom:0.5rem; }
+    .menu-mock-item { display:flex; justify-content:space-between; align-items:baseline; padding:0.4rem 0; border-bottom:1px solid var(--border2); opacity:0; transform:translateX(-8px); transition:opacity 0.4s ease,transform 0.4s ease; }
+    .menu-mock-item.loaded { opacity:1; transform:translateX(0); }
+    .menu-mock-name { font-family:'Cinzel',serif; font-size:0.6rem; color:var(--white); letter-spacing:0.05em; }
+    .menu-mock-price { font-family:'Cinzel',serif; font-size:0.6rem; color:var(--gold); }
+
+    /* stop 2 merch */
+    .merch-mock-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; }
+    .merch-mock-card { background:var(--black); border:1px solid var(--border2); border-radius:3px; padding:0.6rem; opacity:0; transform:translateY(10px); transition:opacity 0.4s ease,transform 0.4s ease; }
+    .merch-mock-card.loaded { opacity:1; transform:translateY(0); }
+    .merch-mock-img { height:40px; background:linear-gradient(135deg,var(--surface2),var(--deep)); border-radius:2px; margin-bottom:0.4rem; display:flex; align-items:center; justify-content:center; font-size:1.1rem; }
+    .merch-mock-title { font-family:'Cinzel',serif; font-size:0.5rem; color:var(--white); letter-spacing:0.05em; margin-bottom:0.2rem; }
+    .merch-mock-price { font-family:'Cinzel',serif; font-size:0.5rem; color:var(--gold); }
+    .cart-badge { position:absolute; top:1rem; right:1rem; background:var(--gold); color:var(--black); font-family:'Cinzel',serif; font-size:0.55rem; font-weight:700; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.4s ease,transform 0.3s ease; }
+    .cart-badge.visible { opacity:1; }
+    .cart-badge.bump { transform:scale(1.4); }
+
+    /* stop 3 youtube */
+    .yt-mock-embed { position:relative; width:100%; padding-top:56.25%; background:var(--black); border-radius:3px; overflow:hidden; margin-bottom:0.6rem; }
+    .yt-mock-embed iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:none; }
+    .yt-mock-thumbs { display:grid; grid-template-columns:repeat(3,1fr); gap:0.4rem; }
+    .yt-mock-thumb { height:36px; background:linear-gradient(135deg,var(--surface2),var(--deep)); border-radius:2px; border:1px solid var(--border2); opacity:0; transition:opacity 0.4s ease; }
+    .yt-mock-thumb.loaded { opacity:1; }
+    .live-badge { display:inline-flex; align-items:center; gap:0.35rem; background:rgba(220,38,38,0.12); border:1px solid rgba(220,38,38,0.35); padding:0.15rem 0.5rem; border-radius:2px; font-family:'Cinzel',serif; font-size:0.5rem; letter-spacing:0.1em; text-transform:uppercase; color:#ef4444; margin-bottom:0.5rem; }
+    .live-dot { width:6px; height:6px; border-radius:50%; background:#ef4444; animation:livePulse 1.4s ease-in-out infinite; }
+    @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+
+    /* stop 4 admin */
+    .admin-mock-row { display:flex; align-items:center; justify-content:space-between; padding:0.45rem 0; border-bottom:1px solid var(--border2); gap:0.5rem; }
+    .admin-mock-label { font-family:'Cinzel',serif; font-size:0.55rem; color:var(--muted); letter-spacing:0.05em; flex-shrink:0; }
+    .admin-mock-val { font-family:'Cinzel',serif; font-size:0.55rem; color:var(--white); }
+    .admin-toggle { width:28px; height:14px; border-radius:7px; border:1px solid var(--border); background:var(--deep); position:relative; cursor:pointer; transition:background 0.3s; flex-shrink:0; }
+    .admin-toggle.on { background:var(--gold); border-color:var(--gold); }
+    .admin-toggle::after { content:''; position:absolute; top:2px; left:2px; width:8px; height:8px; border-radius:50%; background:var(--muted); transition:all 0.3s; }
+    .admin-toggle.on::after { left:16px; background:var(--black); }
+    .admin-mock-save { display:block; margin-top:0.75rem; width:100%; padding:0.4rem; background:var(--gold); color:var(--black); font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.1em; text-transform:uppercase; border:none; cursor:pointer; border-radius:2px; }
+    .admin-saved-msg { font-family:'Cinzel',serif; font-size:0.55rem; color:var(--gold); text-align:center; margin-top:0.4rem; min-height:0.8rem; }
+
+    /* stop 5 waveform */
+    .waveform-wrap { width:85%; text-align:center; }
+    .waveform-bars { display:flex; align-items:flex-end; justify-content:center; gap:3px; height:80px; margin-bottom:1rem; }
+    .waveform-bar { width:4px; border-radius:2px; background:var(--gold-dim); transition:height 0.12s ease; }
+    .waveform-bar.active { background:var(--gold); }
+    .waveform-play { display:inline-flex; align-items:center; gap:0.6rem; padding:0.65rem 1.5rem; border:1px solid var(--gold-dim); background:transparent; color:var(--gold); font-family:'Cinzel',serif; font-size:0.62rem; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; border-radius:2px; transition:all 0.3s; }
+    .waveform-play:hover,.waveform-play.playing { border-color:var(--gold); background:var(--gold-glow); }
+    .play-icon { width:0; height:0; border-style:solid; border-width:5px 0 5px 9px; border-color:transparent transparent transparent var(--gold); }
+    .play-icon.pause { border:none; width:9px; height:10px; background:linear-gradient(to right,var(--gold) 35%,transparent 35%,transparent 65%,var(--gold) 65%); }
+    .waveform-track { font-family:'Cinzel',serif; font-size:0.52rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); margin-top:0.75rem; }
+
+    /* SERVICES */
+    #services { background:var(--black); }
+    .services-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.25rem; margin-bottom:1rem; position:relative; }
+    /* Single glow behind entire grid — shines through gaps between cards only */
+    .services-glow { position:absolute; width:520px; height:520px; border-radius:50%; background:radial-gradient(circle,rgba(201,168,76,0.2) 0%,rgba(201,168,76,0.07) 40%,transparent 70%); pointer-events:none; transform:translate(-50%,-50%); left:var(--gx,50%); top:var(--gy,50%); opacity:0; transition:opacity 0.4s ease; z-index:0; }
+    .services-glow.visible { opacity:1; }
+
+    /* SERVICES — flip cards */
+    .service-card { border:none; background:transparent; border-radius:4px; padding:0;
+      position:relative; cursor:default; z-index:1;
+      perspective:1000px; height:320px; }
+    .service-card-inner { width:100%; height:100%; position:relative;
+      transform-style:preserve-3d;
+      transition:transform 0.65s cubic-bezier(0.4,0.2,0.2,1); }
+    .service-card:hover .service-card-inner,
+    .service-card.flipped .service-card-inner { transform:rotateY(180deg); }
+    .service-card-front, .service-card-back {
+      position:absolute; inset:0; border-radius:4px;
+      backface-visibility:hidden; -webkit-backface-visibility:hidden;
+      padding:1.75rem 1.75rem; display:flex; flex-direction:column; justify-content:flex-start;
+      overflow:hidden; }
+    .service-card-front {
+      border:1px solid var(--border); background:var(--surface); }
+    .service-card-back {
+      border:1px solid rgba(201,168,76,0.35); background:var(--deep);
+      transform:rotateY(180deg); justify-content:center; }
+    .service-card.hovered .service-card-front { border-color:rgba(201,168,76,0.35); box-shadow:0 14px 44px rgba(0,0,0,0.45); }
+    .service-back-title { font-family:'Cinzel',serif; font-size:0.62rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:1rem; }
+    .service-back-items { list-style:none; padding:0; margin:0; }
+    .service-back-items li { font-size:0.88rem; color:var(--muted); padding:0.35rem 0; border-bottom:1px solid var(--border2); display:flex; gap:0.6rem; line-height:1.5; }
+    .service-back-items li::before { content:'—'; color:var(--gold-dim); flex-shrink:0; }
+    /* flip hint — desktop only */
+    .service-flip-hint { position:absolute; bottom:0.9rem; right:1rem;
+      font-family:'Cinzel',serif; font-size:0.44rem; letter-spacing:0.12em;
+      text-transform:uppercase; color:var(--muted2); opacity:0.5;
+      transition:opacity 0.3s; pointer-events:none; }
+    .service-card:hover .service-flip-hint { opacity:0; }
+    /* mobile: no flip, plain card */
+    @media (max-width:640px) {
+      .service-card { perspective:none; height:auto; }
+      .service-card-inner { transform:none !important; transition:none; transform-style:flat; }
+      .service-card-front { position:relative; inset:auto; backface-visibility:visible; -webkit-backface-visibility:visible; }
+      .service-card-back { display:none; }
+      .service-flip-hint { display:none; }
+    }
+
+    .service-glyph { font-size:1.5rem; margin-bottom:0.75rem; display:block; }
+    .service-name { font-family:'Cinzel',serif; font-size:0.78rem; letter-spacing:0.1em; color:var(--white); margin-bottom:0.65rem; text-transform:uppercase; }
+    .service-desc { font-size:0.9rem; color:var(--muted); line-height:1.6; margin-bottom:1rem; }
+    .service-tags { display:flex; flex-wrap:wrap; gap:0.35rem; }
+    .service-tag { padding:0.18rem 0.6rem; border:1px solid var(--border); font-family:'Cinzel',serif; font-size:0.5rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold-dim); }
+    .creative-section { margin-top:3.5rem; border-top:1px solid var(--border2); padding-top:3rem; }
+    .creative-label { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.4em; text-transform:uppercase; color:var(--gold); opacity:0.6; margin-bottom:1.5rem; text-align:center; }
+    .creative-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; }
+    .creative-card { border:1px solid var(--border2); background:var(--deep); border-radius:4px; padding:1.5rem 1.25rem; text-align:center; transition:border-color 0.3s; }
+    .creative-card:hover { border-color:rgba(201,168,76,0.25); }
+    .creative-glyph { font-size:1.4rem; margin-bottom:0.75rem; display:block; }
+    .creative-name { font-family:'Cinzel',serif; font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--white); margin-bottom:0.5rem; }
+    .creative-desc { font-size:0.85rem; color:var(--muted2); line-height:1.6; }
+    .creative-note { text-align:center; margin-top:1.5rem; font-size:0.88rem; color:var(--muted2); font-style:italic; }
+
+    /* PROCESS */
+    #process { background:linear-gradient(180deg,var(--black) 0%,var(--deep) 100%); }
+    .process-track { position:relative; display:grid; grid-template-columns:repeat(4,1fr); margin-top:1rem; }
+    .process-line { position:absolute; top:2.2rem; left:12.5%; right:12.5%; height:1px; background:var(--border2); z-index:0; }
+    .process-line-fill { position:absolute; top:2.2rem; left:12.5%; height:1px; background:linear-gradient(to right,var(--gold-dim),var(--gold)); z-index:1; width:0; transition:width 1.4s cubic-bezier(0.4,0,0.2,1); }
+    .process-step { padding:0 1rem 2rem; position:relative; z-index:2; }
+    .process-num { font-family:'Cinzel Decorative',serif; font-size:1.6rem; color:var(--border2); margin-bottom:0.75rem; transition:color 0.5s ease; display:block; }
+    .process-step.active .process-num { color:var(--gold); }
+    .process-step-title { font-family:'Cinzel',serif; font-size:0.68rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--gold); margin-bottom:0.6rem; }
+    .process-step-desc { font-size:0.88rem; color:var(--muted); line-height:1.7; }
+    .process-note { margin-top:2.5rem; padding:1.25rem 1.5rem; border:1px solid var(--border2); background:var(--surface); border-radius:4px; font-size:0.9rem; color:var(--muted); line-height:1.7; font-style:italic; }
+    @media (max-width:640px) { .process-track { grid-template-columns:1fr 1fr; } .process-line,.process-line-fill { display:none; } }
+
+    /* WORK */
+    #work { background:var(--black); }
+    .work-card { border:1px solid var(--border); background:var(--surface); border-radius:4px; overflow:hidden; display:grid; grid-template-columns:1fr 1fr; transition:border-color 0.3s; }
+    .work-card:hover { border-color:rgba(201,168,76,0.3); }
+    .work-visual { background:var(--deep); display:flex; align-items:center; justify-content:center; padding:2.5rem 2rem; min-height:340px; border-right:1px solid var(--border2); }
+    .work-browser { width:90%; background:var(--surface2); border:1px solid var(--border); border-radius:6px; overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,0.5); }
+    .work-iframe-wrap { position:relative; width:100%; height:320px; overflow:hidden; }
+    .work-iframe-wrap iframe { width:200%; height:200%; border:none; transform:scale(0.5); transform-origin:top left; pointer-events:none; }
+    .work-bar { background:var(--deep); padding:0.5rem 0.75rem; display:flex; align-items:center; gap:0.5rem; border-bottom:1px solid var(--border2); }
+    .work-bar-dots { display:flex; gap:4px; }
+    .work-bar-dot { width:7px; height:7px; border-radius:50%; background:var(--muted2); }
+    .work-bar-url { flex:1; background:var(--black); border-radius:3px; padding:0.2rem 0.5rem; font-family:'Cinzel',serif; font-size:0.48rem; color:var(--gold-dim); }
+    .work-body-inner { padding:0.75rem; }
+    .w-line { height:6px; border-radius:2px; margin-bottom:5px; }
+    .w-line-gold { background:linear-gradient(to right,var(--gold-dim),var(--gold-dim) 55%,transparent); opacity:0.65; }
+    .w-line-muted { background:var(--muted2); opacity:0.25; }
+    .w-block { height:34px; background:var(--surface); border:1px solid var(--border2); border-radius:2px; margin-bottom:4px; display:flex; align-items:center; padding:0 0.5rem; }
+    .w-block-text { font-family:'Cinzel',serif; font-size:0.44rem; color:var(--muted); }
+    .w-block-price { font-family:'Cinzel',serif; font-size:0.44rem; color:var(--gold); margin-left:auto; }
+    .w-mini-grid { display:grid; grid-template-columns:1fr 1fr; gap:3px; margin-top:5px; }
+    .w-mini { height:22px; background:var(--surface); border:1px solid var(--border2); border-radius:2px; }
+    .cursor { display:inline-block; width:1px; height:0.7em; background:var(--gold); margin-left:1px; animation:blink 1s step-end infinite; vertical-align:text-bottom; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    .work-body { padding:2.5rem 2rem; display:flex; flex-direction:column; justify-content:center; }
+    .work-tag { display:inline-block; margin-bottom:1rem; font-family:'Cinzel',serif; font-size:0.52rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); border:1px solid var(--border); padding:0.2rem 0.65rem; }
+    .work-title { font-family:'Cinzel Decorative',serif; font-size:1.5rem; color:var(--white); margin-bottom:0.3rem; }
+    .work-location { font-family:'Cinzel',serif; font-size:0.58rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); margin-bottom:1.1rem; }
+    .work-desc { font-size:0.92rem; color:var(--muted); line-height:1.75; margin-bottom:1.25rem; }
+    .work-features { list-style:none; margin-bottom:1.5rem; }
+    .work-features li { font-size:0.88rem; color:var(--muted); padding:0.35rem 0; border-bottom:1px solid var(--border2); display:flex; gap:0.6rem; }
+    .work-features li::before { content:'—'; color:var(--gold-dim); flex-shrink:0; }
+    .work-link { font-family:'Cinzel',serif; font-size:0.58rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--gold); text-decoration:none; border-bottom:1px solid var(--gold-dim); padding-bottom:2px; transition:border-color 0.3s; }
+    .work-link:hover { border-color:var(--gold); }
+    @media (max-width:768px) { .work-card { grid-template-columns:1fr; } .work-visual { border-right:none; border-bottom:1px solid var(--border2); min-height:220px; } }
+
+    /* PRICING */
+    #pricing { background:linear-gradient(180deg,var(--deep) 0%,var(--black) 100%); }
+    .pricing-center { max-width:560px; margin:0 auto; text-align:center; }
+    .pricing-num-wrap { display:inline-block; position:relative; overflow:hidden; }
+    .pricing-main-num { font-family:'Cinzel Decorative',serif; font-size:clamp(3.5rem,10vw,5.5rem); color:var(--gold); line-height:1; }
+    .pricing-shimmer { position:absolute; inset:0; background:linear-gradient(105deg,transparent 30%,rgba(201,168,76,0.35) 50%,transparent 70%); background-size:200% 100%; animation:shimmer 3s ease-in-out infinite; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .pricing-main-sup { font-size:2rem; vertical-align:super; color:var(--gold-dim); }
+    .pricing-mo { font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:1.5rem; }
+    .pricing-rule { width:100px; height:1px; background:linear-gradient(to right,transparent,var(--gold-dim),transparent); margin:0 auto 1.5rem; }
+    .pricing-desc { color:var(--muted); font-size:1rem; line-height:1.8; font-style:italic; margin-bottom:2rem; }
+    .pricing-bullets { list-style:none; text-align:left; margin:0 auto 2rem; display:inline-block; }
+    .pricing-bullets li { font-size:0.9rem; color:var(--muted); padding:0.4rem 0; border-bottom:1px solid var(--border2); display:flex; gap:0.6rem; }
+    .pricing-bullets li::before { content:'✦'; color:var(--gold-dim); flex-shrink:0; font-size:0.55rem; margin-top:5px; }
+
+    /* CONTACT */
+    #contact { background:linear-gradient(180deg,var(--black) 0%,var(--deep) 50%,var(--black) 100%); text-align:center; }
+    .contact-inner { max-width:540px; margin:0 auto; }
+    .contact-desc { color:var(--muted); font-style:italic; font-size:1.05rem; line-height:1.8; margin-bottom:2.5rem; }
+    .contact-email { display:inline-block; margin-bottom:1rem; padding:1rem 2.75rem; border:1px solid var(--gold-dim); font-family:'Cinzel',serif; font-size:0.72rem; letter-spacing:0.2em; color:var(--gold); text-decoration:none; transition:all 0.3s; animation:emailPulse 4s ease-in-out infinite; }
+    @keyframes emailPulse { 0%,100%{box-shadow:0 0 0 0 transparent} 50%{box-shadow:0 0 18px rgba(201,168,76,0.15)} }
+    .contact-email:hover { background:var(--gold-glow); border-color:var(--gold); box-shadow:0 0 30px var(--gold-glow); animation:none; }
+    .contact-sub { font-size:0.88rem; color:var(--muted2); font-style:italic; }
+    .contact-coords { display:inline-flex; align-items:center; gap:0.6rem; margin-top:2rem; font-family:'Cinzel',serif; font-size:0.55rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted2); }
+    .contact-coords::before,.contact-coords::after { content:''; display:block; width:40px; height:1px; background:var(--border2); }
+
+    /* FOOTER */
+    footer { border-top:1px solid var(--border); padding:2rem 2.5rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; background:var(--black); }
+    .footer-brand { display:flex; align-items:center; gap:0.75rem; }
+    .footer-brand img { height:30px; filter:brightness(0.5); }
+    .footer-text { font-family:'Cinzel',serif; font-size:0.52rem; letter-spacing:0.18em; color:var(--muted2); text-transform:uppercase; }
+    .footer-links { display:flex; gap:1.5rem; list-style:none; }
+    .footer-links a { font-family:'Cinzel',serif; font-size:0.52rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted2); text-decoration:none; transition:color 0.3s; }
+    .footer-links a:hover { color:var(--gold); }
+    @media (max-width:600px) { footer { flex-direction:column; align-items:center; text-align:center; } section { padding:4rem 1.25rem; } }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <a href="index.html" class="nav-brand">
+    <img src="logo-horizontal.png" alt="Dread Pirate Studio">
+    <span class="nav-brand-sub">The Studio</span>
+  </a>
+  <button class="nav-hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="#stats">Why a Site</a></li>
+    <li><a href="#voyage">The Voyage</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#contact" class="nav-cta">Get in Touch</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div id="hero-parallax">
+    <svg class="p-obj" style="width:180px;top:10%;left:4%;" data-speed="40" data-dir="-1" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="48" stroke="#c9a84c" stroke-width="0.5" opacity="0.5"/>
+      <circle cx="50" cy="50" r="36" stroke="#c9a84c" stroke-width="0.3" opacity="0.4"/>
+      <polygon points="50,4 53,46 50,50 47,46" fill="#c9a84c" opacity="0.7"/>
+      <polygon points="50,96 53,54 50,50 47,54" fill="#c9a84c" opacity="0.35"/>
+      <polygon points="4,50 46,47 50,50 46,53" fill="#c9a84c" opacity="0.35"/>
+      <polygon points="96,50 54,47 50,50 54,53" fill="#c9a84c" opacity="0.35"/>
+      <text x="50" y="15" text-anchor="middle" fill="#c9a84c" font-size="7" font-family="Georgia,serif" opacity="0.6">N</text>
+    </svg>
+    <svg class="p-obj" style="width:88px;top:8%;right:5%;" data-speed="60" data-dir="1" viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="30" cy="12" r="8" stroke="#c9a84c" stroke-width="1.5" opacity="0.5"/>
+      <line x1="30" y1="20" x2="30" y2="70" stroke="#c9a84c" stroke-width="1.5" opacity="0.5"/>
+      <path d="M10 55 Q30 75 50 55" stroke="#c9a84c" stroke-width="1.5" fill="none" opacity="0.5"/>
+      <line x1="10" y1="28" x2="50" y2="28" stroke="#c9a84c" stroke-width="1.5" opacity="0.5"/>
+    </svg>
+    <svg class="p-obj" style="width:240px;top:42%;right:3%;" data-speed="30" data-dir="-1" viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="0" y1="60" x2="200" y2="60" stroke="#c9a84c" stroke-width="0.5" opacity="0.3"/>
+      <line x1="100" y1="0" x2="100" y2="120" stroke="#c9a84c" stroke-width="0.5" opacity="0.3"/>
+      <circle cx="100" cy="60" r="30" stroke="#c9a84c" stroke-width="0.5" opacity="0.3"/>
+      <circle cx="100" cy="60" r="15" stroke="#c9a84c" stroke-width="0.5" opacity="0.3"/>
+      <circle cx="100" cy="60" r="3" fill="#c9a84c" opacity="0.4"/>
+    </svg>
+    <svg class="p-obj" style="width:110px;bottom:14%;left:5%;" data-speed="50" data-dir="1" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="40" y1="0" x2="40" y2="80" stroke="#c9a84c" stroke-width="0.5" opacity="0.4"/>
+      <line x1="0" y1="40" x2="80" y2="40" stroke="#c9a84c" stroke-width="0.5" opacity="0.4"/>
+      <line x1="11" y1="11" x2="69" y2="69" stroke="#c9a84c" stroke-width="0.3" opacity="0.3"/>
+      <line x1="69" y1="11" x2="11" y2="69" stroke="#c9a84c" stroke-width="0.3" opacity="0.3"/>
+      <circle cx="40" cy="40" r="20" stroke="#c9a84c" stroke-width="0.3" opacity="0.3"/>
+    </svg>
+  </div>
+  <div id="hero-content">
+    <p class="hero-eyebrow">Willmar, Minnesota &nbsp;&middot;&nbsp; Web Design &amp; Digital Services</p>
+    <div class="hero-logo">
+      <video autoplay loop muted playsinline>
+        <source src="logo-animated.webm" type="video/webm">
+        <img src="logo.png" alt="Dread Pirate Studio">
+      </video>
+    </div>
+    <h1 class="hero-title">Your site.<br><em>Your code.</em><br>Your crew.</h1>
+    <div class="hero-rule"></div>
+    <p class="hero-sub">Custom-built websites on a retainer you can actually afford — no templates, no WordPress, no agency overhead. One person who knows what they're doing, local to Willmar.</p>
+    <div class="hero-cta-group">
+      <a href="#voyage" class="btn btn-gold">Take the Voyage</a>
+      <a href="#contact" class="btn btn-outline">Start a Conversation</a>
+    </div>
+  </div>
+  <div class="scroll-hint"><span></span>Scroll</div>
+</section>
+
+<!-- STATS -->
+<section id="stats">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label">The Numbers Don't Lie</div>
+      <h2 class="section-title">Why Your Business Needs a Website</h2>
+      <div class="section-rule"></div>
+      <p class="section-sub">Still thinking about it? Here's what's happening while you wait.</p>
+    </div>
+    <div class="stats-axis-wrap">
+      <div class="stats-axis-line" id="stats-axis"></div>
+    </div>
+    <div class="stats-grid stagger">
+      <div class="stat-item" data-target="81" data-suffix="%" data-delay="0">
+        <div class="stat-number">0%</div>
+        <div class="stat-label">of consumers research a business online before making any purchase</div>
+        <div class="stat-source">Zippia, 2024</div>
+      </div>
+      <div class="stat-item" data-target="98" data-suffix="%" data-delay="220">
+        <div class="stat-number">0%</div>
+        <div class="stat-label">of consumers use the internet to find local businesses near them</div>
+        <div class="stat-source">BrightLocal, 2024</div>
+      </div>
+      <div class="stat-item" data-target="62" data-suffix="%" data-delay="440">
+        <div class="stat-number">0%</div>
+        <div class="stat-label">of consumers won't use a business they can't find online</div>
+        <div class="stat-source">Digital Silk, 2024</div>
+      </div>
+      <div class="stat-item" data-target="2.8" data-suffix="x" data-delay="660" data-decimal="1">
+        <div class="stat-number">0x</div>
+        <div class="stat-label">more likely to grow revenue — businesses with a professional website</div>
+        <div class="stat-source">Google &amp; Deloitte study</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIFFERENCE -->
+<section id="difference">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label">Why Dread Pirate Studio</div>
+      <h2 class="section-title">Not an Agency. Not a Template.</h2>
+      <div class="section-rule"></div>
+      <p class="section-sub">Most web shops hand you a WordPress site from a theme and charge $120/month just to keep the lights on.</p>
+    </div>
+    <div class="diff-wrap">
+      <div class="diff-col diff-col--them reveal-left">
+        <div class="diff-col-head">The Agency Way</div>
+        <div class="diff-item"><label class="neon-checkbox is-unchecked diff-icon"><input type="checkbox" disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>WordPress templates — your site looks like everyone else's</span></div>
+        <div class="diff-item"><label class="neon-checkbox is-unchecked diff-icon"><input type="checkbox" disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>Handed off between account managers, designers, developers</span></div>
+        <div class="diff-item"><label class="neon-checkbox is-unchecked diff-icon"><input type="checkbox" disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>Plugin debt — updates break things, security holes pile up</span></div>
+        <div class="diff-item"><label class="neon-checkbox is-unchecked diff-icon"><input type="checkbox" disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>Cancel and the site disappears — you own nothing</span></div>
+        <div class="diff-item"><label class="neon-checkbox is-unchecked diff-icon"><input type="checkbox" disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>$120+/month just for hosting, before any actual work</span></div>
+        <div class="diff-item"><label class="neon-checkbox is-unchecked diff-icon"><input type="checkbox" disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>Based in Hutchinson — or Minneapolis — or wherever</span></div>
+        <div class="diff-callout">96.2% of all hacked websites are running WordPress — not because WordPress is targeted, but because unpatched plugins are the easiest door in.</div>
+      </div>
+      <div class="diff-col diff-col--us reveal-right">
+        <div class="diff-col-head">The DPS Way</div>
+        <div class="diff-item"><label class="neon-checkbox is-checked diff-icon"><input type="checkbox" checked disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>Custom code — built for your business, nobody else has it</span></div>
+        <div class="diff-item"><label class="neon-checkbox is-checked diff-icon"><input type="checkbox" checked disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>One person builds it, maintains it, and picks up the phone</span></div>
+        <div class="diff-item"><label class="neon-checkbox is-checked diff-icon"><input type="checkbox" checked disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>No plugins, no theme updates, no unpatched vulnerabilities</span></div>
+        <div class="diff-item"><label class="neon-checkbox is-checked diff-icon"><input type="checkbox" checked disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>Your code is always yours — files transferred on purchase</span></div>
+        <div class="diff-item"><label class="neon-checkbox is-checked diff-icon"><input type="checkbox" checked disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>One flat retainer covers hosting, maintenance &amp; support</span></div>
+        <div class="diff-item"><label class="neon-checkbox is-checked diff-icon"><input type="checkbox" checked disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>Based in Willmar — we can meet, we know the market</span></div>
+        <div class="diff-callout">Cloudflare SSL and DDoS protection included. No WordPress login pages for bots to brute-force. Supabase row-level security keeps your data locked down.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE VOYAGE -->
+<section id="voyage">
+  <div class="voyage-header reveal">
+    <div class="section-label">Capabilities Showcase</div>
+    <h2 class="section-title">Take the Voyage</h2>
+    <div class="section-rule"></div>
+    <p class="section-sub">Scroll through what's possible. Each stop is a live demonstration of something we can build for you.</p>
+  </div>
+
+  <div id="voyage-outer">
+    <div id="voyage-stage">
+
+      <!-- Progress dots -->
+      <div id="voyage-dots">
+        <div class="voyage-dot" data-stop="0"></div>
+        <div class="voyage-dot" data-stop="1"></div>
+        <div class="voyage-dot" data-stop="2"></div>
+        <div class="voyage-dot" data-stop="3"></div>
+        <div class="voyage-dot" data-stop="4"></div>
+      </div>
+
+      <!-- Stop 1: Menu -->
+      <div class="voyage-stop" id="vstop-0">
+        <div class="voyage-visual" id="vis-menu">
+          <div class="voyage-card">
+            <div class="mock-browser">
+              <div class="mock-bar"><div class="mock-dots"><div class="mock-dot"></div><div class="mock-dot"></div><div class="mock-dot"></div></div><div class="mock-url">yoursite.com/menu</div></div>
+              <div class="mock-body">
+                <div class="menu-mock-cat">Breakfast</div>
+                <div class="menu-mock-item" id="mi1"><span class="menu-mock-name">Two Eggs Any Style</span><span class="menu-mock-price">$7.49</span></div>
+                <div class="menu-mock-item" id="mi2"><span class="menu-mock-name">Buttermilk Pancakes</span><span class="menu-mock-price">$6.99</span></div>
+                <div class="menu-mock-item" id="mi3"><span class="menu-mock-name">Biscuits &amp; Gravy</span><span class="menu-mock-price">$8.25</span></div>
+                <div class="menu-mock-item" id="mi4"><span class="menu-mock-name">The Captain's Skillet</span><span class="menu-mock-price">$11.50</span></div>
+                <div class="menu-mock-item" id="mi5"><span class="menu-mock-name">French Toast</span><span class="menu-mock-price">$7.99</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="voyage-body">
+          <div class="voyage-card">
+            <div class="voyage-num">01</div>
+            <div class="voyage-stop-label">Live Menu Management</div>
+            <h3 class="voyage-stop-title">Your Menu, Always Current</h3>
+            <p class="voyage-stop-desc">Menu items live in a database — update them from your admin panel and the site reflects the change instantly. No developer, no file uploads, no waiting. Change prices, add seasonal items, mark things unavailable — all in seconds.</p>
+            <div class="voyage-tags"><span class="voyage-tag">Database-driven</span><span class="voyage-tag">Admin panel</span><span class="voyage-tag">Real-time</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stop 2: Merch -->
+      <div class="voyage-stop" id="vstop-1">
+        <div class="voyage-body">
+          <div class="voyage-card">
+            <div class="voyage-num">02</div>
+            <div class="voyage-stop-label">E-Commerce &amp; Fulfillment</div>
+            <h3 class="voyage-stop-title">Your Merch Store, Zero Inventory</h3>
+            <p class="voyage-stop-desc">Print-on-demand merch powered by Printify and Stripe — customers order, Printify prints and ships, you collect. No upfront inventory cost, no boxes in the back room. Products sync automatically from your Printify catalog to your site.</p>
+            <div class="voyage-tags"><span class="voyage-tag">Stripe payments</span><span class="voyage-tag">Printify</span><span class="voyage-tag">No inventory</span><span class="voyage-tag">Auto-sync</span></div>
+          </div>
+        </div>
+        <div class="voyage-visual" id="vis-merch" style="position:relative;">
+          <div class="voyage-card">
+            <div class="mock-browser">
+              <div class="mock-bar"><div class="mock-dots"><div class="mock-dot"></div><div class="mock-dot"></div><div class="mock-dot"></div></div><div class="mock-url">yoursite.com/merch</div></div>
+              <div class="mock-body">
+                <div class="merch-mock-grid">
+                  <div class="merch-mock-card" id="mc1"><div class="merch-mock-img">☕</div><div class="merch-mock-title">Signature Mug</div><div class="merch-mock-price">$18.99</div></div>
+                  <div class="merch-mock-card" id="mc2"><div class="merch-mock-img">👕</div><div class="merch-mock-title">Classic Tee</div><div class="merch-mock-price">$24.99</div></div>
+                  <div class="merch-mock-card" id="mc3"><div class="merch-mock-img">🧢</div><div class="merch-mock-title">Snapback Hat</div><div class="merch-mock-price">$22.00</div></div>
+                  <div class="merch-mock-card" id="mc4"><div class="merch-mock-img">🛍</div><div class="merch-mock-title">Tote Bag</div><div class="merch-mock-price">$16.50</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stop 3: YouTube -->
+      <div class="voyage-stop" id="vstop-2">
+        <div class="voyage-visual" id="vis-youtube">
+          <div class="voyage-card">
+            <div class="mock-browser">
+              <div class="mock-bar"><div class="mock-dots"><div class="mock-dot"></div><div class="mock-dot"></div><div class="mock-dot"></div></div><div class="mock-url">dreadpiratestudio.com/video</div></div>
+              <div class="mock-body">
+                <!-- DPS YouTube — replace VIDEO_ID with the actual YouTube video ID e.g. dQw4w9WgXcQ -->
+                <div class="yt-mock-embed">
+                  <iframe src="https://www.youtube.com/embed/zxTU6nlrJOE?controls=1&modestbranding=1&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen title="Dread Pirate Studio"></iframe>
+                </div>
+                <div class="yt-mock-thumbs">
+                  <div class="yt-mock-thumb" id="ytt1"></div>
+                  <div class="yt-mock-thumb" id="ytt2"></div>
+                  <div class="yt-mock-thumb" id="ytt3"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="voyage-body">
+          <div class="voyage-card">
+            <div class="voyage-num">03</div>
+            <div class="voyage-stop-label">YouTube Integration</div>
+            <h3 class="voyage-stop-title">Your Channel, Always Current</h3>
+            <p class="voyage-stop-desc">Your YouTube channel embedded directly in your site — new videos appear automatically without touching a line of code. Live streams are detected in real time and flagged with a live badge. Your audience never has to leave your site to find your latest content.</p>
+            <div class="voyage-tags"><span class="voyage-tag">YouTube API</span><span class="voyage-tag">Auto-updates</span><span class="voyage-tag">Live detection</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stop 4: Admin -->
+      <div class="voyage-stop" id="vstop-3">
+        <div class="voyage-body">
+          <div class="voyage-card">
+            <div class="voyage-num">04</div>
+            <div class="voyage-stop-label">Self-Service Admin Panel</div>
+            <h3 class="voyage-stop-title">You're in Control</h3>
+            <p class="voyage-stop-desc">Every client gets a custom admin panel built into their site. Update hours, flip on an announcement banner, change photos, manage your menu — all from a simple dashboard built specifically for your business. No calls to a developer, no separate platform to log into.</p>
+            <div class="voyage-tags"><span class="voyage-tag">Custom dashboard</span><span class="voyage-tag">Hours &amp; banners</span><span class="voyage-tag">Image management</span><span class="voyage-tag">No developer needed</span></div>
+          </div>
+        </div>
+        <div class="voyage-visual" id="vis-admin">
+          <div class="voyage-card">
+            <div class="mock-browser">
+              <div class="mock-bar"><div class="mock-dots"><div class="mock-dot"></div><div class="mock-dot"></div><div class="mock-dot"></div></div><div class="mock-url">yoursite.com/admin</div></div>
+              <div class="mock-body">
+                <div class="admin-mock-row"><span class="admin-mock-label">Weekday Hours</span><span class="admin-mock-val" id="admin-hours">6am – 4pm</span></div>
+                <div class="admin-mock-row"><span class="admin-mock-label">Saturday Hours</span><span class="admin-mock-val">6am – 11am</span></div>
+                <div class="admin-mock-row"><span class="admin-mock-label">Announcement Banner</span><div class="admin-toggle" id="admin-toggle"></div></div>
+                <div class="admin-mock-row" id="admin-banner-row" style="opacity:0;transition:opacity 0.4s;"><span class="admin-mock-label">Banner Message</span><span class="admin-mock-val" style="font-size:0.5rem;color:var(--gold)">Closed Dec 25 &#10084;</span></div>
+                <div class="admin-mock-row"><span class="admin-mock-label">Payment Note</span><span class="admin-mock-val" style="font-size:0.5rem;">Cash &amp; check only</span></div>
+                <button class="admin-mock-save" id="admin-save-btn">Save Changes</button>
+                <div class="admin-saved-msg" id="admin-saved"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stop 5: Audio / Creative -->
+      <div class="voyage-stop" id="vstop-4">
+        <div class="voyage-visual" id="vis-audio">
+          <div class="voyage-card">
+            <div class="waveform-wrap">
+              <div class="waveform-bars" id="waveform-bars"></div>
+              <button class="waveform-play" id="waveform-play-btn" type="button">
+                <div class="play-icon" id="play-icon"></div>
+                <span id="play-label">Play Sample</span>
+              </button>
+              <div class="waveform-track">Frieda's Big Stacks &nbsp;&middot;&nbsp; Original Jingle by DPS</div>
+              <audio id="jingle-audio" src="https://bhokimstqlnysyypivbp.supabase.co/storage/v1/object/public/site-images/FriedasBigStacks.mp3" preload="none"></audio>
+            </div>
+          </div>
+        </div>
+        <div class="voyage-body">
+          <div class="voyage-card">
+            <div class="voyage-num">05</div>
+            <div class="voyage-stop-label">Creative Services</div>
+            <h3 class="voyage-stop-title">Your Brand, Radio-Ready</h3>
+            <p class="voyage-stop-desc">Beyond the website — original jingles, branded radio-ready ads with custom background music, logo and graphic design, video editing and production. Everything your brand needs to sound and look as good as your site. Hit play to hear a real jingle produced for a client.</p>
+            <div class="voyage-tags"><span class="voyage-tag">Jingle &amp; audio</span><span class="voyage-tag">Radio ads</span><span class="voyage-tag">Logo design</span><span class="voyage-tag">Video editing</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end #voyage-stage -->
+    <div id="voyage-spacer"></div>
+  </div><!-- end #voyage-outer -->
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label">What We Offer</div>
+      <h2 class="section-title">The Full Cargo Hold</h2>
+      <div class="section-rule"></div>
+      <p class="section-sub">Everything a local business needs to have a real presence online — built clean, maintained right, priced for Main Street.</p>
+    </div>
+    <div class="services-grid" id="services-grid">
+      <div class="services-glow" id="services-glow"></div>
+      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">⚓</span><div class="service-name">Custom Website Build</div><p class="service-desc">Hand-coded from scratch for your business. Fast, mobile-first, and yours to keep. No templates, no page builders, no limitations baked in by someone else's framework.</p><div class="service-tags"><span class="service-tag">Custom code</span><span class="service-tag">Mobile-first</span><span class="service-tag">Fast load times</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">What's included</div><ul class="service-back-items"><li>Hand-coded HTML, CSS &amp; JS — no frameworks</li><li>Mobile-first, responsive on every device</li><li>Cloudflare hosting &amp; SSL from day one</li><li>Files are yours — always</li></ul></div></div></div>
+      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">🔁</span><div class="service-name">Monthly Retainer</div><p class="service-desc">One flat monthly fee covers hosting, maintenance, and minor content updates. Your site stays current without you lifting a finger. Major work quoted separately.</p><div class="service-tags"><span class="service-tag">Cloudflare hosting</span><span class="service-tag">Content updates</span><span class="service-tag">Priority support</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">What's covered</div><ul class="service-back-items"><li>Cloudflare hosting &amp; DNS management</li><li>Security patches &amp; uptime monitoring</li><li>Minor copy &amp; content updates</li><li>Priority response — you're not in a queue</li></ul></div></div></div>
+      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">🛒</span><div class="service-name">Online Ordering &amp; Payments</div><p class="service-desc">Real payment processing with Stripe, print-on-demand merch with Printify, or custom order forms integrated into your site. No Shopify middleman.</p><div class="service-tags"><span class="service-tag">Stripe</span><span class="service-tag">Print-on-demand</span><span class="service-tag">Custom forms</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">How it works</div><ul class="service-back-items"><li>Stripe handles payments — no Shopify cut</li><li>Printify syncs merch automatically</li><li>Revenue routes directly to your bank</li><li>Custom order forms for any workflow</li></ul></div></div></div>
+      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">📋</span><div class="service-name">Menu &amp; Content Management</div><p class="service-desc">Admin panels built for your specific needs — update menus, products, hours, photos, and announcements yourself without touching code or calling anyone.</p><div class="service-tags"><span class="service-tag">Admin dashboard</span><span class="service-tag">Image upload</span><span class="service-tag">Real-time updates</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">What you control</div><ul class="service-back-items"><li>Menu items, prices &amp; descriptions</li><li>Photo gallery &amp; featured images</li><li>Hours, announcements &amp; banners</li><li>No code knowledge required</li></ul></div></div></div>
+      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">📍</span><div class="service-name">Local Search Presence</div><p class="service-desc">Clean semantic HTML structure with local signals helps search engines understand who you are, what you do, and where you are — the foundation of being found.</p><div class="service-tags"><span class="service-tag">Semantic markup</span><span class="service-tag">Local signals</span><span class="service-tag">Performance tuning</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">What we build in</div><ul class="service-back-items"><li>Semantic HTML with local business schema</li><li>Clean page titles &amp; meta descriptions</li><li>Fast load times (Core Web Vitals)</li><li>Google Maps &amp; NAP consistency</li></ul></div></div></div>
+      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">🔧</span><div class="service-name">Rescue &amp; Migration</div><p class="service-desc">Currently on Shopify, WordPress, or a platform charging too much or breaking too often? We migrate your content, rebuild it right, and put you back in control.</p><div class="service-tags"><span class="service-tag">Shopify migration</span><span class="service-tag">WordPress rescue</span><span class="service-tag">Domain transfer</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">What we handle</div><ul class="service-back-items"><li>Full content &amp; data migration</li><li>Domain transfer &amp; DNS cutover</li><li>Redirect mapping so you keep your SEO</li><li>Old platform cancelled cleanly</li></ul></div></div></div>
+    </div>
+    <div class="creative-section reveal">
+      <div class="creative-label">Additional Creative Services &mdash; &agrave; la Carte</div>
+      <div class="creative-grid">
+        <div class="creative-card"><span class="creative-glyph">🎨</span><div class="creative-name">Logo &amp; Graphic Design</div><p class="creative-desc">Brand identity that works across print and digital.</p></div>
+        <div class="creative-card"><span class="creative-glyph">🎵</span><div class="creative-name">Jingle Creation</div><p class="creative-desc">Original music written and produced for your brand.</p></div>
+        <div class="creative-card"><span class="creative-glyph">📻</span><div class="creative-name">Radio-Ready Ads</div><p class="creative-desc">Branded audio ads with original background music.</p></div>
+        <div class="creative-card"><span class="creative-glyph">🎬</span><div class="creative-name">Video Editing</div><p class="creative-desc">Promotional video, social content, event coverage.</p></div>
+        <div class="creative-card"><span class="creative-glyph">🔬</span><div class="creative-name">Digital R&amp;D</div><p class="creative-desc">Custom integrations, automations, digital solutions.</p></div>
+      </div>
+      <p class="creative-note">Retainer clients receive a discounted rate on all creative services. All services available freelance — scoped and quoted per project.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section id="process">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label">How It Works</div>
+      <h2 class="section-title">Simple as Shipping</h2>
+      <div class="section-rule"></div>
+      <p class="section-sub">No discovery calls that go nowhere, no 12-week timelines. We move fast and keep it straightforward.</p>
+    </div>
+    <div class="process-track" id="process-track">
+      <div class="process-line"></div>
+      <div class="process-line-fill" id="process-fill"></div>
+      <div class="process-step" id="ps1"><span class="process-num">01</span><div class="process-step-title">We Talk</div><p class="process-step-desc">Tell me about your business and what's not working. No forms, no pitch deck — just a conversation.</p></div>
+      <div class="process-step" id="ps2"><span class="process-num">02</span><div class="process-step-title">I Scope It</div><p class="process-step-desc">A clear plan with a flat price, agreed in writing before anything starts. No surprise invoices.</p></div>
+      <div class="process-step" id="ps3"><span class="process-num">03</span><div class="process-step-title">We Build</div><p class="process-step-desc">I build, you give feedback, we iterate. Most sites are live in 2–4 weeks depending on scope.</p></div>
+      <div class="process-step" id="ps4"><span class="process-num">04</span><div class="process-step-title">I Stay On</div><p class="process-step-desc">Monthly retainer covers hosting, maintenance, and minor updates. Bigger work is quoted separately — retainer clients get a discounted project rate.</p></div>
+    </div>
+    <div class="process-note reveal">Any work beyond minor updates — new pages, integrations, redesigns, creative services — is scoped and agreed in writing before work begins. No surprises, no assumptions, no mystery invoices.</div>
+  </div>
+</section>
+
+<!-- WORK -->
+<section id="work">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label">Current Work</div>
+      <h2 class="section-title">Ships We've Built</h2>
+      <div class="section-rule"></div>
+      <p class="section-sub">Every project is custom — no two are alike. Here's what's in the water.</p>
+    </div>
+    <div class="work-card reveal">
+      <div class="work-visual">
+        <div class="work-browser">
+          <div class="work-bar"><div class="work-bar-dots"><div class="work-bar-dot"></div><div class="work-bar-dot"></div><div class="work-bar-dot"></div></div><div class="work-bar-url">friedascafe.com</div></div>
+          <div class="work-iframe-wrap">
+            <iframe src="https://friedascafe.pages.dev" title="Frieda's Cafe" loading="lazy" scrolling="yes"></iframe>
+          </div>
+        </div>
+      </div>
+      <div class="work-body">
+        <span class="work-tag">Active Client &nbsp;&middot;&nbsp; Retainer</span>
+        <h3 class="work-title">Frieda's Cafe</h3>
+        <div class="work-location">Willmar, MN &nbsp;&middot;&nbsp; Family Diner since 1970</div>
+        <p class="work-desc">Replaced a disconnected static site and Shopify merch store with a single unified custom site — menu management, online merch ordering with print-on-demand fulfillment, and an admin panel Steve and Amy can use themselves.</p>
+        <ul class="work-features">
+          <li>Custom admin panel for self-service content updates</li>
+          <li>Stripe-powered merch store with Printify fulfillment</li>
+          <li>Live menu pulled from Supabase database</li>
+          <li>Cloudflare Pages — fast, secure, unlimited bandwidth</li>
+        </ul>
+        <a href="https://friedascafe.pages.dev" target="_blank" rel="noopener" class="work-link">Visit friedascafe.com &rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="section-inner">
+    <div class="section-header reveal">
+      <div class="section-label">Pricing</div>
+      <h2 class="section-title">Honest Numbers</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="pricing-center reveal">
+      <div class="pricing-num-wrap">
+        <div class="pricing-main-num"><sup class="pricing-main-sup">$</sup>59</div>
+        <div class="pricing-shimmer"></div>
+      </div>
+      <div class="pricing-mo">/month to get started</div>
+      <div class="pricing-rule"></div>
+      <p class="pricing-desc">Rent the site with no upfront build cost and keep it as long as you want. When you're ready to purchase, your monthly retainer rate drops. Flexible payment plans available on every project.</p>
+      <ul class="pricing-bullets">
+        <li>Hosting on Cloudflare's global network</li>
+        <li>SSL security and DDoS protection included</li>
+        <li>Minor content updates covered</li>
+        <li>Priority phone and email support</li>
+        <li>Admin panel for self-service edits</li>
+        <li>Build cost determined by project scope</li>
+        <li>New pages and features quoted separately</li>
+      </ul>
+      <a href="#contact" class="btn btn-gold">Let's Talk</a>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-inner">
+    <div class="contact-inner">
+      <div class="section-header reveal">
+        <div class="section-label">Get in Touch</div>
+        <h2 class="section-title">Let's Talk</h2>
+        <div class="section-rule"></div>
+      </div>
+      <p class="contact-desc reveal">Whether you're ready to start or just curious what a custom site would cost for your business — reach out. No pressure, no pitch deck, no forms to fill out.</p>
+      <div class="reveal">
+        <a href="mailto:gabe&#64;dreadpiratestudio.com" class="contact-email">gabe&#64;dreadpiratestudio.com</a>
+        <p class="contact-sub">Response time: usually within 24 hours</p>
+        <div class="contact-coords">45.1219&deg; N &nbsp;95.0435&deg; W &nbsp;&middot;&nbsp; Willmar, MN</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <img src="logo-horizontal.png" alt="Dread Pirate Studio">
+    <span class="footer-text">&copy; 2026 Dread Pirate Studio</span>
+  </div>
+  <ul class="footer-links">
+    <li><a href="index.html">&larr; Home</a></li>
+    <li><a href="collective/index.html">The Collective</a></li>
+    <li><a href="mailto:gabe&#64;dreadpiratestudio.com">Email</a></li>
+  </ul>
+</footer>
+
+<script data-cfasync="false">
+// NAV
+var nav = document.getElementById('main-nav');
+setTimeout(function() { nav.classList.add('visible'); }, 80);
+var hamburger = document.getElementById('hamburger');
+var navLinks = document.getElementById('nav-links');
+hamburger.addEventListener('click', function() { hamburger.classList.toggle('open'); navLinks.classList.toggle('open'); });
+var navAs = navLinks.querySelectorAll('a');
+for (var ni = 0; ni < navAs.length; ni++) {
+  navAs[ni].addEventListener('click', function() { hamburger.classList.remove('open'); navLinks.classList.remove('open'); });
+}
+
+// PARALLAX
+var pObjs = document.querySelectorAll('.p-obj');
+var tX = 0, tY = 0, cX = 0, cY = 0;
+
+window.addEventListener('mousemove', function(e) {
+  tX = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
+  tY = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
+});
+
+function tick() {
+  cX += (tX - cX) * 0.08;
+  cY += (tY - cY) * 0.08;
+
+  for (var i = 0; i < pObjs.length; i++) {
+    var spd = parseFloat(pObjs[i].getAttribute('data-speed'));
+    var dir = parseFloat(pObjs[i].getAttribute('data-dir'));
+
+    pObjs[i].style.transform =
+      'translate(' + (cX * spd * dir) + 'px, ' + (cY * spd * dir) + 'px)';
+  }
+
+  requestAnimationFrame(tick);
+}
+
+requestAnimationFrame(tick);
+
+// === SCROLL ANIMATION ENGINE ===
+// rootMargin "-5% 0px -5% 0px": fires when element is within 5% of either viewport edge
+// This means animations start almost immediately as elements enter, not halfway through
+
+var revealObserver = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) {
+      e.target.classList.remove('exiting');
+      e.target.classList.add('visible');
+    } else {
+      // Determine exit direction based on which edge the element left from
+      var rect = e.target.getBoundingClientRect();
+      var isAbove = rect.bottom < 0;
+      if (isAbove) {
+        // Element scrolled past above viewport — apply exit class (flows through)
+        e.target.classList.add('exiting');
+        e.target.classList.remove('visible');
+      } else {
+        // Element hasn't entered yet (below viewport) — reset to entry state
+        e.target.classList.remove('exiting');
+        e.target.classList.remove('visible');
+      }
+    }
+  });
+}, { rootMargin: '-5px 0px -5px 0px', threshold: 0 });
+
+var revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+for (var ri = 0; ri < revealEls.length; ri++) {
+  revealObserver.observe(revealEls[ri]);
+}
+
+// === VOYAGE SCROLL-JACK ENGINE — sticky + spacer, rAF loop ===
+// CSS makes #voyage-stage sticky. A tall #voyage-spacer creates scroll distance.
+// JS reads scrollY every frame and maps it to progress. No wheel capture, no locking.
+// outerTop measured once at load when scrollY=0 so getBoundingClientRect is accurate.
+
+var vOuter    = document.getElementById('voyage-outer');
+var vStage    = document.getElementById('voyage-stage');
+var vStops    = document.querySelectorAll('.voyage-stop');
+var vDots     = document.querySelectorAll('.voyage-dot');
+var NUM_STOPS = vStops.length;
+var vSpacer   = document.getElementById('voyage-spacer');
+var vTriggered = [];
+for (var vt = 0; vt < NUM_STOPS; vt++) vTriggered.push({});
+
+function easeV(t) { return t < 0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
+function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+
+// Scroll distance per stop — 1.5x viewport height feels deliberate
+var SCROLL_PER_STOP = window.innerHeight * 1.5;
+var TOTAL_SCROLL = NUM_STOPS * SCROLL_PER_STOP;
+if (vSpacer) vSpacer.style.height = TOTAL_SCROLL + 'px';
+
+// Measure outer top ONCE at load (scrollY=0 makes rect.top === doc offset)
+var vOuterTop = 0;
+function measureOuter() {
+  if (!vOuter) return;
+  vOuterTop = vOuter.getBoundingClientRect().top + window.scrollY;
+}
+window.addEventListener('load', measureOuter);
+window.addEventListener('resize', function() {
+  SCROLL_PER_STOP = window.innerHeight * 1.5;
+  TOTAL_SCROLL = NUM_STOPS * SCROLL_PER_STOP;
+  if (vSpacer) vSpacer.style.height = TOTAL_SCROLL + 'px';
+  measureOuter();
+});
+measureOuter();
+
+// Init: hide all stops
+for (var vi = 0; vi < NUM_STOPS; vi++) {
+  vStops[vi].style.opacity = '0';
+  vStops[vi].style.pointerEvents = 'none';
+}
+
+function renderVoyage(progress) {
+  var sw = 1 / NUM_STOPS;
+  for (var si = 0; si < NUM_STOPS; si++) {
+    var lp    = clamp01((progress - si * sw) / sw);
+    var vstop = vStops[si];
+    var vvis  = vstop.querySelector('.voyage-visual');
+    var vbod  = vstop.querySelector('.voyage-body');
+    var even  = (si % 2 === 0);
+
+    if (lp <= 0 && si > 0) { vstop.style.opacity='0'; vstop.style.pointerEvents='none'; continue; }
+    if (lp >= 1)            { vstop.style.opacity='0'; vstop.style.pointerEvents='none'; continue; }
+
+    vstop.style.opacity = '1';
+    vstop.style.pointerEvents = 'auto';
+
+    for (var di=0; di<vDots.length; di++) {
+      vDots[di].classList.toggle('active', parseInt(vDots[di].getAttribute('data-stop')) === si);
+    }
+
+    // Enter 0-0.3, Hold 0.3-0.7, Exit 0.7-1.0
+    var ep  = easeV(clamp01(lp / 0.3));
+    var xp  = easeV(clamp01((lp - 0.7) / 0.3));
+    var op  = Math.max(0, Math.min(ep, 1 - xp));
+    var inH = lp >= 0.3 && lp < 0.7;
+
+    if (vvis) {
+      var vx = xp > 0 ? (even ? xp*110 : xp*-110) : (even ? (1-ep)*-110 : (1-ep)*110);
+      vvis.style.transform = 'translateX(' + vx + '%)';
+      vvis.style.opacity = String(op);
+    }
+    if (vbod) {
+      var by = xp > 0 ? xp*-60 : (1-ep)*70;
+      vbod.style.transform = 'translateY(' + by + 'px)';
+      vbod.style.opacity = String(op);
+    }
+
+    if (inH) {
+      if (si===0&&!vTriggered[0].menu){vTriggered[0].menu=true;var ids=['mi1','mi2','mi3','mi4','mi5'];for(var mi=0;mi<ids.length;mi++){(function(i){setTimeout(function(){var e=document.getElementById(ids[i]);if(e)e.classList.add('loaded');},i*200);})(mi);}}
+      if (si===1&&!vTriggered[1].merch){vTriggered[1].merch=true;var mc=['mc1','mc2','mc3','mc4'];var cb=document.getElementById('cart-badge');var cn=0;for(var mi2=0;mi2<mc.length;mi2++){(function(i){setTimeout(function(){var e=document.getElementById(mc[i]);if(e)e.classList.add('loaded');if(i<2)setTimeout(function(){cn++;if(cb){cb.textContent=cn;cb.classList.add('visible','bump');setTimeout(function(){cb.classList.remove('bump');},300);}},350);},i*260);})(mi2);}}
+      if (si===2&&!vTriggered[2].yt){vTriggered[2].yt=true;var yt=['ytt1','ytt2','ytt3'];for(var yi=0;yi<yt.length;yi++){(function(i){setTimeout(function(){var e=document.getElementById(yt[i]);if(e)e.classList.add('loaded');},500+i*160);})(yi);}}
+      if (si===3&&!vTriggered[3].admin){vTriggered[3].admin=true;setTimeout(function(){var t=document.getElementById('admin-toggle');if(t)t.classList.add('on');var b=document.getElementById('admin-banner-row');if(b)b.style.opacity='1';},800);setTimeout(function(){var h=document.getElementById('admin-hours');if(h)h.textContent='7am \u2013 3pm';},1600);}
+    }
+
+    if (lp < 0.1) {
+      if(si===0){vTriggered[0].menu=false;var mr=document.querySelectorAll('.menu-mock-item');for(var m=0;m<mr.length;m++)mr[m].classList.remove('loaded');}
+      if(si===1){vTriggered[1].merch=false;var mc2=document.querySelectorAll('.merch-mock-card');for(var m2=0;m2<mc2.length;m2++)mc2[m2].classList.remove('loaded');var cb2=document.getElementById('cart-badge');if(cb2){cb2.textContent='0';cb2.classList.remove('visible');}}
+      if(si===2){vTriggered[2].yt=false;}
+      if(si===3){vTriggered[3].admin=false;var t2=document.getElementById('admin-toggle');if(t2)t2.classList.remove('on');var b2=document.getElementById('admin-banner-row');if(b2)b2.style.opacity='0';var h2=document.getElementById('admin-hours');if(h2)h2.textContent='6am \u2013 4pm';}
+    }
+  }
+}
+
+// rAF loop — reads scrollY every frame, drives animations directly
+function voyageFrame() {
+  if (vOuter && vSpacer) {
+    var scrolled = window.scrollY - vOuterTop;
+    var progress = clamp01(scrolled / TOTAL_SCROLL);
+    renderVoyage(progress);
+  }
+  requestAnimationFrame(voyageFrame);
+}
+requestAnimationFrame(voyageFrame);
+
+
+// Admin save button
+var adminSaveBtn = document.getElementById('admin-save-btn');
+var adminSaved = document.getElementById('admin-saved');
+if (adminSaveBtn) {
+  adminSaveBtn.addEventListener('click', function() {
+    adminSaveBtn.textContent = 'Saving...';
+    setTimeout(function() { adminSaveBtn.textContent='Save Changes'; if(adminSaved){adminSaved.textContent='\u2746 Saved \u2014 site updated'; setTimeout(function(){adminSaved.textContent='';},2500);} }, 800);
+  });
+}
+
+// STAT COUNTERS
+function countUp(el, target, suffix, decimal, delay) {
+  setTimeout(function() {
+    el.classList.add('visible');
+    var numEl = el.querySelector('.stat-number');
+    var dur = 1600; var start = null;
+    function step(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts-start)/dur, 1);
+      var easev = 1 - Math.pow(1-p, 3);
+      var val = target * easev;
+      numEl.textContent = (decimal ? val.toFixed(decimal) : Math.round(val)) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }, delay);
+}
+var statsEl = document.getElementById('stats');
+var statsDone = false;
+new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting && !statsDone) {
+      statsDone = true;
+      document.getElementById('stats-axis').classList.add('drawn');
+      var items = document.querySelectorAll('.stat-item');
+      for (var i=0;i<items.length;i++) {
+        var item = items[i];
+        countUp(item, parseFloat(item.getAttribute('data-target')), item.getAttribute('data-suffix')||'', parseInt(item.getAttribute('data-decimal'))||0, parseInt(item.getAttribute('data-delay'))||0);
+      }
+    }
+  });
+}, { threshold:0.1 }).observe(statsEl);
+
+// WAVEFORM
+var wfContainer = document.getElementById('waveform-bars');
+var bars = [];
+if (wfContainer) {
+  for (var b=0;b<28;b++) {
+    var bar = document.createElement('div');
+    bar.className = 'waveform-bar';
+    bar.style.height = (10+Math.random()*58)+'px';
+    wfContainer.appendChild(bar);
+    bars.push(bar);
+  }
+}
+var jingleAudio = document.getElementById('jingle-audio');
+var playBtn = document.getElementById('waveform-play-btn');
+var playIcon = document.getElementById('play-icon');
+var playLabel = document.getElementById('play-label');
+var isPlaying = false; var wfTimer = null;
+function animWave() { for(var i=0;i<bars.length;i++){bars[i].style.height=(8+Math.random()*64)+'px';bars[i].classList.toggle('active',Math.random()>0.48);} wfTimer=setTimeout(animWave,110); }
+function stopWave() { if(wfTimer){clearTimeout(wfTimer);wfTimer=null;} for(var i=0;i<bars.length;i++){bars[i].style.height=(10+Math.random()*52)+'px';bars[i].classList.remove('active');} }
+if (playBtn && jingleAudio) {
+  playBtn.addEventListener('click', function() {
+    if (!isPlaying) {
+      jingleAudio.play(); isPlaying=true; playBtn.classList.add('playing'); playIcon.classList.add('pause'); playLabel.textContent='Pause'; animWave();
+    } else {
+      jingleAudio.pause(); isPlaying=false; playBtn.classList.remove('playing'); playIcon.classList.remove('pause'); playLabel.textContent='Play Sample'; stopWave();
+    }
+  });
+  jingleAudio.addEventListener('ended', function() { isPlaying=false; playBtn.classList.remove('playing'); playIcon.classList.remove('pause'); playLabel.textContent='Play Sample'; stopWave(); });
+}
+
+// SERVICE CARD GLOW — single light source behind the grid, visible in gaps only
+var servicesGrid = document.getElementById('services-grid');
+var servicesGlow = document.getElementById('services-glow');
+if (servicesGrid && servicesGlow) {
+  servicesGrid.addEventListener('mouseenter', function() {
+    servicesGlow.classList.add('visible');
+  });
+  servicesGrid.addEventListener('mouseleave', function() {
+    servicesGlow.classList.remove('visible');
+  });
+  servicesGrid.addEventListener('mousemove', function(e) {
+    var r = servicesGrid.getBoundingClientRect();
+    servicesGlow.style.setProperty('--gx', (e.clientX - r.left) + 'px');
+    servicesGlow.style.setProperty('--gy', (e.clientY - r.top) + 'px');
+  });
+}
+// individual card hover elevation only — no glow per card
+var sCards = document.querySelectorAll('.service-card');
+// Tap-to-flip for touch devices
+var isTouchDevice = (function() { try { document.createEvent('TouchEvent'); return true; } catch(e) { return false; } })();
+if (isTouchDevice) {
+  for (var tci = 0; tci < sCards.length; tci++) {
+    sCards[tci].addEventListener('click', function() {
+      this.classList.toggle('flipped');
+    });
+  }
+}
+for (var sc=0;sc<sCards.length;sc++) {
+  (function(card) {
+    card.addEventListener('mouseenter', function() { card.classList.add('hovered'); });
+    card.addEventListener('mouseleave', function() { card.classList.remove('hovered'); });
+  })(sCards[sc]);
+}
+
+// PROCESS LINE
+var procDone = false;
+new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting && !procDone) {
+      procDone = true;
+      var fill=document.getElementById('process-fill'); if(fill) fill.style.width='75%';
+      var pIds=['ps1','ps2','ps3','ps4'];
+      for (var i=0;i<pIds.length;i++) {
+        (function(idx){ setTimeout(function(){ var el=document.getElementById(pIds[idx]); if(el) el.classList.add('active'); }, idx*340); })(i);
+      }
+    }
+  });
+}, { threshold:0.1 }).observe(document.getElementById('process-track'));
+</script>
+
+</body>
+</html>
