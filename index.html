@@ -19,8 +19,8 @@
       --border:    rgba(201,168,76,0.15);
     }
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    html { overflow-x: hidden; }
-    body { background:var(--black); color:var(--white); font-family:'Crimson Text',Georgia,serif; font-size:18px; }
+    html { overflow-x:hidden; width:100%; }
+    body { overflow-x:hidden; width:100%; max-width:100%; position:relative; background:var(--black); color:var(--white); font-family:'Crimson Text',Georgia,serif; font-size:18px; }
 
     nav { position:fixed; top:0; left:0; right:0; z-index:900; padding:0 2rem; height:72px; display:flex; align-items:center; justify-content:space-between; background:linear-gradient(to bottom,rgba(8,8,8,0.95),rgba(8,8,8,0.7)); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); }
     .nav-logo { text-decoration:none; }
@@ -35,16 +35,18 @@
     .nav-hamburger.open span:nth-child(3) { transform:rotate(-45deg) translate(5px,-5px); }
     .mobile-only { display:none; }
     @media (max-width:768px) {
-      .nav-hamburger { display:flex; }
-      .nav-links { display:none; flex-direction:column; position:absolute; top:72px; left:0; right:0; background:rgba(8,8,8,0.98); border-bottom:1px solid var(--border); padding:1rem 0; gap:0; }
+      nav { padding:0 1rem; width:100%; overflow:clip; }
+      .nav-logo img { height:40px; }
+      .nav-hamburger { display:flex; flex:0 0 auto; }
+      .nav-links { display:none; flex-direction:column; position:absolute; top:72px; left:0; right:0; width:100%; max-width:100%; background:rgba(8,8,8,0.98); border-bottom:1px solid var(--border); padding:0.5rem 0 calc(env(safe-area-inset-bottom,0px) + 0.5rem); gap:0; overflow:hidden; }
       .nav-links.open { display:flex; }
-      .nav-links li { border-bottom:1px solid var(--border); }
+      .nav-links li { border-bottom:1px solid var(--border); width:100%; }
       .nav-links li:last-child { border-bottom:none; }
-      .nav-links a { display:block; padding:0.85rem 2rem; font-size:0.75rem; }
+      .nav-links a { display:block; padding:0.9rem 1rem; font-size:0.72rem; }
       .mobile-only { display:block; }
     }
 
-    #hero { position:relative; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:80px 2rem 4rem; }
+    #hero { position:relative; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:80px 2rem 4rem; overflow:hidden; }
     .hero-bg { position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(201,168,76,0.06) 0%,transparent 70%),radial-gradient(ellipse 60% 40% at 50% 80%,rgba(139,26,26,0.08) 0%,transparent 60%),linear-gradient(180deg,#080808 0%,#0a0c10 50%,#080808 100%); z-index:0; }
     .hero-vignette { position:absolute; inset:0; background:radial-gradient(ellipse 100% 100% at 50% 50%,transparent 30%,rgba(8,8,8,0.6) 100%); z-index:0; }
 
@@ -57,7 +59,16 @@
     .hero-logo { width:min(1020px,95vw); animation:logoPulse 4s ease-in-out infinite; display:block; }
     .hero-logo video { width:100%; height:auto; display:block; filter:drop-shadow(0 0 40px rgba(201,168,76,0.3)) brightness(1.1); }
     @media (max-width:768px) {
-      .hero-logo { width:95vw; transform:scale(2); transform-origin:center center; }
+      #hero { min-height:100svh; padding:86px 1rem 3rem; }
+      .hero-content { gap:1.1rem; width:min(100%, 26rem); }
+      .hero-logo { width:min(96vw, 640px); transform:none; margin:0; }
+      .hero-logo video { transform:scale(2.02); transform-origin:center center; }
+      .hero-tagline { font-size:0.6rem; letter-spacing:0.28em; }
+      .hero-divider { width:120px; }
+      .hero-desc { max-width:28rem; font-size:0.98rem; line-height:1.55; padding:0 0.35rem; }
+      .hero-cta-group { width:100%; gap:0.75rem; }
+      .btn { width:min(100%, 18rem); padding:0.8rem 1.1rem; }
+      .scroll-hint { bottom:1.15rem; }
     }
     @keyframes logoPulse { 0%,100% { filter:drop-shadow(0 0 30px rgba(201,168,76,0.25)) brightness(1.0); } 50% { filter:drop-shadow(0 0 55px rgba(201,168,76,0.45)) brightness(1.2); } }
     .hero-tagline { font-family:'Cinzel',serif; font-size:clamp(0.65rem,2vw,0.85rem); letter-spacing:0.4em; text-transform:uppercase; color:var(--gold); opacity:0.8; animation:fadeUp 1.2s 0.3s ease both; }
