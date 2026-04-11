@@ -23,7 +23,7 @@
     body { width:100%; max-width:100%; background:var(--black); color:var(--white); font-family:'Crimson Text',Georgia,serif; font-size:18px; }
 
     nav { position:fixed; top:0; left:0; right:0; z-index:900; padding:0 2rem; height:72px; display:flex; align-items:center; justify-content:space-between; background:linear-gradient(to bottom,rgba(8,8,8,0.95),rgba(8,8,8,0.7)); border-bottom:1px solid var(--border); backdrop-filter:blur(12px); }
-    .nav-logo { text-decoration:none; }
+    .nav-logo { text-decoration:none; display:flex; align-items:center; min-width:0; flex:1 1 auto; }
     .nav-logo img { height:44px; width:auto; }
     .nav-links { display:flex; gap:2rem; list-style:none; }
     .nav-links a { color:var(--muted); text-decoration:none; font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.15em; text-transform:uppercase; transition:color 0.3s; }
@@ -35,10 +35,11 @@
     .nav-hamburger.open span:nth-child(3) { transform:rotate(-45deg) translate(5px,-5px); }
     .mobile-only { display:none; }
     @media (max-width:768px) {
-      nav { padding:0 1rem; width:100%; overflow:visible; }
-      .nav-logo img { height:40px; }
-      .nav-hamburger { display:flex; flex:0 0 auto; }
-      .nav-links { display:none; flex-direction:column; position:absolute; top:72px; left:0; right:0; width:100%; max-width:100%; background:rgba(8,8,8,0.98); border-bottom:1px solid var(--border); padding:0.5rem 0 calc(env(safe-area-inset-bottom,0px) + 0.5rem); gap:0; overflow:hidden; }
+      nav { padding:0 1rem; width:100%; overflow-x:clip; overflow-y:visible; }
+      .nav-logo { min-width:0; }
+      .nav-logo img { height:40px; max-width:min(72vw, 290px); }
+      .nav-hamburger { display:flex; flex:0 0 auto; margin-left:0.75rem; position:relative; z-index:1002; }
+      .nav-links { display:none; flex-direction:column; position:fixed; top:72px; left:0; right:0; width:100vw; max-width:100vw; max-height:calc(100svh - 72px); background:rgba(8,8,8,0.98); border-bottom:1px solid var(--border); padding:0.5rem 0 calc(env(safe-area-inset-bottom,0px) + 0.5rem); gap:0; overflow-y:auto; overflow-x:hidden; z-index:1000; }
       .nav-links.open { display:flex; }
       .nav-links li { border-bottom:1px solid var(--border); width:100%; }
       .nav-links li:last-child { border-bottom:none; }
