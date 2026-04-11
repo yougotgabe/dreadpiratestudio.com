@@ -449,11 +449,11 @@ function toggleNotes(el){
 
 load();
 
-var YT_KEY='AIzaSyDEiPP3x0zqmyP__x9oarso-S9rQHsXtM4';
+// YouTube calls proxied through Cloudflare Worker — key never exposed in browser
 function fetchYouTubeChannel(cid,cb){
   if(!cid){cb(null,[]);return;}
-  var liveUrl='https://www.googleapis.com/youtube/v3/search?part=snippet&channelId='+encodeURIComponent(cid)+'&eventType=live&type=video&maxResults=1&key='+YT_KEY;
-  var vidUrl='https://www.googleapis.com/youtube/v3/search?part=snippet&channelId='+encodeURIComponent(cid)+'&order=date&type=video&maxResults=4&key='+YT_KEY;
+  var liveUrl='/yt-proxy?type=live&channelId='+encodeURIComponent(cid);
+  var vidUrl='/yt-proxy?type=videos&channelId='+encodeURIComponent(cid);
   var ld=null,vd=null,n=0;
   function done(){n++;if(n<2)return;var r=[];
     if(ld&&ld.items&&ld.items.length){var li=ld.items[0];r.push({id:li.id.videoId,title:li.snippet.title,isLive:true});}
