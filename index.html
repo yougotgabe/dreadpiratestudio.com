@@ -35,7 +35,7 @@
     .nav-hamburger.open span:nth-child(3) { transform:rotate(-45deg) translate(5px,-5px); }
     .mobile-only { display:none; }
     @media (max-width:768px) {
-      nav { padding:0 1rem; width:100%; overflow:clip; }
+      nav { padding:0 1rem; width:100%; overflow:visible; }
       .nav-logo img { height:40px; }
       .nav-hamburger { display:flex; flex:0 0 auto; }
       .nav-links { display:none; flex-direction:column; position:absolute; top:72px; left:0; right:0; width:100%; max-width:100%; background:rgba(8,8,8,0.98); border-bottom:1px solid var(--border); padding:0.5rem 0 calc(env(safe-area-inset-bottom,0px) + 0.5rem); gap:0; overflow:hidden; }
@@ -507,6 +507,7 @@
       <li><a href="#hold">The Hold</a></li>
       <li><a href="#video">Video</a></li>
       <li><a href="#music">Music</a></li>
+      <li><a href="webdesign.html">Web Design</a></li>
       <li><a href="#contact">Contact</a></li>
       <li class="mobile-only"><a href="crew.html">The Crew Roster</a></li>
       <li class="mobile-only"><a href="crew/edit.html">&#128273; Edit Profile</a></li>
