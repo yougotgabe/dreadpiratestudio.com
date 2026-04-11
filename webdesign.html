@@ -121,6 +121,9 @@
     .hero-eyebrow { font-family:'Cinzel',serif; font-size:0.62rem; letter-spacing:0.45em; text-transform:uppercase; color:var(--gold); opacity:0; animation:fadeUp 1s 0.2s ease forwards; }
     .hero-logo { width:min(1020px,95vw); opacity:0; animation:fadeUp 1s 0.05s ease forwards, logoPulse 4s 1.5s ease-in-out infinite; display:block; margin:-3rem 0; }
     .hero-logo video { width:100%; height:auto; display:block; filter:drop-shadow(0 0 40px rgba(201,168,76,0.3)) brightness(1.1); }
+    @media (max-width:768px) {
+      .hero-logo { width:190vw; margin-left:-45vw; margin-right:-45vw; }
+    }
     @keyframes logoPulse { 0%,100%{filter:drop-shadow(0 0 30px rgba(201,168,76,0.25)) brightness(1.0)} 50%{filter:drop-shadow(0 0 55px rgba(201,168,76,0.45)) brightness(1.2)} }
     .hero-title { font-family:'Cinzel Decorative',serif; font-size:clamp(1.7rem,5vw,3.6rem); color:var(--white); line-height:1.1; opacity:0; animation:fadeUp 1s 0.3s ease forwards; }
     .hero-title em { font-style:normal; color:var(--gold); }
@@ -211,6 +214,9 @@
       height:100vh;
       overflow:hidden;
       background:var(--deep);
+    }
+    @media (max-width:768px) {
+      #voyage-stage { top:68px; height:calc(100vh - 68px); }
     }
 
     /* Each stop fills the stage, absolutely positioned */
@@ -404,11 +410,27 @@
       .service-card-front { position:relative; inset:auto; backface-visibility:visible; -webkit-backface-visibility:visible; }
       .service-card-back { display:none; }
       .service-flip-hint { display:none; }
+      .services-grid { grid-template-columns:1fr 1fr; gap:0.75rem; }
+      .service-card-front { padding:1.1rem 1rem; }
+      .service-glyph { font-size:1.2rem; margin-bottom:0.5rem; }
+      .service-name { font-size:0.68rem; margin-bottom:0.4rem; }
+      .service-desc { display:none; }
+      .service-tags { display:none; }
+      .creative-grid { grid-template-columns:1fr 1fr; gap:0.75rem; }
+      .creative-card { padding:1rem 0.75rem; }
+      .creative-glyph { font-size:1.2rem; }
+      .creative-name { font-size:0.68rem; margin-bottom:0.3rem; }
+      .creative-desc { font-size:0.78rem; line-height:1.45; }
     }
 
     .service-glyph { font-size:1.5rem; margin-bottom:0.75rem; display:block; }
     .service-name { font-family:'Cinzel',serif; font-size:0.78rem; letter-spacing:0.1em; color:var(--white); margin-bottom:0.65rem; text-transform:uppercase; }
     .service-desc { font-size:0.9rem; color:var(--muted); line-height:1.6; margin-bottom:1rem; }
+    .service-desc-mobile { display:none; font-size:0.82rem; color:var(--muted); line-height:1.5; margin-bottom:0.75rem; }
+    @media (max-width:640px) {
+      .service-desc { display:none; }
+      .service-desc-mobile { display:block; }
+    }
     .service-tags { display:flex; flex-wrap:wrap; gap:0.35rem; }
     .service-tag { padding:0.18rem 0.6rem; border:1px solid var(--border); font-family:'Cinzel',serif; font-size:0.5rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold-dim); }
     .creative-section { margin-top:3.5rem; border-top:1px solid var(--border2); padding-top:3rem; }
@@ -512,7 +534,7 @@
 <nav id="main-nav">
   <a href="index.html" class="nav-brand">
     <img src="logo-horizontal.png" alt="Dread Pirate Studio">
-    <span class="nav-brand-sub">The Studio</span>
+    <span class="nav-brand-sub">Web Design</span>
   </a>
   <button class="nav-hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
   <ul class="nav-links" id="nav-links">
@@ -828,12 +850,12 @@
     </div>
     <div class="services-grid" id="services-grid">
       <div class="services-glow" id="services-glow"></div>
-      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">⚓</span><div class="service-name">Custom Website Build</div><p class="service-desc">Hand-coded from scratch for your business. Fast, mobile-first, and yours to keep. No templates, no page builders, no limitations baked in by someone else's framework.</p><div class="service-tags"><span class="service-tag">Custom code</span><span class="service-tag">Mobile-first</span><span class="service-tag">Fast load times</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">What's included</div><ul class="service-back-items"><li>Hand-coded HTML, CSS &amp; JS — no frameworks</li><li>Mobile-first, responsive on every device</li><li>Cloudflare hosting &amp; SSL from day one</li><li>Files are yours — always</li></ul></div></div></div>
-      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">🔁</span><div class="service-name">Monthly Retainer</div><p class="service-desc">One flat monthly fee covers hosting, maintenance, and minor content updates. Your site stays current without you lifting a finger. Major work quoted separately.</p><div class="service-tags"><span class="service-tag">Cloudflare hosting</span><span class="service-tag">Content updates</span><span class="service-tag">Priority support</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">What's covered</div><ul class="service-back-items"><li>Cloudflare hosting &amp; DNS management</li><li>Security patches &amp; uptime monitoring</li><li>Minor copy &amp; content updates</li><li>Priority response — you're not in a queue</li></ul></div></div></div>
-      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">🛒</span><div class="service-name">Online Ordering &amp; Payments</div><p class="service-desc">Real payment processing with Stripe, print-on-demand merch with Printify, or custom order forms integrated into your site. No Shopify middleman.</p><div class="service-tags"><span class="service-tag">Stripe</span><span class="service-tag">Print-on-demand</span><span class="service-tag">Custom forms</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">How it works</div><ul class="service-back-items"><li>Stripe handles payments — no Shopify cut</li><li>Printify syncs merch automatically</li><li>Revenue routes directly to your bank</li><li>Custom order forms for any workflow</li></ul></div></div></div>
-      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">📋</span><div class="service-name">Menu &amp; Content Management</div><p class="service-desc">Admin panels built for your specific needs — update menus, products, hours, photos, and announcements yourself without touching code or calling anyone.</p><div class="service-tags"><span class="service-tag">Admin dashboard</span><span class="service-tag">Image upload</span><span class="service-tag">Real-time updates</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">What you control</div><ul class="service-back-items"><li>Menu items, prices &amp; descriptions</li><li>Photo gallery &amp; featured images</li><li>Hours, announcements &amp; banners</li><li>No code knowledge required</li></ul></div></div></div>
-      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">📍</span><div class="service-name">Local Search Presence</div><p class="service-desc">Clean semantic HTML structure with local signals helps search engines understand who you are, what you do, and where you are — the foundation of being found.</p><div class="service-tags"><span class="service-tag">Semantic markup</span><span class="service-tag">Local signals</span><span class="service-tag">Performance tuning</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">What we build in</div><ul class="service-back-items"><li>Semantic HTML with local business schema</li><li>Clean page titles &amp; meta descriptions</li><li>Fast load times (Core Web Vitals)</li><li>Google Maps &amp; NAP consistency</li></ul></div></div></div>
-      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">🔧</span><div class="service-name">Rescue &amp; Migration</div><p class="service-desc">Currently on Shopify, WordPress, or a platform charging too much or breaking too often? We migrate your content, rebuild it right, and put you back in control.</p><div class="service-tags"><span class="service-tag">Shopify migration</span><span class="service-tag">WordPress rescue</span><span class="service-tag">Domain transfer</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">What we handle</div><ul class="service-back-items"><li>Full content &amp; data migration</li><li>Domain transfer &amp; DNS cutover</li><li>Redirect mapping so you keep your SEO</li><li>Old platform cancelled cleanly</li></ul></div></div></div>
+      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">⚓</span><div class="service-name">Custom Website Build</div><p class="service-desc">Hand-coded from scratch for your business. Fast, mobile-first, and yours to keep. No templates, no page builders, no limitations baked in by someone else's framework.</p><p class="service-desc-mobile">Hand-coded, fast, and yours to keep. No templates. No middlemen.</p><div class="service-tags"><span class="service-tag">Custom code</span><span class="service-tag">Mobile-first</span><span class="service-tag">Fast load times</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">What's included</div><ul class="service-back-items"><li>Hand-coded HTML, CSS &amp; JS — no frameworks</li><li>Mobile-first, responsive on every device</li><li>Cloudflare hosting &amp; SSL from day one</li><li>Files are yours — always</li></ul></div></div></div>
+      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">🔁</span><div class="service-name">Monthly Retainer</div><p class="service-desc">One flat monthly fee covers hosting, maintenance, and minor content updates. Your site stays current without you lifting a finger. Major work quoted separately.</p><p class="service-desc-mobile">Flat monthly fee. Hosting, maintenance, and updates — handled.</p><div class="service-tags"><span class="service-tag">Cloudflare hosting</span><span class="service-tag">Content updates</span><span class="service-tag">Priority support</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">What's covered</div><ul class="service-back-items"><li>Cloudflare hosting &amp; DNS management</li><li>Security patches &amp; uptime monitoring</li><li>Minor copy &amp; content updates</li><li>Priority response — you're not in a queue</li></ul></div></div></div>
+      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">🛒</span><div class="service-name">Online Ordering &amp; Payments</div><p class="service-desc">Real payment processing with Stripe, print-on-demand merch with Printify, or custom order forms integrated into your site. No Shopify middleman.</p><p class="service-desc-mobile">Stripe payments, merch, order forms. No Shopify cut.</p><div class="service-tags"><span class="service-tag">Stripe</span><span class="service-tag">Print-on-demand</span><span class="service-tag">Custom forms</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">How it works</div><ul class="service-back-items"><li>Stripe handles payments — no Shopify cut</li><li>Printify syncs merch automatically</li><li>Revenue routes directly to your bank</li><li>Custom order forms for any workflow</li></ul></div></div></div>
+      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">📋</span><div class="service-name">Menu &amp; Content Management</div><p class="service-desc">Admin panels built for your specific needs — update menus, products, hours, photos, and announcements yourself without touching code or calling anyone.</p><p class="service-desc-mobile">Your own admin panel. Update menus, hours, and photos yourself.</p><div class="service-tags"><span class="service-tag">Admin dashboard</span><span class="service-tag">Image upload</span><span class="service-tag">Real-time updates</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">What you control</div><ul class="service-back-items"><li>Menu items, prices &amp; descriptions</li><li>Photo gallery &amp; featured images</li><li>Hours, announcements &amp; banners</li><li>No code knowledge required</li></ul></div></div></div>
+      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">📍</span><div class="service-name">Local Search Presence</div><p class="service-desc">Clean semantic HTML structure with local signals helps search engines understand who you are, what you do, and where you are — the foundation of being found.</p><p class="service-desc-mobile">Built to be found. Clean code and local signals that search engines trust.</p><div class="service-tags"><span class="service-tag">Semantic markup</span><span class="service-tag">Local signals</span><span class="service-tag">Performance tuning</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">What we build in</div><ul class="service-back-items"><li>Semantic HTML with local business schema</li><li>Clean page titles &amp; meta descriptions</li><li>Fast load times (Core Web Vitals)</li><li>Google Maps &amp; NAP consistency</li></ul></div></div></div>
+      <div class="service-card reveal"><div class="service-card-inner"><div class="service-card-front"><span class="service-glyph">🔧</span><div class="service-name">Rescue &amp; Migration</div><p class="service-desc">Currently on Shopify, WordPress, or a platform charging too much or breaking too often? We migrate your content, rebuild it right, and put you back in control.</p><p class="service-desc-mobile">Trapped on Shopify or WordPress? We migrate you out and set it right.</p><div class="service-tags"><span class="service-tag">Shopify migration</span><span class="service-tag">WordPress rescue</span><span class="service-tag">Domain transfer</span></div><span class="service-flip-hint">hover for details</span></div><div class="service-card-back"><div class="service-back-title">What we handle</div><ul class="service-back-items"><li>Full content &amp; data migration</li><li>Domain transfer &amp; DNS cutover</li><li>Redirect mapping so you keep your SEO</li><li>Old platform cancelled cleanly</li></ul></div></div></div>
     </div>
     <div class="creative-section reveal">
       <div class="creative-label">Additional Creative Services &mdash; &agrave; la Carte</div>
@@ -968,6 +990,22 @@
 </footer>
 
 <script data-cfasync="false">
+// LOGO VIDEO AUTOPLAY — force play on mobile where autoplay may be deferred
+(function() {
+  function forceLogoPlay() {
+    var vids = document.querySelectorAll('.hero-logo video');
+    for (var i = 0; i < vids.length; i++) {
+      var v = vids[i];
+      v.muted = true;
+      v.setAttribute('playsinline', '');
+      var p = v.play();
+      if (p && p.catch) { p.catch(function() {}); }
+    }
+  }
+  document.addEventListener('DOMContentLoaded', forceLogoPlay);
+  window.addEventListener('load', forceLogoPlay);
+})();
+
 // NAV
 var nav = document.getElementById('main-nav');
 setTimeout(function() { nav.classList.add('visible'); }, 80);

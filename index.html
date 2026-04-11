@@ -56,6 +56,9 @@
     @keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
     .hero-logo { width:min(1020px,95vw); animation:logoPulse 4s ease-in-out infinite; display:block; }
     .hero-logo video { width:100%; height:auto; display:block; filter:drop-shadow(0 0 40px rgba(201,168,76,0.3)) brightness(1.1); }
+    @media (max-width:768px) {
+      .hero-logo { width:190vw; margin-left:-45vw; margin-right:-45vw; }
+    }
     @keyframes logoPulse { 0%,100% { filter:drop-shadow(0 0 30px rgba(201,168,76,0.25)) brightness(1.0); } 50% { filter:drop-shadow(0 0 55px rgba(201,168,76,0.45)) brightness(1.2); } }
     .hero-tagline { font-family:'Cinzel',serif; font-size:clamp(0.65rem,2vw,0.85rem); letter-spacing:0.4em; text-transform:uppercase; color:var(--gold); opacity:0.8; animation:fadeUp 1.2s 0.3s ease both; }
     .hero-divider { width:200px; height:1px; background:linear-gradient(to right,transparent,var(--gold-dim),transparent); animation:fadeUp 1.2s 0.5s ease both; }
@@ -1489,6 +1492,24 @@
     <iframe id="sap-widget-frame" class="sap-hidden-frame" title="Hidden site audio player" allow="autoplay"></iframe>
   </div>
 
+
+<script>
+// LOGO VIDEO AUTOPLAY — force play on mobile where autoplay may be deferred
+(function() {
+  function forceLogoPlay() {
+    var vids = document.querySelectorAll('.hero-logo video');
+    for (var i = 0; i < vids.length; i++) {
+      var v = vids[i];
+      v.muted = true;
+      v.setAttribute('playsinline', '');
+      var p = v.play();
+      if (p && p.catch) { p.catch(function() {}); }
+    }
+  }
+  document.addEventListener('DOMContentLoaded', forceLogoPlay);
+  window.addEventListener('load', forceLogoPlay);
+})();
+</script>
 
 <script>
   window.SITE_AUDIO_PLAYLIST_URL = 'https://soundcloud.com/yougotgabe/sets/dread-pirate-studio';
