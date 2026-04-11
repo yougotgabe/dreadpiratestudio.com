@@ -276,13 +276,13 @@ function toggleNotes(el){
 
 load();
 
-var YT_KEY='AIzaSyDEiPP3x0zqmyP__x9oarso-S9rQHsXtM4';
+// YouTube proxied via Cloudflare Worker — key stored server-side only
 var ytLiveItems=[];
 function fetchAndRenderYT(prof){
   var cid=prof.youtube_channel_id;
   if(!cid) return;
-  var liveUrl='https://www.googleapis.com/youtube/v3/search?part=snippet&channelId='+encodeURIComponent(cid)+'&eventType=live&type=video&maxResults=1&key='+YT_KEY;
-  var vidUrl='https://www.googleapis.com/youtube/v3/search?part=snippet&channelId='+encodeURIComponent(cid)+'&order=date&type=video&maxResults=6&key='+YT_KEY;
+  var liveUrl='/yt-proxy?type=live&channelId='+encodeURIComponent(cid);
+  var vidUrl='/yt-proxy?type=videos&channelId='+encodeURIComponent(cid);
   var ld=null,vd=null,n=0;
   function done(){
     n++;if(n<2)return;
