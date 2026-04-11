@@ -1,0 +1,14 @@
+name = "yt-proxy"
+main = "yt-proxy.js"
+compatibility_date = "2024-01-01"
+
+# Routes — worker intercepts /yt-proxy on your domain
+# Set this up in the Cloudflare dashboard under Workers > Triggers > Routes
+# Route pattern: dreadpiratestudio.com/yt-proxy*
+
+# Secret env var — set via CLI or dashboard, NEVER put the actual key here:
+#   wrangler secret put YT_API_KEY
+# Then paste your new restricted Google API key when prompted.
+
+[vars]
+# Non-secret vars can go here — YT_API_KEY must be a secret, not a var
