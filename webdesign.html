@@ -212,7 +212,52 @@
     .diff-icon { flex-shrink:0; margin-top:2px; }
     .diff-col--us .diff-icon { color:var(--gold); }
     .diff-callout { margin-top:2.5rem; padding:1rem 1.25rem; background:rgba(201,168,76,0.04); border-left:2px solid var(--gold-dim); font-size:0.85rem; color:var(--muted); font-style:italic; line-height:1.6; }
-    @media (max-width:640px) { .diff-wrap { grid-template-columns:1fr; } }
+
+    /* Mobile: flip card replacing the two-column layout */
+    .diff-flip-wrap { display:none; }
+    @media (max-width:640px) {
+      .diff-wrap { display:none; }
+      .diff-flip-wrap {
+        display:block;
+        perspective:1200px;
+        margin-top:2rem;
+        cursor:pointer;
+      }
+      .diff-flip-inner {
+        position:relative;
+        width:100%;
+        min-height:520px;
+        transform-style:preserve-3d;
+        transition:transform 0.65s cubic-bezier(0.4,0.2,0.2,1);
+      }
+      .diff-flip-wrap.flipped .diff-flip-inner { transform:rotateY(180deg); }
+      .diff-flip-front, .diff-flip-back {
+        position:absolute;
+        inset:0;
+        backface-visibility:hidden;
+        -webkit-backface-visibility:hidden;
+        border-radius:4px;
+        padding:2rem 1.5rem 1.5rem;
+        min-height:520px;
+      }
+      .diff-flip-front { background:var(--deep); border:1px solid var(--border); }
+      .diff-flip-back { background:var(--surface); border:1px solid rgba(201,168,76,0.3); transform:rotateY(180deg); }
+      .diff-flip-hint {
+        display:block;
+        text-align:center;
+        font-family:'Cinzel',serif;
+        font-size:0.5rem;
+        letter-spacing:0.2em;
+        text-transform:uppercase;
+        color:var(--muted2);
+        opacity:0.6;
+        margin-top:1.25rem;
+        padding-top:1rem;
+        border-top:1px solid var(--border2);
+      }
+      .diff-item { font-size:0.85rem; margin-bottom:0.9rem; }
+      .diff-callout { font-size:0.78rem; margin-top:1.5rem; padding:0.75rem 1rem; }
+    }
 
     /* VOYAGE — sticky + spacer scroll-jack
        The sticky CSS does all the positioning work.
@@ -508,6 +553,52 @@
     .work-card { border:1px solid var(--border); background:var(--surface); border-radius:4px; overflow:hidden; display:grid; grid-template-columns:1fr 1fr; transition:border-color 0.3s; }
     .work-card:hover { border-color:rgba(201,168,76,0.3); }
     .work-visual { background:var(--deep); display:flex; align-items:center; justify-content:center; padding:2.5rem 2rem; min-height:340px; border-right:1px solid var(--border2); }
+    @media (max-width:640px) {
+      .work-card { display:none; }
+      .work-flip-wrap {
+        display:block;
+        perspective:1200px;
+        cursor:pointer;
+        border:1px solid var(--border);
+        border-radius:4px;
+        overflow:hidden;
+      }
+      .work-flip-inner {
+        position:relative;
+        width:100%;
+        min-height:460px;
+        transform-style:preserve-3d;
+        transition:transform 0.65s cubic-bezier(0.4,0.2,0.2,1);
+      }
+      .work-flip-wrap.flipped .work-flip-inner { transform:rotateY(180deg); }
+      .work-flip-front, .work-flip-back {
+        position:absolute;
+        inset:0;
+        backface-visibility:hidden;
+        -webkit-backface-visibility:hidden;
+        border-radius:4px;
+        min-height:460px;
+        overflow:hidden;
+      }
+      .work-flip-front { background:var(--deep); display:flex; flex-direction:column; }
+      .work-flip-back { background:var(--surface); transform:rotateY(180deg); padding:1.75rem 1.5rem; display:flex; flex-direction:column; justify-content:flex-start; }
+      .work-flip-hint {
+        font-family:"Cinzel",serif;
+        font-size:0.5rem;
+        letter-spacing:0.2em;
+        text-transform:uppercase;
+        color:var(--muted2);
+        opacity:0.6;
+        padding:0.6rem;
+        text-align:center;
+        border-top:1px solid var(--border2);
+        background:var(--deep);
+        flex-shrink:0;
+      }
+      .work-flip-iframe { flex:1; overflow:hidden; }
+      .work-flip-iframe iframe { width:100%; height:100%; border:none; }
+    }
+    @media (min-width:641px) { .work-flip-wrap { display:none; } }
     .work-browser { width:90%; background:var(--surface2); border:1px solid var(--border); border-radius:6px; overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,0.5); }
     .work-iframe-wrap { position:relative; width:100%; height:320px; overflow:hidden; }
     .work-iframe-wrap iframe { width:200%; height:200%; border:none; transform:scale(0.5); transform-origin:top left; pointer-events:none; }
@@ -715,6 +806,32 @@
         <div class="diff-item"><label class="neon-checkbox is-checked diff-icon"><input type="checkbox" checked disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>One flat retainer covers hosting, maintenance &amp; support</span></div>
         <div class="diff-item"><label class="neon-checkbox is-checked diff-icon"><input type="checkbox" checked disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>Based in Willmar — we can meet, we know the market</span></div>
         <div class="diff-callout">Cloudflare SSL and DDoS protection included. No WordPress login pages for bots to brute-force. Supabase row-level security keeps your data locked down.</div>
+      </div>
+    </div>
+
+    <!-- MOBILE FLIP CARD — hidden on desktop, shown on mobile via CSS -->
+    <div class="diff-flip-wrap reveal" id="diff-flip">
+      <div class="diff-flip-inner">
+        <div class="diff-flip-front">
+          <div class="diff-col-head" style="color:var(--muted2);">The Agency Way</div>
+          <div class="diff-item" style="color:var(--muted2);"><label class="neon-checkbox is-unchecked diff-icon"><input type="checkbox" disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>WordPress templates — looks like everyone else's</span></div>
+          <div class="diff-item" style="color:var(--muted2);"><label class="neon-checkbox is-unchecked diff-icon"><input type="checkbox" disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>Handed off between managers, designers, developers</span></div>
+          <div class="diff-item" style="color:var(--muted2);"><label class="neon-checkbox is-unchecked diff-icon"><input type="checkbox" disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>Plugin debt — updates break things, holes pile up</span></div>
+          <div class="diff-item" style="color:var(--muted2);"><label class="neon-checkbox is-unchecked diff-icon"><input type="checkbox" disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>Cancel and the site disappears — you own nothing</span></div>
+          <div class="diff-item" style="color:var(--muted2);"><label class="neon-checkbox is-unchecked diff-icon"><input type="checkbox" disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>$120+/month just for hosting, before any work</span></div>
+          <div class="diff-item" style="color:var(--muted2);"><label class="neon-checkbox is-unchecked diff-icon"><input type="checkbox" disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>Based wherever — not here, doesn't know the market</span></div>
+          <div class="diff-flip-hint">tap to see the DPS way →</div>
+        </div>
+        <div class="diff-flip-back">
+          <div class="diff-col-head" style="color:var(--gold);">The DPS Way</div>
+          <div class="diff-item" style="color:var(--muted);"><label class="neon-checkbox is-checked diff-icon"><input type="checkbox" checked disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>Custom code — built for you, nobody else has it</span></div>
+          <div class="diff-item" style="color:var(--muted);"><label class="neon-checkbox is-checked diff-icon"><input type="checkbox" checked disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>One person builds it, maintains it, picks up the phone</span></div>
+          <div class="diff-item" style="color:var(--muted);"><label class="neon-checkbox is-checked diff-icon"><input type="checkbox" checked disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>No plugins, no theme updates, no vulnerabilities</span></div>
+          <div class="diff-item" style="color:var(--muted);"><label class="neon-checkbox is-checked diff-icon"><input type="checkbox" checked disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>Your code is always yours — transferred on purchase</span></div>
+          <div class="diff-item" style="color:var(--muted);"><label class="neon-checkbox is-checked diff-icon"><input type="checkbox" checked disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>One flat retainer covers hosting, maintenance &amp; support</span></div>
+          <div class="diff-item" style="color:var(--muted);"><label class="neon-checkbox is-checked diff-icon"><input type="checkbox" checked disabled><div class="neon-checkbox__frame"><div class="neon-checkbox__box"><div class="neon-checkbox__check-container"><svg viewBox="0 0 24 24" class="neon-checkbox__check"><path d="M3,12.5l7,7L21,5"></path></svg></div><div class="neon-checkbox__glow"></div><div class="neon-checkbox__borders"><span></span><span></span><span></span><span></span></div></div></div></label><span>Based in Willmar — we can meet, we know the market</span></div>
+          <div class="diff-flip-hint">← tap to flip back</div>
+        </div>
       </div>
     </div>
   </div>
@@ -974,6 +1091,35 @@
         <a href="https://friedascafe.pages.dev" target="_blank" rel="noopener" class="work-link">Visit friedascafe.com &rarr;</a>
       </div>
     </div>
+
+    <!-- MOBILE FLIP CARD for Ships section -->
+    <div class="work-flip-wrap reveal" id="work-flip">
+      <div class="work-flip-inner">
+        <div class="work-flip-front">
+          <div class="work-browser" style="margin:1rem;border-radius:4px;overflow:hidden;flex:1;">
+            <div class="work-bar"><div class="work-bar-dots"><div class="work-bar-dot"></div><div class="work-bar-dot"></div><div class="work-bar-dot"></div></div><div class="work-bar-url">friedascafe.com</div></div>
+            <div class="work-flip-iframe" style="height:340px;">
+              <iframe src="https://friedascafe.pages.dev" title="Frieda's Cafe" loading="lazy" scrolling="yes" style="width:100%;height:100%;border:none;"></iframe>
+            </div>
+          </div>
+          <div class="work-flip-hint">tap to see project details →</div>
+        </div>
+        <div class="work-flip-back">
+          <span class="work-tag">Active Client &nbsp;&middot;&nbsp; Retainer</span>
+          <h3 class="work-title" style="margin-top:0.75rem;">Frieda's Cafe</h3>
+          <div class="work-location">Willmar, MN &nbsp;&middot;&nbsp; Family Diner since 1970</div>
+          <p class="work-desc" style="font-size:0.85rem;margin:0.75rem 0;">Replaced a static site and Shopify store with one unified custom site — menu management, merch ordering, and an admin panel Steve and Amy can use themselves.</p>
+          <ul class="work-features" style="font-size:0.82rem;">
+            <li>Custom admin panel for self-service updates</li>
+            <li>Stripe merch store with Printify fulfillment</li>
+            <li>Live menu from Supabase database</li>
+            <li>Cloudflare Pages — fast, secure, unlimited bandwidth</li>
+          </ul>
+          <a href="https://friedascafe.pages.dev" target="_blank" rel="noopener" class="work-link" style="margin-top:1rem;font-size:0.75rem;">Visit friedascafe.com &rarr;</a>
+          <div class="work-flip-hint" style="margin-top:1rem;padding-top:0.75rem;border-top:1px solid var(--border2);text-align:center;font-family:'Cinzel',serif;font-size:0.5rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted2);opacity:0.6;">← tap to flip back</div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1039,6 +1185,23 @@
 </footer>
 
 <script data-cfasync="false">
+// FLIP CARDS — diff section and work section (mobile only)
+(function() {
+  function initFlip(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('click', function(e) {
+      // Don't flip if tapping a link inside the back face
+      if (e.target.tagName === 'A') return;
+      el.classList.toggle('flipped');
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    initFlip('diff-flip');
+    initFlip('work-flip');
+  });
+})();
+
 // LOGO VIDEO AUTOPLAY — force play on mobile where autoplay may be deferred
 (function() {
   function forceLogoPlay() {
