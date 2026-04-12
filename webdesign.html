@@ -501,6 +501,7 @@
     }
     .service-tags { display:flex; flex-wrap:wrap; gap:0.35rem; }
     .service-tag { padding:0.18rem 0.6rem; border:1px solid var(--border); font-family:'Cinzel',serif; font-size:0.5rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold-dim); }
+    @media (max-width:640px) { .service-tags { display:none !important; } }
     .creative-section { margin-top:3.5rem; border-top:1px solid var(--border2); padding-top:3rem; }
     .creative-label { font-family:'Cinzel',serif; font-size:0.6rem; letter-spacing:0.4em; text-transform:uppercase; color:var(--gold); opacity:0.6; margin-bottom:1.5rem; text-align:center; }
     .creative-swipe-hint { display:none; text-align:center; font-family:'Cinzel',serif; font-size:0.5rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted2); opacity:0.5; margin-top:0.75rem; }
@@ -1104,33 +1105,9 @@
         <div class="work-flip-front">
           <div style="margin:1rem;border-radius:4px;overflow:hidden;flex:1;border:1px solid var(--border);background:var(--surface2);">
             <div class="work-bar"><div class="work-bar-dots"><div class="work-bar-dot"></div><div class="work-bar-dot"></div><div class="work-bar-dot"></div></div><div class="work-bar-url">friedascafe.com</div></div>
-            <!-- Static mockup — no live iframe so the card is fully tappable -->
-            <div style="padding:1.25rem;display:flex;flex-direction:column;gap:0.75rem;">
-              <div style="height:48px;background:linear-gradient(135deg,#0a0c10,#12141a);border-radius:3px;display:flex;align-items:center;justify-content:center;">
-                <span style="font-family:'Cinzel Decorative',serif;font-size:0.9rem;color:#c9a84c;letter-spacing:0.1em;">Frieda's Cafe</span>
-              </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
-                <div style="background:var(--deep);border:1px solid var(--border2);border-radius:3px;padding:0.6rem;text-align:center;">
-                  <div style="font-family:'Cinzel',serif;font-size:0.42rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);opacity:0.7;margin-bottom:0.3rem;">Menu</div>
-                  <div style="font-size:0.7rem;color:var(--muted2);">Live · Admin</div>
-                </div>
-                <div style="background:var(--deep);border:1px solid var(--border2);border-radius:3px;padding:0.6rem;text-align:center;">
-                  <div style="font-family:'Cinzel',serif;font-size:0.42rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);opacity:0.7;margin-bottom:0.3rem;">Merch</div>
-                  <div style="font-size:0.7rem;color:var(--muted2);">Stripe · Printify</div>
-                </div>
-                <div style="background:var(--deep);border:1px solid var(--border2);border-radius:3px;padding:0.6rem;text-align:center;">
-                  <div style="font-family:'Cinzel',serif;font-size:0.42rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);opacity:0.7;margin-bottom:0.3rem;">Orders</div>
-                  <div style="font-size:0.7rem;color:var(--muted2);">Real-time</div>
-                </div>
-                <div style="background:var(--deep);border:1px solid var(--border2);border-radius:3px;padding:0.6rem;text-align:center;">
-                  <div style="font-family:'Cinzel',serif;font-size:0.42rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);opacity:0.7;margin-bottom:0.3rem;">Hosting</div>
-                  <div style="font-size:0.7rem;color:var(--muted2);">Cloudflare</div>
-                </div>
-              </div>
-              <div style="background:var(--deep);border:1px solid var(--border2);border-radius:3px;padding:0.75rem;text-align:center;">
-                <div style="font-family:'Cinzel',serif;font-size:0.42rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);opacity:0.7;margin-bottom:0.4rem;">Active Client · Retainer</div>
-                <div style="font-size:0.75rem;color:var(--muted);">Custom-built from scratch.<br>Family diner since 1970.</div>
-              </div>
+            <!-- Live preview — pointer-events:none makes entire card tappable to flip -->
+            <div style="height:340px;overflow:hidden;position:relative;">
+              <iframe src="https://friedascafe.pages.dev" title="Frieda's Cafe" loading="lazy" style="width:100%;height:100%;border:none;pointer-events:none;"></iframe>
             </div>
           </div>
           <div class="work-flip-hint">tap to see project details →</div>
