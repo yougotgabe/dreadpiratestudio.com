@@ -272,6 +272,13 @@
     #voyage { background:var(--black); padding:0; }
     .voyage-header { text-align:center; padding:6rem 2rem 4rem; }
 
+    /* Ship video in voyage header */
+    .voyage-ship-wrap { margin-top:2.5rem; display:flex; justify-content:center; pointer-events:none; }
+    .voyage-ship-video { width:clamp(400px,64vw,760px); height:auto; display:block; filter:drop-shadow(0 8px 32px rgba(201,168,76,0.18)); }
+    @media (max-width:768px) {
+      .voyage-ship-video { width:clamp(320px,90vw,520px); }
+    }
+
     /* Outer creates the scroll distance. Height set by JS on load. */
     #voyage-outer { position:relative; }
     #voyage-spacer { width:100%; pointer-events:none; }
@@ -851,6 +858,11 @@
     <h2 class="section-title">Take the Voyage</h2>
     <div class="section-rule"></div>
     <p class="section-sub">Scroll through what's possible. Each stop is a live demonstration of something we can build for you.</p>
+    <div class="voyage-ship-wrap">
+      <video class="voyage-ship-video" autoplay loop muted playsinline>
+        <source src="DPS-ship.webm" type="video/webm">
+      </video>
+    </div>
   </div>
 
   <div id="voyage-outer">
