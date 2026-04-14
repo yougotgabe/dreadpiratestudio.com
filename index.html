@@ -103,7 +103,57 @@
     #captain { background:linear-gradient(180deg,var(--black) 0%,var(--deep) 50%,var(--black) 100%); }
     .captain-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; }
     .captain-img-wrap { position:relative; display:flex; justify-content:center; }
-    .captain-img-wrap img { width:min(260px,100%); filter:drop-shadow(0 0 40px rgba(201,168,76,0.2)); }
+    .captain-frame-wrapper {
+      --captain-frame-scale: 0.94;
+      position: relative;
+      width: min(447px, 100%);
+      max-width: 447px;
+      height: auto;
+      aspect-ratio: 1024 / 1536;
+      filter: drop-shadow(0 0 40px rgba(201,168,76,0.18));
+    }
+    .captain-video-mask {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      z-index: 1;
+      background: transparent;
+      -webkit-mask-image: url('./DPS-frame-mask.png');
+      -webkit-mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      -webkit-mask-size: contain;
+      -webkit-mask-mode: luminance;
+      mask-image: url('./DPS-frame-mask.png');
+      mask-repeat: no-repeat;
+      mask-position: center;
+      mask-size: contain;
+      mask-mode: luminance;
+      transform: scale(var(--captain-frame-scale));
+      transform-origin: center center;
+    }
+    .captain-video-mask video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.02);
+      transform-origin: center center;
+      display: block;
+      z-index: 1;
+    }
+    .captain-frame-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      display: block;
+      z-index: 2;
+      transform: scale(var(--captain-frame-scale));
+      transform-origin: center center;
+    }
     .captain-text h3 { font-family:'Cinzel Decorative',serif; font-size:1.8rem; color:var(--gold); margin-bottom:0.25rem; }
     .captain-text .rank { font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.3em; color:var(--muted); text-transform:uppercase; margin-bottom:1.5rem; }
     .captain-text p { color:var(--muted); line-height:1.8; margin-bottom:1rem; font-size:1rem; }
@@ -169,6 +219,7 @@
     @media (max-width:768px) {
       .captain-grid { grid-template-columns:1fr; text-align:center; }
       .captain-img-wrap { margin-bottom:2rem; }
+      .captain-frame-wrapper { width:min(362px, 86vw); }
       .skills-list { justify-content:center; }
       .nav-links { display:none; }
     }
@@ -672,7 +723,15 @@
       </div>
       <div class="captain-grid">
         <div class="captain-img-wrap">
-          <img src="icon.png" alt="Captain Gabe Nelson" id="captain-image">
+          <div class="captain-frame-wrapper" id="captain-image-wrap">
+            <div class="captain-video-mask">
+              <video id="captain-video" autoplay muted loop playsinline preload="metadata" poster="icon.png">
+                <source src="DPS-portrait.mp4" type="video/mp4">
+                <img src="icon.png" alt="Captain Gabe Nelson" id="captain-image">
+              </video>
+            </div>
+            <img src="DPS-frame.png" alt="Captain Gabe Nelson frame" class="captain-frame-overlay">
+          </div>
         </div>
         <div class="captain-text">
           <h3 id="captain-name">Gabe Nelson</h3>
@@ -937,7 +996,7 @@
         setHTML('captain-rank', cfg.captain_rank ? htmlEncode(cfg.captain_rank).replace(/ \/ /g,' &nbsp;/&nbsp; ') : '');
         setHTML('captain-bio-1', cfg.captain_bio_1 ? htmlEncode(cfg.captain_bio_1).replace(/—/g,'&mdash;') : '');
         setHTML('captain-bio-2', cfg.captain_bio_2 ? htmlEncode(cfg.captain_bio_2).replace(/—/g,'&mdash;') : '');
-        if (cfg.captain_image) { var ci=document.getElementById('captain-image'); if(ci) ci.src=cfg.captain_image; }
+        if (cfg.captain_image) { var ci=document.getElementById('captain-image'); if(ci && ci.tagName === 'IMG') ci.src=cfg.captain_image; }
         if (cfg.captain_skills) {
           var skillsEl=document.getElementById('captain-skills');
           if(skillsEl){
