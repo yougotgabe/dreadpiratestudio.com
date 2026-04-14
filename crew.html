@@ -102,7 +102,7 @@
   var SUPABASE_KEY = 'sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
 
   function fetchCrew() {
-    var url = SUPABASE_URL + '/rest/v1/crew_profiles?published=eq.true&order=sort_order.asc&select=slug,display_name,rank,disciplines,bio,photo_url';
+    var url = SUPABASE_URL + '/rest/v1/crew_profiles?published=eq.true&order=sort_order.asc&select=slug,display_name,rank,disciplines,bio,photo_url,photo_position';
     fetch(url, {
       headers: {
         'apikey': SUPABASE_KEY,
@@ -126,7 +126,7 @@
     for (var i = 0; i < profiles.length; i++) {
       var p = profiles[i];
       var photo = p.photo_url
-        ? '<img src="' + esc(p.photo_url) + '" alt="' + esc(p.display_name) + '" loading="lazy">'
+        ? '<img src="' + esc(p.photo_url) + '" alt="' + esc(p.display_name) + '" loading="lazy" style="object-position:' + esc(p.photo_position||'50% 50%') + '">'
         : '<div class="placeholder">&#9760;</div>';
       var disciplines = '';
       if (p.disciplines && p.disciplines.length) {
