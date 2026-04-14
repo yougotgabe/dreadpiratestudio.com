@@ -58,6 +58,17 @@
   .upload-progress.err{color:#8a3030;}
   .current-url{font-size:0.78rem;color:var(--muted);font-style:italic;word-break:break-all;}
 
+  /* Focal point / crop widget */
+  .crop-widget{display:none;flex-direction:column;gap:0.6rem;}
+  .crop-widget.visible{display:flex;}
+  .crop-label{font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);}
+  .crop-viewport{position:relative;overflow:hidden;border:1px solid var(--border);cursor:grab;user-select:none;touch-action:none;background:var(--deep);}
+  .crop-viewport.square{width:100%;max-width:220px;aspect-ratio:1/1;}
+  .crop-viewport.banner{width:100%;aspect-ratio:4/1;}
+  .crop-viewport:active{cursor:grabbing;}
+  .crop-viewport img{position:absolute;width:100%;height:100%;object-fit:cover;pointer-events:none;transition:object-position 0s;}
+  .crop-hint{font-size:0.78rem;color:var(--muted);font-style:italic;}
+
   .media-list{display:flex;flex-direction:column;gap:1rem;}
   .media-item{background:var(--deep);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
   .media-item-header{padding:0.75rem 1rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer;background:var(--surface);}
@@ -140,7 +151,6 @@
     <div class="fg">
       <label>Profile Photo</label>
       <div class="img-upload-wrap">
-        <img id="photo-preview" class="img-preview-thumb" src="" alt="Profile photo preview">
         <div class="upload-btn-row">
           <label class="upload-btn">
             Choose Photo
@@ -149,13 +159,18 @@
           <span class="upload-progress" id="photo-progress"></span>
         </div>
         <p class="hint">JPG, PNG, WebP or GIF · max 10MB. Square or portrait works best.</p>
-        <p class="current-url" id="photo-url-display"></p>
+        <div class="crop-widget" id="photo-crop-widget">
+          <span class="crop-label">Drag to reposition · this is how it appears on your profile and the crew page</span>
+          <div class="crop-viewport square" id="photo-crop-viewport">
+            <img id="photo-crop-img" src="" alt="">
+          </div>
+          <p class="crop-hint">Drag up/down to choose which part of your photo shows.</p>
+        </div>
       </div>
     </div>
     <div class="fg">
       <label>Banner Image</label>
       <div class="img-upload-wrap">
-        <img id="banner-preview" class="img-preview banner-preview" src="" alt="Banner preview">
         <div class="upload-btn-row">
           <label class="upload-btn">
             Choose Banner
@@ -164,7 +179,13 @@
           <span class="upload-progress" id="banner-progress"></span>
         </div>
         <p class="hint">Wide landscape image recommended · ideally 1200×300px · max 10MB.</p>
-        <p class="current-url" id="banner-url-display"></p>
+        <div class="crop-widget" id="banner-crop-widget">
+          <span class="crop-label">Drag to reposition · this is how your banner appears on your profile</span>
+          <div class="crop-viewport banner" id="banner-crop-viewport">
+            <img id="banner-crop-img" src="" alt="">
+          </div>
+          <p class="crop-hint">Drag left/right to choose which part of your banner shows.</p>
+        </div>
       </div>
     </div>
 
@@ -197,7 +218,7 @@ var SURL='https://efylfnnshmaauhiwqaxj.supabase.co';
 var SKEY='sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
 var STORAGE_BUCKET='crew-images';
 var profile=null, token=null, selDiscs=[], mediaItems=[], openItems={};
-var photoUrl='', bannerUrl='';
+var photoUrl='', bannerUrl='', photoPosition='50% 50%', bannerPosition='50% 50%';
 
 document.getElementById('tok-in').addEventListener('keydown',function(e){if(e.key==='Enter')doValidate();});
 
@@ -244,15 +265,13 @@ function populateForm(p){
   // Load existing photo/banner
   photoUrl=p.photo_url||'';
   bannerUrl=p.banner_url||'';
+  photoPosition=p.photo_position||'50% 50%';
+  bannerPosition=p.banner_position||'50% 50%';
   if(photoUrl){
-    var thumb=document.getElementById('photo-preview');
-    thumb.src=photoUrl;thumb.classList.add('visible');
-    document.getElementById('photo-url-display').textContent='Current: '+photoUrl;
+    showCropWidget('photo', photoUrl, photoPosition);
   }
   if(bannerUrl){
-    var ban=document.getElementById('banner-preview');
-    ban.src=bannerUrl;ban.classList.add('visible');
-    document.getElementById('banner-url-display').textContent='Current: '+bannerUrl;
+    showCropWidget('banner', bannerUrl, bannerPosition);
   }
 
   // Build links array
@@ -322,20 +341,17 @@ function uploadImage(file, field){
     var publicUrl=SURL+'/storage/v1/object/public/'+STORAGE_BUCKET+'/'+path;
     if(field==='photo'){
       photoUrl=publicUrl;
-      var thumb=document.getElementById('photo-preview');
-      thumb.src=publicUrl;thumb.classList.add('visible');
-      document.getElementById('photo-url-display').textContent='Current: '+publicUrl;
+      photoPosition='50% 50%';
+      showCropWidget('photo', publicUrl, photoPosition);
     } else if(field==='banner'){
       bannerUrl=publicUrl;
-      var ban=document.getElementById('banner-preview');
-      ban.src=publicUrl;ban.classList.add('visible');
-      document.getElementById('banner-url-display').textContent='Current: '+publicUrl;
+      bannerPosition='50% 50%';
+      showCropWidget('banner', publicUrl, bannerPosition);
     } else {
       // media photo upload — field is the item index
       var idx=parseInt(field,10);
       if(!isNaN(idx) && mediaItems[idx]){
         mediaItems[idx].url=publicUrl;
-        // Update the URL input in the open media item
         var bodies=document.querySelectorAll('.media-item-body');
         if(bodies[idx]){
           var urlIn=bodies[idx].querySelector('.media-url-input');
@@ -351,6 +367,82 @@ function uploadImage(file, field){
     console.error('Upload error:',err);
     setUploadStatus(field,'err','Upload failed — try again');
   });
+}
+
+// ── Crop / focal point widget ─────────────────────────────────
+function showCropWidget(field, url, position){
+  var widget=document.getElementById(field+'-crop-widget');
+  var img=document.getElementById(field+'-crop-img');
+  if(!widget||!img) return;
+  img.src=url;
+  img.style.objectPosition=position;
+  widget.classList.add('visible');
+  initCropDrag(field);
+}
+
+function initCropDrag(field){
+  var viewport=document.getElementById(field+'-crop-viewport');
+  var img=document.getElementById(field+'-crop-img');
+  if(!viewport||!img) return;
+  // Remove old listeners by cloning
+  var fresh=viewport.cloneNode(true);
+  viewport.parentNode.replaceChild(fresh,viewport);
+  viewport=fresh;
+  img=viewport.querySelector('img');
+
+  // Parse current position
+  var pos=parsePosition(field==='photo'?photoPosition:bannerPosition);
+  var px=pos.x, py=pos.y; // 0–100
+
+  var dragging=false, startX=0, startY=0, startPx=0, startPy=0;
+
+  function applyPosition(){
+    var cssPos=px+'% '+py+'%';
+    img.style.objectPosition=cssPos;
+    if(field==='photo') photoPosition=cssPos;
+    else bannerPosition=cssPos;
+  }
+
+  function onDown(e){
+    dragging=true;
+    var pt=getPoint(e);
+    startX=pt.x; startY=pt.y;
+    startPx=px; startPy=py;
+    e.preventDefault();
+  }
+  function onMove(e){
+    if(!dragging) return;
+    var pt=getPoint(e);
+    var dx=pt.x-startX, dy=pt.y-startY;
+    var rect=viewport.getBoundingClientRect();
+    // Invert: dragging right moves focus left (pans image right)
+    px=Math.min(100,Math.max(0,startPx-(dx/rect.width)*100));
+    py=Math.min(100,Math.max(0,startPy-(dy/rect.height)*100));
+    applyPosition();
+    e.preventDefault();
+  }
+  function onUp(){ dragging=false; }
+  function getPoint(e){
+    if(e.touches&&e.touches.length) return{x:e.touches[0].clientX,y:e.touches[0].clientY};
+    return{x:e.clientX,y:e.clientY};
+  }
+
+  viewport.addEventListener('mousedown',onDown);
+  viewport.addEventListener('touchstart',onDown,{passive:false});
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('touchmove',onMove,{passive:false});
+  document.addEventListener('mouseup',onUp);
+  document.addEventListener('touchend',onUp);
+
+  applyPosition();
+}
+
+function parsePosition(str){
+  var parts=(str||'50% 50%').split(' ');
+  return{
+    x:parseFloat(parts[0])||50,
+    y:parseFloat(parts[1])||50
+  };
 }
 
 function setUploadStatus(field, state, msg){
@@ -577,6 +669,8 @@ function doSave(){
     hobbies:document.getElementById('f-hobbies').value.trim(),
     photo_url:photoUrl,
     banner_url:bannerUrl,
+    photo_position:photoPosition,
+    banner_position:bannerPosition,
     player_playlist_url:document.getElementById('f-playlist').value.trim(),
     extra_links:JSON.stringify(profileLinks.filter(function(l){return l.label||l.url;})),
     link_1_label:profileLinks[0]?profileLinks[0].label:'',link_1_url:profileLinks[0]?profileLinks[0].url:'',

@@ -308,8 +308,8 @@ function load(){
 
 function renderProfile(p){
   document.title=(p.display_name||'Crew')+' — Dread Pirate Studio';
-  if(p.photo_url) document.getElementById('p-photo').innerHTML='<img src="'+esc(p.photo_url)+'" alt="'+escT(p.display_name)+'">';
-  if(p.banner_url){var b=document.getElementById('p-banner');b.innerHTML='<img src="'+esc(p.banner_url)+'" alt="Banner">';b.style.display='block';}
+  if(p.photo_url){var photoPos=p.photo_position||'50% 50%';document.getElementById('p-photo').innerHTML='<img src="'+esc(p.photo_url)+'" alt="'+escT(p.display_name)+'" style="object-position:'+esc(photoPos)+'">';}
+  if(p.banner_url){var bannerPos=p.banner_position||'50% 50%';var b=document.getElementById('p-banner');b.innerHTML='<img src="'+esc(p.banner_url)+'" alt="Banner" style="object-position:'+esc(bannerPos)+'">';b.style.display='block';}
   document.getElementById('p-rank').textContent=p.rank||'';
   document.getElementById('p-name').textContent=p.display_name||'';
   if(p.disciplines&&p.disciplines.length){
