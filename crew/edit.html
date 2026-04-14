@@ -40,6 +40,24 @@
   .dt-add input{flex:1;}
   .dt-add button{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:0.4rem 0.8rem;font-family:'Cinzel',serif;font-size:0.6rem;cursor:pointer;transition:all 0.2s;}
   .dt-add button:hover{border-color:var(--gold-dim);color:var(--gold);}
+
+  /* Image upload widget */
+  .img-upload-wrap{display:flex;flex-direction:column;gap:0.75rem;}
+  .img-preview{width:100%;max-height:200px;object-fit:cover;border:1px solid var(--border);display:none;}
+  .img-preview.banner-preview{max-height:120px;}
+  .img-preview.visible{display:block;}
+  .img-preview-thumb{width:80px;height:80px;object-fit:cover;border:1px solid var(--border);border-radius:2px;display:none;}
+  .img-preview-thumb.visible{display:block;}
+  .upload-btn-row{display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;}
+  .upload-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:0.55rem 1rem;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+  .upload-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
+  .upload-btn input[type=file]{display:none;}
+  .upload-progress{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.1em;color:var(--muted);}
+  .upload-progress.uploading{color:var(--gold-dim);}
+  .upload-progress.done{color:#4a9e64;}
+  .upload-progress.err{color:#8a3030;}
+  .current-url{font-size:0.78rem;color:var(--muted);font-style:italic;word-break:break-all;}
+
   .media-list{display:flex;flex-direction:column;gap:1rem;}
   .media-item{background:var(--deep);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
   .media-item-header{padding:0.75rem 1rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer;background:var(--surface);}
@@ -120,14 +138,34 @@
 
     <p class="sec-label">Photo</p>
     <div class="fg">
-      <label>Photo URL</label>
-      <input type="url" id="f-photo" placeholder="https://...">
-      <p class="hint">Upload to Imgur, Discord, or GitHub issues. For Dropbox, change dl=0 to raw=1 at the end of the URL.</p>
+      <label>Profile Photo</label>
+      <div class="img-upload-wrap">
+        <img id="photo-preview" class="img-preview-thumb" src="" alt="Profile photo preview">
+        <div class="upload-btn-row">
+          <label class="upload-btn">
+            Choose Photo
+            <input type="file" id="photo-file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handleUpload(this,'photo')">
+          </label>
+          <span class="upload-progress" id="photo-progress"></span>
+        </div>
+        <p class="hint">JPG, PNG, WebP or GIF · max 10MB. Square or portrait works best.</p>
+        <p class="current-url" id="photo-url-display"></p>
+      </div>
     </div>
     <div class="fg">
-      <label>Banner Image URL</label>
-      <input type="url" id="f-banner" placeholder="https://... (wide landscape image, ideally 1200x300px)">
-      <p class="hint">Full-width banner at the top of your profile, like a YouTube channel banner.</p>
+      <label>Banner Image</label>
+      <div class="img-upload-wrap">
+        <img id="banner-preview" class="img-preview banner-preview" src="" alt="Banner preview">
+        <div class="upload-btn-row">
+          <label class="upload-btn">
+            Choose Banner
+            <input type="file" id="banner-file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handleUpload(this,'banner')">
+          </label>
+          <span class="upload-progress" id="banner-progress"></span>
+        </div>
+        <p class="hint">Wide landscape image recommended · ideally 1200×300px · max 10MB.</p>
+        <p class="current-url" id="banner-url-display"></p>
+      </div>
     </div>
 
     <p class="sec-label">Your Audio Player</p>
@@ -157,7 +195,9 @@
 <script>
 var SURL='https://efylfnnshmaauhiwqaxj.supabase.co';
 var SKEY='sb_publishable_XWIUAf_n31K4x-AXkSO5Sg_IwppPmww';
+var STORAGE_BUCKET='crew-images';
 var profile=null, token=null, selDiscs=[], mediaItems=[], openItems={};
+var photoUrl='', bannerUrl='';
 
 document.getElementById('tok-in').addEventListener('keydown',function(e){if(e.key==='Enter')doValidate();});
 
@@ -199,10 +239,23 @@ function populateForm(p){
   document.getElementById('f-talents').value=p.talents||'';
   document.getElementById('f-interests').value=p.interests||'';
   document.getElementById('f-hobbies').value=p.hobbies||'';
-  document.getElementById('f-photo').value=p.photo_url||'';
-  document.getElementById('f-banner').value=p.banner_url||'';
   document.getElementById('f-playlist').value=p.player_playlist_url||'';
-  // Build links array from profile — migrate from old 4-slot system
+
+  // Load existing photo/banner
+  photoUrl=p.photo_url||'';
+  bannerUrl=p.banner_url||'';
+  if(photoUrl){
+    var thumb=document.getElementById('photo-preview');
+    thumb.src=photoUrl;thumb.classList.add('visible');
+    document.getElementById('photo-url-display').textContent='Current: '+photoUrl;
+  }
+  if(bannerUrl){
+    var ban=document.getElementById('banner-preview');
+    ban.src=bannerUrl;ban.classList.add('visible');
+    document.getElementById('banner-url-display').textContent='Current: '+bannerUrl;
+  }
+
+  // Build links array
   profileLinks=[];
   var legacyLinks=[
     {label:p.link_1_label||'',url:p.link_1_url||''},
@@ -210,10 +263,8 @@ function populateForm(p){
     {label:p.link_3_label||'',url:p.link_3_url||''},
     {label:p.link_4_label||'',url:p.link_4_url||''}
   ];
-  // Also parse extra_links JSON if present
   var extraLinks=[];
   try{ if(p.extra_links) extraLinks=JSON.parse(p.extra_links); }catch(e){}
-  // Merge: use extra_links if populated, else fall back to legacy
   if(extraLinks.length){
     profileLinks=extraLinks;
   } else {
@@ -232,6 +283,85 @@ function populateForm(p){
   }
   for(var k=0;k<selDiscs.length;k++){if(presets.indexOf(selDiscs[k])===-1)addDiscTag(selDiscs[k]);}
   renderMediaList();
+}
+
+// ── Image upload ──────────────────────────────────────────────
+function handleUpload(input, field){
+  var file=input.files[0];
+  if(!file) return;
+  if(file.size > 10*1024*1024){
+    setUploadStatus(field,'err','File too large (max 10MB)');
+    input.value=''; return;
+  }
+  var allowed=['image/jpeg','image/png','image/webp','image/gif'];
+  if(allowed.indexOf(file.type)===-1){
+    setUploadStatus(field,'err','Only JPG, PNG, WebP or GIF allowed');
+    input.value=''; return;
+  }
+  uploadImage(file, field);
+}
+
+function uploadImage(file, field){
+  if(!profile) return;
+  setUploadStatus(field,'uploading','Uploading…');
+  // Build storage path: slug/field-timestamp.ext
+  var ext=file.name.split('.').pop().toLowerCase()||'jpg';
+  var path=profile.slug+'/'+field+'-'+Date.now()+'.'+ext;
+  var uploadUrl=SURL+'/storage/v1/object/'+STORAGE_BUCKET+'/'+path;
+  fetch(uploadUrl,{
+    method:'POST',
+    headers:{
+      'apikey':SKEY,
+      'Authorization':'Bearer '+SKEY,
+      'Content-Type':file.type,
+      'x-upsert':'true'
+    },
+    body:file
+  }).then(function(r){
+    if(!r.ok) return r.text().then(function(t){throw new Error(t);});
+    var publicUrl=SURL+'/storage/v1/object/public/'+STORAGE_BUCKET+'/'+path;
+    if(field==='photo'){
+      photoUrl=publicUrl;
+      var thumb=document.getElementById('photo-preview');
+      thumb.src=publicUrl;thumb.classList.add('visible');
+      document.getElementById('photo-url-display').textContent='Current: '+publicUrl;
+    } else if(field==='banner'){
+      bannerUrl=publicUrl;
+      var ban=document.getElementById('banner-preview');
+      ban.src=publicUrl;ban.classList.add('visible');
+      document.getElementById('banner-url-display').textContent='Current: '+publicUrl;
+    } else {
+      // media photo upload — field is the item index
+      var idx=parseInt(field,10);
+      if(!isNaN(idx) && mediaItems[idx]){
+        mediaItems[idx].url=publicUrl;
+        // Update the URL input in the open media item
+        var bodies=document.querySelectorAll('.media-item-body');
+        if(bodies[idx]){
+          var urlIn=bodies[idx].querySelector('.media-url-input');
+          if(urlIn) urlIn.value=publicUrl;
+          var prev=bodies[idx].querySelector('.media-img-preview');
+          if(prev){prev.src=publicUrl;prev.style.display='block';}
+        }
+      }
+    }
+    setUploadStatus(field,'done','Uploaded!');
+    setTimeout(function(){setUploadStatus(field,'','');},3000);
+  }).catch(function(err){
+    console.error('Upload error:',err);
+    setUploadStatus(field,'err','Upload failed — try again');
+  });
+}
+
+function setUploadStatus(field, state, msg){
+  var elId;
+  if(field==='photo') elId='photo-progress';
+  else if(field==='banner') elId='banner-progress';
+  else elId='media-upload-progress-'+field;
+  var el=document.getElementById(elId);
+  if(!el) return;
+  el.className='upload-progress'+(state?' '+state:'');
+  el.textContent=msg;
 }
 
 function toggleDisc(){var v=this.getAttribute('data-v'),idx=selDiscs.indexOf(v);if(idx===-1){selDiscs.push(v);this.classList.add('on');}else{selDiscs.splice(idx,1);this.classList.remove('on');}}
@@ -287,6 +417,32 @@ function renderMediaList(){
       sizeHtml+='<option value="'+sizeOpts[s][0]+'"'+(sel?' selected':'')+'>'+sizeOpts[s][1]+'</option>';
     }
 
+    // Photo upload button for photo-type items
+    var isPhoto=item.type==='photo';
+    var urlFieldHtml;
+    if(isPhoto){
+      var hasImg=item.url&&item.url.length>0;
+      urlFieldHtml=''
+        +'<div class="fg">'
+        +'<label>Photo</label>'
+        +'<div class="img-upload-wrap">'
+        +(hasImg?'<img class="img-preview-thumb visible" src="'+escAttr(item.url)+'" alt="" style="margin-bottom:0.5rem;">':'<img class="img-preview-thumb media-img-preview" src="" alt="" style="display:none;margin-bottom:0.5rem;">')
+        +'<div class="upload-btn-row">'
+        +'<label class="upload-btn">Choose Photo<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handleMediaPhotoUpload(this,'+idx+')"></label>'
+        +'<span class="upload-progress" id="media-upload-progress-'+idx+'"></span>'
+        +'</div>'
+        +'<p class="hint">Or paste a direct image URL below.</p>'
+        +'<input type="url" class="media-url-input" value="'+escAttr(item.url||'')+'" oninput="mediaItems['+idx+'].url=this.value" placeholder="https://..." style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--white);padding:0.65rem 0.9rem;font-family:Crimson Text,Georgia,serif;font-size:1rem;outline:none;margin-top:0.5rem;">'
+        +'</div>'
+        +'</div>';
+    } else {
+      urlFieldHtml=''
+        +'<div class="fg"><label>URL / Embed Source</label>'
+        +'<input type="url" class="media-url-input" value="'+escAttr(item.url||'')+'" oninput="mediaItems['+idx+'].url=this.value" placeholder="https://...">'
+        +'<p class="hint">SoundCloud/YouTube/Spotify: copy the src from Share &rarr; Embed. BandLab: use bandlab.com/embed/?id=... Photos: direct image link.</p>'
+        +'</div>';
+    }
+
     html+='<div class="media-item">'
       +'<div class="media-item-header" onclick="toggleMediaBody(this)">'
       +'<span class="media-item-num">#'+(idx+1)+'</span>'
@@ -298,20 +454,19 @@ function renderMediaList(){
       +'</div></div>'
       +'<div class="media-item-body'+isOpen+'">'
       +'<div class="fg"><label>Type</label>'
-      +'<select onchange="updateItemField('+idx+',\'type\',this.value)">'+typeHtml+'</select></div>'
+      +'<select onchange="updateItemType('+idx+',this.value)">'+typeHtml+'</select></div>'
       +'<div class="fg"><label>Size</label>'
       +'<select onchange="updateItemField('+idx+',\'size\',this.value)">'+sizeHtml+'</select></div>'
       +'<div class="fg"><label>Title</label>'
       +'<input type="text" value="'+escAttr(item.title||'')+'" onblur="updateItemTitle('+idx+',this.value)" placeholder="Give this item a name"></div>'
-      +'<div class="fg"><label>URL / Embed Source</label>'
-      +'<input type="url" value="'+escAttr(item.url||'')+'" oninput="mediaItems['+idx+'].url=this.value" placeholder="https://...">'
-      +'<p class="hint">SoundCloud/YouTube/Spotify: copy the src from Share &rarr; Embed. BandLab: use bandlab.com/embed/?id=... Photos: direct image link.</p></div>'
+      +urlFieldHtml
       +'<div class="fg"><label>Caption</label>'
       +'<input type="text" value="'+escAttr(item.caption||'')+'" oninput="mediaItems['+idx+'].caption=this.value" placeholder="Short description shown on the card"></div>'
       +'<div class="fg"><label>Notes <span style="opacity:0.6;font-size:0.85rem;">(lyrics, backstory, credits)</span></label>'
       +'<textarea rows="6" oninput="mediaItems['+idx+'].notes=this.value" placeholder="Add lyrics, story, credits...">'+escAttr(item.notes||'')+'</textarea></div>'
       +'<div class="fg"><label>Tag Other Crew Members</label>'
-      +'<input type="text" value="'+(item.crew_tags&&item.crew_tags.join?item.crew_tags.filter(function(t){return t!==profile.slug;}).join(', '):'')+'" oninput="updateItemTags('+idx+',this.value)" onblur="updateItemTags('+idx+',this.value)" placeholder="e.g. ot, gabe (comma separated)" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--white);padding:0.65rem 0.9rem;font-family:Crimson Text,Georgia,serif;font-size:1rem;outline:none;">'
+      +'<input type="text" value="'+(item.crew_tags&&item.crew_tags.join?item.crew_tags.filter(function(t){return t!==profile.slug;}).join(', '):'')
+      +'" oninput="updateItemTags('+idx+',this.value)" onblur="updateItemTags('+idx+',this.value)" placeholder="e.g. ot, gabe (comma separated)" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--white);padding:0.65rem 0.9rem;font-family:Crimson Text,Georgia,serif;font-size:1rem;outline:none;">'
       +'<p style="font-size:0.82rem;color:var(--muted);font-style:italic;margin-top:0.3rem;">Credit other crew: gabe, ot, zach, abram, jade</p></div>'
       +'<div class="fg"><label>Published</label>'
       +'<select onchange="mediaItems['+idx+'].published=this.value===\'true\'">'
@@ -321,11 +476,35 @@ function renderMediaList(){
       +'</div></div>';
   }
   list.innerHTML=html;
-  // Restore open states
   var bodies=document.querySelectorAll('.media-item-body');
   for(var i=0;i<bodies.length;i++){
     if(openItems[i]) bodies[i].classList.add('open');
   }
+}
+
+function handleMediaPhotoUpload(input, idx){
+  var file=input.files[0];
+  if(!file) return;
+  if(file.size > 10*1024*1024){
+    setUploadStatus(idx,'err','File too large (max 10MB)');
+    input.value=''; return;
+  }
+  var allowed=['image/jpeg','image/png','image/webp','image/gif'];
+  if(allowed.indexOf(file.type)===-1){
+    setUploadStatus(idx,'err','Only JPG, PNG, WebP or GIF allowed');
+    input.value=''; return;
+  }
+  uploadImage(file, idx);
+}
+
+function updateItemType(idx, val){
+  if(!mediaItems[idx]) return;
+  mediaItems[idx].type=val;
+  // Re-render to swap URL field vs upload widget
+  var wasOpen=openItems[idx];
+  openItems[idx]=true;
+  renderMediaList();
+  if(!wasOpen) openItems[idx]=false;
 }
 
 var profileLinks=[];
@@ -352,17 +531,14 @@ function toggleMediaBody(h){
   var items=document.querySelectorAll('.media-item');
   for(var i=0;i<items.length;i++){if(items[i].querySelector('.media-item-header')===h){openItems[i]=body.classList.contains('open');break;}}
 }
-// FIX: title only updates on blur, never on input — prevents renderMediaList() on every keystroke
 function updateItemTags(idx,val){
   if(!mediaItems[idx]) return;
   var tags=val.split(',').map(function(t){return t.trim().toLowerCase();}).filter(function(t){return t;});
-  // Always include the owner's slug
   if(profile&&profile.slug&&tags.indexOf(profile.slug)===-1) tags.unshift(profile.slug);
   mediaItems[idx].crew_tags=tags;
 }
 function updateItemTitle(idx,val){
   if(mediaItems[idx]) mediaItems[idx].title=val;
-  // Update just the display text without full re-render
   var headers=document.querySelectorAll('.media-item-title-display');
   if(headers[idx]) headers[idx].textContent=val||'Untitled Item';
 }
@@ -399,8 +575,8 @@ function doSave(){
     talents:document.getElementById('f-talents').value.trim(),
     interests:document.getElementById('f-interests').value.trim(),
     hobbies:document.getElementById('f-hobbies').value.trim(),
-    photo_url:document.getElementById('f-photo').value.trim(),
-      banner_url:document.getElementById('f-banner').value.trim(),
+    photo_url:photoUrl,
+    banner_url:bannerUrl,
     player_playlist_url:document.getElementById('f-playlist').value.trim(),
     extra_links:JSON.stringify(profileLinks.filter(function(l){return l.label||l.url;})),
     link_1_label:profileLinks[0]?profileLinks[0].label:'',link_1_url:profileLinks[0]?profileLinks[0].url:'',
