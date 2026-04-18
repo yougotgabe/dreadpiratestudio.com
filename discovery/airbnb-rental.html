@@ -821,6 +821,7 @@
   const rankingList = document.getElementById('priorities-list');
   const prioritiesInput = document.getElementById('priorities_ranked');
   let draggedItem = null;
+  let saveTimeout;
 
   function updateRankNumbers() {
     Array.from(rankingList.children).forEach((item, idx) => {
@@ -958,7 +959,6 @@
     return data;
   }
 
-  let saveTimeout;
   function saveDraft() {
     clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => {
