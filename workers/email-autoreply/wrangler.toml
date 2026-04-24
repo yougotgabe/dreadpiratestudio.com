@@ -1,0 +1,6 @@
+name = "email-autoreply"
+main = "email-autoreply.js"
+compatibility_date = "2024-01-01"
+
+[email]
+receiving = [{matchers = [{type = "literal", value = "gabe@dreadpiratestudio.com"}]}]
