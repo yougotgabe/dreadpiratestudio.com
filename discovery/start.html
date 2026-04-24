@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Start Your Project — Dread Pirate Studio</title>
+<link rel="icon" type="image/png" href="../icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<meta name="description" content="Start your project with Dread Pirate Studio. Tell us about your business and we'll put together an accurate proposal — no pressure, no sales call required.">
+<style>
+  :root {
+    --black: #080808;
+    --deep: #0d0f14;
+    --surface: #131620;
+    --surface-hover: #171926;
+    --gold: #c9a84c;
+    --gold-dim: #8a6f2e;
+    --gold-glow: rgba(201,168,76,0.18);
+    --gold-glow-strong: rgba(201,168,76,0.28);
+    --white: #e8e0d0;
+    --muted: #6b6355;
+    --border: rgba(201,168,76,0.15);
+    --border-hover: rgba(201,168,76,0.4);
+  }
+
+  *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+  html { overflow-x:hidden; scroll-behavior:smooth; }
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 18px;
+    min-height: 100vh;
+  }
+
+  /* ── Nav ── */
+  nav {
+    position: fixed; top:0; left:0; right:0; z-index:900;
+    padding: 0 2rem; height: 72px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(to bottom,rgba(8,8,8,0.97),rgba(8,8,8,0.75));
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo { text-decoration: none; }
+  .nav-logo img { height: 44px; width: auto; }
+  .nav-back {
+    font-family: 'Cinzel', serif; font-size: 0.65rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); text-decoration: none; transition: color 0.3s;
+  }
+  .nav-back:hover { color: var(--gold); }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 10rem 2rem 4rem;
+    text-align: center;
+    position: relative;
+    background: linear-gradient(180deg,#080808 0%,#0a0c10 100%);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 20%,rgba(201,168,76,0.07) 0%,transparent 70%);
+    pointer-events: none;
+  }
+  .hero-rule {
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg,transparent,var(--gold),transparent);
+    margin-bottom: 3rem;
+    opacity: 0.4;
+  }
+  .hero-kicker {
+    font-family: 'Cinzel', serif; font-size: 0.65rem;
+    letter-spacing: 0.5em; text-transform: uppercase;
+    color: var(--gold); opacity: 0.7; margin-bottom: 1rem;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(2rem,5vw,3.8rem);
+    color: var(--white); line-height: 1.1; margin-bottom: 1.25rem;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .hero-sub {
+    color: var(--muted); font-style: italic;
+    font-size: 1.1rem; max-width: 560px; margin: 0 auto 1rem;
+    line-height: 1.7;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+  .hero-divider {
+    display: flex; align-items: center; gap: 12px;
+    width: 120px; margin: 2rem auto 0;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+  .hero-divider-line {
+    flex: 1; height: 1px;
+    background: linear-gradient(90deg,transparent,var(--gold-dim));
+  }
+  .hero-divider-line.r { background: linear-gradient(90deg,var(--gold-dim),transparent); }
+  .hero-divider-diamond {
+    width: 6px; height: 6px; background: var(--gold);
+    transform: rotate(45deg); flex-shrink: 0;
+  }
+
+  /* ── Instruction ── */
+  .instruction {
+    text-align: center; padding: 2.5rem 2rem 0;
+    animation: fadeUp 0.6s 0.35s ease both;
+  }
+  .instruction-label {
+    font-family: 'Cinzel', serif; font-size: 0.7rem;
+    letter-spacing: 0.35em; text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── Grid ── */
+  .grid-wrap {
+    max-width: 960px; margin: 0 auto;
+    padding: 2.5rem 2rem 6rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  /* ── Category Card ── */
+  .card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2rem 1.75rem;
+    text-decoration: none;
+    color: var(--white);
+    display: flex; flex-direction: column; gap: 0.75rem;
+    cursor: pointer;
+    transition: border-color 0.3s, background 0.3s, transform 0.3s, box-shadow 0.3s;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+  }
+  .card::before {
+    content: '';
+    position: absolute; top:-1px; left:-1px; right:-1px; height: 2px;
+    background: linear-gradient(to right,transparent,var(--gold-dim),transparent);
+    transition: opacity 0.3s;
+  }
+  .card::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%,var(--gold-glow) 0%,transparent 70%);
+    opacity: 0; transition: opacity 0.4s;
+    pointer-events: none;
+  }
+  .card:hover {
+    border-color: var(--border-hover);
+    background: var(--surface-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 24px var(--gold-glow);
+  }
+  .card:hover::after { opacity: 1; }
+  .card:hover .card-arrow { transform: translateX(4px); color: var(--gold); }
+  .card:hover .card-icon { color: var(--gold); transform: scale(1.05); }
+
+  .card:nth-child(1) { animation-delay: 0.1s; }
+  .card:nth-child(2) { animation-delay: 0.15s; }
+  .card:nth-child(3) { animation-delay: 0.2s; }
+  .card:nth-child(4) { animation-delay: 0.25s; }
+  .card:nth-child(5) { animation-delay: 0.3s; }
+  .card:nth-child(6) { animation-delay: 0.35s; }
+  .card:nth-child(7) { animation-delay: 0.4s; }
+
+  .card-icon {
+    font-size: 2rem; line-height: 1;
+    color: var(--gold-dim);
+    transition: color 0.3s, transform 0.3s;
+    margin-bottom: 0.25rem;
+  }
+  .card-label {
+    font-family: 'Cinzel', serif; font-size: 0.75rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 0.1rem;
+  }
+  .card-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
+    color: var(--white); line-height: 1.2;
+  }
+  .card-desc {
+    font-size: 0.95rem; color: var(--muted);
+    font-style: italic; line-height: 1.6;
+    flex: 1;
+  }
+  .card-examples {
+    font-family: 'Cinzel', serif; font-size: 0.6rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: rgba(201,168,76,0.4); line-height: 1.8;
+    border-top: 1px solid rgba(201,168,76,0.08);
+    padding-top: 0.75rem; margin-top: 0.25rem;
+  }
+  .card-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 0.5rem;
+  }
+  .card-time {
+    font-family: 'Cinzel', serif; font-size: 0.58rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); opacity: 0.6;
+  }
+  .card-arrow {
+    font-size: 1rem; color: var(--muted);
+    transition: transform 0.3s, color 0.3s;
+  }
+
+  /* ── Not sure strip ── */
+  .not-sure-wrap {
+    max-width: 960px; margin: 0 auto;
+    padding: 0 2rem 6rem;
+  }
+  .not-sure {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold-dim);
+    background: var(--surface);
+    padding: 1.5rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1.5rem; flex-wrap: wrap;
+    text-decoration: none; color: var(--white);
+    transition: border-color 0.3s, background 0.3s;
+    animation: fadeUp 0.5s 0.45s ease both;
+  }
+  .not-sure:hover {
+    border-color: var(--border-hover);
+    border-left-color: var(--gold);
+    background: var(--surface-hover);
+  }
+  .not-sure:hover .not-sure-arrow { transform: translateX(4px); color: var(--gold); }
+  .not-sure-text { flex: 1; }
+  .not-sure-label {
+    font-family: 'Cinzel', serif; font-size: 0.65rem;
+    letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--gold-dim); margin-bottom: 0.3rem;
+  }
+  .not-sure-title {
+    font-family: 'Cinzel Decorative', serif; font-size: 1.1rem;
+    color: var(--white); margin-bottom: 0.3rem;
+  }
+  .not-sure-desc {
+    font-size: 0.9rem; color: var(--muted); font-style: italic;
+  }
+  .not-sure-arrow {
+    font-size: 1.25rem; color: var(--muted);
+    transition: transform 0.3s, color 0.3s; flex-shrink: 0;
+  }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem; text-align: center;
+    background: var(--black);
+  }
+  .footer-text {
+    font-family: 'Cinzel', serif; font-size: 0.6rem;
+    letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase;
+  }
+  .footer-text a { color: var(--muted); text-decoration: none; transition: color 0.3s; }
+  .footer-text a:hover { color: var(--gold); }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* ── Mobile ── */
+  @media(max-width:768px) {
+    nav { padding: 0 1rem; }
+    .hero { padding: 8rem 1rem 3rem; }
+    .grid-wrap { grid-template-columns: 1fr; padding: 2rem 1rem 4rem; }
+    .not-sure-wrap { padding: 0 1rem 4rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="../index.html" class="nav-logo"><img src="../logo-horizontal.png" alt="Dread Pirate Studio"></a>
+  <a href="../index.html" class="nav-back">&#8592; Back to Port</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-rule"></div>
+  <p class="hero-kicker">Dread Pirate Studio</p>
+  <h1 class="hero-title">Start Your Project</h1>
+  <p class="hero-sub">
+    Tell us about your business and what you're looking to build. No pressure, no sales call required — just an honest conversation about what's possible.
+  </p>
+  <div class="hero-divider">
+    <div class="hero-divider-line"></div>
+    <div class="hero-divider-diamond"></div>
+    <div class="hero-divider-line r"></div>
+  </div>
+</div>
+
+<div class="instruction">
+  <p class="instruction-label">Choose the category that best describes your business</p>
+</div>
+
+<div class="grid-wrap">
+
+  <!-- Card 1: Storefront & Hospitality -->
+  <a class="card" href="storefront-hospitality.html">
+    <div class="card-icon">🏪</div>
+    <div class="card-label">Group 1</div>
+    <div class="card-title">Storefront &amp; Hospitality</div>
+    <p class="card-desc">Brick-and-mortar businesses where customers come to you — in person, online, or both.</p>
+    <div class="card-examples">
+      Restaurant · Coffee Shop · Bar · Bakery<br>
+      Retail Store · Boutique · Salon · Spa
+    </div>
+    <div class="card-footer">
+      <span class="card-time">~15 min</span>
+      <span class="card-arrow">→</span>
+    </div>
+  </a>
+
+  <!-- Card 2: Experience & Rental -->
+  <a class="card" href="experience-rental.html">
+    <div class="card-icon">🏡</div>
+    <div class="card-label">Group 2</div>
+    <div class="card-title">Experience &amp; Rental</div>
+    <p class="card-desc">You're selling time in a space — a stay, an event, an experience. Bookings are everything.</p>
+    <div class="card-examples">
+      Vacation Rental · Event Venue · Wedding Venue<br>
+      Photo Studio · Escape Room · Glamping
+    </div>
+    <div class="card-footer">
+      <span class="card-time">~15 min</span>
+      <span class="card-arrow">→</span>
+    </div>
+  </a>
+
+  <!-- Card 3: Trade & Service -->
+  <a class="card" href="trade-service.html">
+    <div class="card-icon">🔧</div>
+    <div class="card-label">Group 3</div>
+    <div class="card-title">Trade &amp; Service</div>
+    <p class="card-desc">You go to your customers. No storefront — just expertise, a service area, and leads to earn.</p>
+    <div class="card-examples">
+      Electrician · Plumber · HVAC · Contractor<br>
+      Landscaper · Cleaning · Painter · Roofer
+    </div>
+    <div class="card-footer">
+      <span class="card-time">~15 min</span>
+      <span class="card-arrow">→</span>
+    </div>
+  </a>
+
+  <!-- Card 4: Creative & Maker -->
+  <a class="card" href="creative-maker.html">
+    <div class="card-icon">🎨</div>
+    <div class="card-label">Group 4</div>
+    <div class="card-title">Creative &amp; Maker</div>
+    <p class="card-desc">You make things — art, music, products, content. Your story is your biggest selling point.</p>
+    <div class="card-examples">
+      Artist · Photographer · Musician · Woodworker<br>
+      Candle Maker · Jewelry · Ceramics · Printmaker
+    </div>
+    <div class="card-footer">
+      <span class="card-time">~15 min</span>
+      <span class="card-arrow">→</span>
+    </div>
+  </a>
+
+  <!-- Card 5: Professional & Consultant -->
+  <a class="card" href="professional-consultant.html">
+    <div class="card-icon">⚖️</div>
+    <div class="card-label">Group 5</div>
+    <div class="card-title">Professional &amp; Consultant</div>
+    <p class="card-desc">Your expertise is the product. Credibility, trust, and qualified leads are what matter most.</p>
+    <div class="card-examples">
+      Attorney · Accountant · Financial Advisor<br>
+      Coach · Therapist · Real Estate · Consultant
+    </div>
+    <div class="card-footer">
+      <span class="card-time">~15 min</span>
+      <span class="card-arrow">→</span>
+    </div>
+  </a>
+
+  <!-- Card 6: Vacation Rental (Airbnb specific) -->
+  <a class="card" href="airbnb-rental.html">
+    <div class="card-icon">🗝️</div>
+    <div class="card-label">Specialty</div>
+    <div class="card-title">Direct Booking Site</div>
+    <p class="card-desc">Already on Airbnb or VRBO and want to own your bookings directly? This one's built for you.</p>
+    <div class="card-examples">
+      Airbnb Host · VRBO Host · Short-Term Rental<br>
+      Vacation Property · Direct Booking Strategy
+    </div>
+    <div class="card-footer">
+      <span class="card-time">~20 min</span>
+      <span class="card-arrow">→</span>
+    </div>
+  </a>
+
+</div>
+
+<!-- Not sure strip -->
+<div class="not-sure-wrap">
+  <a class="not-sure" href="general.html">
+    <div class="not-sure-text">
+      <div class="not-sure-label">Not sure where you fit?</div>
+      <div class="not-sure-title">Use the General Questionnaire</div>
+      <p class="not-sure-desc">New businesses, nonprofits, side hustles, or anything that doesn't fit neatly above — this is your form. It's shorter and broader, and gives us enough to have a real conversation.</p>
+    </div>
+    <span class="not-sure-arrow">→</span>
+  </a>
+</div>
+
+<footer>
+  <p class="footer-text">
+    <a href="../index.html">Dread Pirate Studio</a> &middot; Willmar, MN &middot;
+    <a href="mailto:gabe@dreadpiratestudio.com">gabe@dreadpiratestudio.com</a>
+  </p>
+</footer>
+
+</body>
+</html>

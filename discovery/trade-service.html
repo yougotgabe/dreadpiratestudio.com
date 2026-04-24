@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discovery — Trade & Service — Dread Pirate Studio</title>
+<link rel="icon" type="image/png" href="../icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<meta name="description" content="Client discovery questionnaire for electricians, plumbers, contractors, landscapers, cleaning services, and other trade businesses — Dread Pirate Studio.">
+<style>
+  :root{
+    --black:#080808;--deep:#0d0f14;--surface:#131620;
+    --gold:#c9a84c;--gold-dim:#8a6f2e;--gold-glow:rgba(201,168,76,0.18);
+    --white:#e8e0d0;--muted:#6b6355;--border:rgba(201,168,76,0.15);
+    --error:#d85a3a;--success:#8fb27e;
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  html{overflow-x:hidden;}
+  body{background:var(--black);color:var(--white);font-family:'Crimson Text',Georgia,serif;font-size:18px;min-height:100vh;}
+
+  nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:0 2rem;height:72px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(8,8,8,0.97),rgba(8,8,8,0.75));border-bottom:1px solid var(--border);backdrop-filter:blur(12px);}
+  .nav-logo{text-decoration:none;}
+  .nav-logo img{height:44px;width:auto;}
+  .nav-back{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.3s;}
+  .nav-back:hover{color:var(--gold);}
+
+  .disc-hero{padding:9rem 2rem 2rem;text-align:center;position:relative;background:linear-gradient(180deg,#080808 0%,#0a0c10 100%);}
+  .disc-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 30%,rgba(201,168,76,0.07) 0%,transparent 70%);pointer-events:none;}
+  .disc-kicker{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);opacity:0.7;margin-bottom:0.75rem;position:relative;}
+  .disc-title{font-family:'Cinzel Decorative',serif;font-size:clamp(2rem,5vw,3.5rem);color:var(--white);line-height:1.1;margin-bottom:1rem;position:relative;}
+  .disc-sub{color:var(--muted);font-style:italic;font-size:1.05rem;max-width:560px;margin:0 auto;position:relative;}
+
+  .progress-wrap{position:sticky;top:72px;z-index:800;background:rgba(8,8,8,0.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:0.9rem 2rem;}
+  .progress-inner{max-width:720px;margin:0 auto;}
+  .progress-label{display:flex;justify-content:space-between;font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem;}
+  .progress-label #progress-percent{color:var(--gold-dim);}
+  .progress-bar{height:2px;background:var(--border);overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(to right,var(--gold-dim),var(--gold));width:0%;transition:width 0.4s ease;box-shadow:0 0 8px var(--gold-glow);}
+
+  .disc-body{max-width:720px;margin:0 auto;padding:3rem 2rem 5rem;}
+  .disc-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3rem 2.5rem;position:relative;}
+  .disc-card::before{content:'';position:absolute;top:-1px;left:-1px;right:-1px;height:2px;background:linear-gradient(to right,transparent,var(--gold-dim),transparent);}
+
+  .step{display:none;animation:fadeUp 0.5s ease;}
+  .step.active{display:block;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+  .step-header{margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);text-align:center;}
+  .step-number{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);opacity:0.75;margin-bottom:0.5rem;}
+  .step-title{font-family:'Cinzel Decorative',serif;font-size:clamp(1.4rem,3.5vw,1.9rem);color:var(--white);margin-bottom:0.4rem;}
+  .step-divider{width:60px;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);margin:0.75rem auto;}
+  .step-subtitle{color:var(--muted);font-style:italic;font-size:0.95rem;}
+  .step-intro{color:var(--muted);font-size:0.95rem;line-height:1.7;margin-bottom:2rem;font-style:italic;}
+
+  .question{margin-bottom:2rem;}
+  .question-label{display:block;font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:0.35rem;line-height:1.5;}
+  .question-label .req{color:var(--gold-dim);margin-left:0.2em;}
+  .question-hint{display:block;color:var(--muted);font-size:0.9rem;font-style:italic;margin-bottom:0.75rem;line-height:1.5;}
+
+  input[type="text"],input[type="email"],input[type="tel"],input[type="number"],textarea,select{
+    width:100%;padding:0.75rem 1rem;font-family:'Crimson Text',Georgia,serif;font-size:1rem;
+    background:var(--black);color:var(--white);border:1px solid var(--border);border-radius:2px;
+    transition:border-color 0.25s,box-shadow 0.25s;
+  }
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-glow);}
+  input::placeholder,textarea::placeholder{color:var(--muted);opacity:0.5;font-style:italic;}
+  textarea{min-height:90px;resize:vertical;line-height:1.6;font-family:'Crimson Text',Georgia,serif;}
+  select option{background:var(--black);color:var(--white);}
+
+  .option-group{display:flex;flex-direction:column;gap:0.5rem;}
+  .option{display:flex;align-items:flex-start;padding:0.8rem 1rem;background:var(--black);border:1px solid var(--border);border-radius:2px;cursor:pointer;transition:all 0.2s;}
+  .option:hover{border-color:var(--gold-dim);background:rgba(201,168,76,0.03);}
+  .option.selected{border-color:var(--gold);background:rgba(201,168,76,0.08);box-shadow:0 0 12px var(--gold-glow);}
+  .option input{margin:0.3rem 0.85rem 0 0;flex-shrink:0;cursor:pointer;appearance:none;-webkit-appearance:none;width:14px;height:14px;border:1px solid var(--gold-dim);background:var(--black);position:relative;transition:all 0.2s;}
+  .option input[type="radio"]{border-radius:50%;}
+  .option input:checked{border-color:var(--gold);background:var(--gold);}
+  .option input[type="checkbox"]:checked::after{content:'';position:absolute;top:1px;left:4px;width:4px;height:8px;border:solid var(--black);border-width:0 2px 2px 0;transform:rotate(45deg);}
+  .option input[type="radio"]:checked::after{content:'';position:absolute;top:3px;left:3px;width:6px;height:6px;border-radius:50%;background:var(--black);}
+  .option-text{font-size:0.98rem;line-height:1.5;color:var(--white);}
+
+  .ranking-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.5rem;}
+  .ranking-item{display:flex;align-items:center;padding:0.8rem 1rem;background:var(--black);border:1px solid var(--border);border-radius:2px;cursor:grab;user-select:none;transition:all 0.2s;}
+  .ranking-item:hover{border-color:var(--gold-dim);}
+  .ranking-item.dragging{opacity:0.4;cursor:grabbing;border-color:var(--gold);}
+  .ranking-number{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:rgba(201,168,76,0.1);color:var(--gold);border:1px solid var(--gold-dim);border-radius:50%;font-family:'Cinzel',serif;font-weight:700;font-size:0.75rem;margin-right:0.9rem;flex-shrink:0;}
+  .ranking-handle{margin-left:auto;color:var(--muted);font-size:1.1rem;line-height:1;opacity:0.5;}
+
+  .conditional{margin-top:0.6rem;padding-left:1rem;border-left:1px solid var(--gold-dim);display:none;animation:fadeUp 0.3s ease;}
+  .conditional.show{display:block;}
+
+  .nav-buttons{display:flex;justify-content:space-between;gap:1rem;margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--border);}
+  button{font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;padding:0.85rem 2rem;border-radius:2px;cursor:pointer;transition:all 0.3s;border:1px solid transparent;}
+  .btn-primary{background:var(--gold);color:var(--black);border-color:var(--gold);}
+  .btn-primary:hover:not(:disabled){background:transparent;color:var(--gold);box-shadow:0 0 20px var(--gold-glow);}
+  .btn-primary:disabled{opacity:0.4;cursor:not-allowed;}
+  .btn-secondary{background:transparent;color:var(--muted);border-color:var(--border);}
+  .btn-secondary:hover{color:var(--gold);border-color:var(--gold-dim);}
+  .btn-submit{background:var(--gold);color:var(--black);border-color:var(--gold);padding:1rem 2.5rem;font-size:0.75rem;}
+  .btn-submit:hover:not(:disabled){background:transparent;color:var(--gold);box-shadow:0 0 24px var(--gold-glow);}
+
+  .draft-notice{font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--muted);text-align:center;margin-top:1rem;opacity:0.6;transition:opacity 0.3s;}
+  .draft-notice .saved{color:var(--success);}
+
+  .error-message{background:rgba(216,90,58,0.08);border:1px solid rgba(216,90,58,0.4);color:var(--error);padding:0.85rem 1rem;border-radius:2px;font-size:0.9rem;margin-top:1rem;display:none;font-style:italic;}
+  .error-message.show{display:block;}
+
+  .success-screen{text-align:center;padding:3rem 1rem;}
+  .success-ornament{width:80px;height:80px;margin:0 auto 2rem;border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(201,168,76,0.05);box-shadow:0 0 32px var(--gold-glow);}
+  .success-ornament::before{content:'';width:30px;height:15px;border:solid var(--gold);border-width:0 0 2px 2px;transform:rotate(-45deg) translate(2px,-4px);}
+  .success-title{font-family:'Cinzel Decorative',serif;font-size:2rem;color:var(--white);margin-bottom:0.5rem;}
+  .success-divider{width:80px;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);margin:1rem auto 1.5rem;}
+  .success-text{color:var(--muted);font-size:1.05rem;max-width:480px;margin:0 auto;font-style:italic;line-height:1.7;}
+
+  footer{border-top:1px solid var(--border);padding:2rem;text-align:center;background:var(--black);}
+  .footer-text{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;}
+  .footer-text a{color:var(--muted);text-decoration:none;transition:color 0.3s;}
+  .footer-text a:hover{color:var(--gold);}
+
+  @media(max-width:768px){
+    nav{padding:0 1rem;}
+    .disc-hero{padding:7rem 1rem 1.5rem;}
+    .disc-body{padding:2rem 1rem 4rem;}
+    .disc-card{padding:2rem 1.25rem;}
+    .progress-wrap{padding:0.75rem 1rem;}
+    .nav-buttons{flex-direction:column-reverse;}
+    .nav-buttons button{width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="../index.html" class="nav-logo"><img src="../logo-horizontal.png" alt="Dread Pirate Studio"></a>
+  <a href="../index.html" class="nav-back">&#8592; Back to Port</a>
+</nav>
+
+<div class="disc-hero">
+  <p class="disc-kicker">Dread Pirate Studio</p>
+  <h1 class="disc-title">Discovery Questionnaire</h1>
+  <p class="disc-sub">Electricians, plumbers, contractors, landscapers, cleaning services &amp; other trade businesses — about 15 minutes</p>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-inner">
+    <div class="progress-label">
+      <span id="progress-text">Step 1 of 9</span>
+      <span id="progress-percent">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+</div>
+
+<div class="disc-body">
+  <div class="disc-card">
+    <form id="discovery-form" novalidate>
+
+      <!-- ══ STEP 0: Welcome & Contact ══ -->
+      <div class="step active" data-step="0">
+        <div class="step-header">
+          <div class="step-number">Getting started</div>
+          <h2 class="step-title">Welcome aboard</h2>
+          <div class="step-divider"></div>
+          <p class="step-subtitle">A few basics before we dig in</p>
+        </div>
+        <p class="step-intro">
+          This questionnaire helps Gabe understand your business, your customers, and what a great outcome looks like for you — so he can put together an accurate proposal before you ever get on a call. There are no wrong answers. Your progress saves automatically as you go.
+        </p>
+        <div class="question">
+          <label class="question-label" for="contact_name">Your name<span class="req">*</span></label>
+          <input type="text" id="contact_name" name="contact_name" required autocomplete="name">
+        </div>
+        <div class="question">
+          <label class="question-label" for="business_name">Business name<span class="req">*</span></label>
+          <input type="text" id="business_name" name="business_name" required autocomplete="organization">
+        </div>
+        <div class="question">
+          <label class="question-label" for="contact_email">Email<span class="req">*</span></label>
+          <input type="email" id="contact_email" name="contact_email" required autocomplete="email">
+        </div>
+        <div class="question">
+          <label class="question-label" for="contact_phone">Phone</label>
+          <span class="question-hint">Optional</span>
+          <input type="tel" id="contact_phone" name="contact_phone" autocomplete="tel">
+        </div>
+        <div class="question">
+          <label class="question-label" for="location">City / Town<span class="req">*</span></label>
+          <input type="text" id="location" name="location" required placeholder="e.g., Willmar, MN">
+        </div>
+      </div>
+
+      <!-- ══ STEP 1: Your Business ══ -->
+      <div class="step" data-step="1">
+        <div class="step-header">
+          <div class="step-number">Section 1 of 8</div>
+          <h2 class="step-title">Your business</h2>
+          <div class="step-divider"></div>
+          <p class="step-subtitle">The foundation for everything else</p>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Type of trade or service business<span class="req">*</span></label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="biz_type" value="electrician" required><span class="option-text">Electrician</span></label>
+            <label class="option"><input type="radio" name="biz_type" value="plumber"><span class="option-text">Plumber</span></label>
+            <label class="option"><input type="radio" name="biz_type" value="hvac"><span class="option-text">HVAC / Heating &amp; Cooling</span></label>
+            <label class="option"><input type="radio" name="biz_type" value="general_contractor"><span class="option-text">General Contractor</span></label>
+            <label class="option"><input type="radio" name="biz_type" value="landscaper"><span class="option-text">Landscaper / Lawn Care</span></label>
+            <label class="option"><input type="radio" name="biz_type" value="cleaning"><span class="option-text">Cleaning Service</span></label>
+            <label class="option"><input type="radio" name="biz_type" value="painter"><span class="option-text">Painter</span></label>
+            <label class="option"><input type="radio" name="biz_type" value="roofer"><span class="option-text">Roofer</span></label>
+            <label class="option"><input type="radio" name="biz_type" value="auto_shop"><span class="option-text">Auto Shop / Mechanic</span></label>
+            <label class="option"><input type="radio" name="biz_type" value="pest_control"><span class="option-text">Pest Control</span></label>
+            <label class="option"><input type="radio" name="biz_type" value="other" data-reveal="biz_type_other"><span class="option-text">Other</span></label>
+          </div>
+          <div class="conditional" id="biz_type_other">
+            <input type="text" name="biz_type_other_text" placeholder="Describe your trade or service…">
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">How long have you been in business?</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="years_open" value="under_1"><span class="option-text">Under 1 year</span></label>
+            <label class="option"><input type="radio" name="years_open" value="1_3"><span class="option-text">1–3 years</span></label>
+            <label class="option"><input type="radio" name="years_open" value="3_10"><span class="option-text">3–10 years</span></label>
+            <label class="option"><input type="radio" name="years_open" value="10_plus"><span class="option-text">10+ years</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Team size</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="team_size" value="solo"><span class="option-text">Just me — solo operator</span></label>
+            <label class="option"><input type="radio" name="team_size" value="2_5"><span class="option-text">2–5 employees</span></label>
+            <label class="option"><input type="radio" name="team_size" value="6_15"><span class="option-text">6–15 employees</span></label>
+            <label class="option"><input type="radio" name="team_size" value="15_plus"><span class="option-text">15+ employees</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label" for="service_area">What is your service area?</label>
+          <span class="question-hint">Cities, counties, or radius — as specific as you want</span>
+          <textarea id="service_area" name="service_area" rows="2" placeholder="e.g., Willmar and surrounding Kandiyohi County, up to 30 miles"></textarea>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Are you licensed and insured?</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="licensed" value="yes"><span class="option-text">Yes — fully licensed and insured</span></label>
+            <label class="option"><input type="radio" name="licensed" value="in_progress"><span class="option-text">In progress</span></label>
+            <label class="option"><input type="radio" name="licensed" value="na"><span class="option-text">Not applicable to my trade</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label" for="certifications">Any certifications or specializations worth featuring?</label>
+          <span class="question-hint">Master electrician, EPA certified, OSHA trained, manufacturer certifications, etc.</span>
+          <textarea id="certifications" name="certifications" rows="2" placeholder="e.g., Master Electrician license, Generac certified installer…"></textarea>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Do you offer emergency or after-hours service?</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="emergency" value="yes"><span class="option-text">Yes — 24/7 or after-hours available</span></label>
+            <label class="option"><input type="radio" name="emergency" value="sometimes"><span class="option-text">Sometimes — case by case</span></label>
+            <label class="option"><input type="radio" name="emergency" value="no"><span class="option-text">No</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Existing website?</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="has_website" value="yes" data-reveal="existing_url"><span class="option-text">Yes</span></label>
+            <label class="option"><input type="radio" name="has_website" value="no"><span class="option-text">No</span></label>
+          </div>
+          <div class="conditional" id="existing_url">
+            <input type="text" name="existing_url_text" placeholder="https://…">
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Currently listed on any of these?</label>
+          <span class="question-hint">Check all that apply</span>
+          <div class="option-group">
+            <label class="option"><input type="checkbox" name="platforms" value="google_biz"><span class="option-text">Google Business Profile</span></label>
+            <label class="option"><input type="checkbox" name="platforms" value="yelp"><span class="option-text">Yelp</span></label>
+            <label class="option"><input type="checkbox" name="platforms" value="angi"><span class="option-text">Angi (formerly Angie's List)</span></label>
+            <label class="option"><input type="checkbox" name="platforms" value="homeadvisor"><span class="option-text">HomeAdvisor</span></label>
+            <label class="option"><input type="checkbox" name="platforms" value="thumbtack"><span class="option-text">Thumbtack</span></label>
+            <label class="option"><input type="checkbox" name="platforms" value="facebook"><span class="option-text">Facebook Business Page</span></label>
+            <label class="option"><input type="checkbox" name="platforms" value="bbb"><span class="option-text">Better Business Bureau (BBB)</span></label>
+            <label class="option"><input type="checkbox" name="platforms" value="none"><span class="option-text">None of these</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ STEP 2: Your Services ══ -->
+      <div class="step" data-step="2">
+        <div class="step-header">
+          <div class="step-number">Section 2 of 8</div>
+          <h2 class="step-title">Your services</h2>
+          <div class="step-divider"></div>
+          <p class="step-subtitle">What you do and how you do it</p>
+        </div>
+
+        <div class="question">
+          <label class="question-label" for="services_list">List your main services</label>
+          <span class="question-hint">One per line — as specific or general as you'd like</span>
+          <textarea id="services_list" name="services_list" rows="6" placeholder="e.g., Panel upgrades&#10;EV charger installation&#10;Whole-home rewiring&#10;Generator installation&#10;Commercial electrical"></textarea>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Do you offer free estimates?</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="free_estimates" value="yes"><span class="option-text">Yes — always free</span></label>
+            <label class="option"><input type="radio" name="free_estimates" value="depends"><span class="option-text">Depends on the job</span></label>
+            <label class="option"><input type="radio" name="free_estimates" value="no"><span class="option-text">No</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Do you offer financing or payment plans?</label>
+          <span class="question-hint">Common for larger jobs — worth featuring prominently if so</span>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="financing" value="yes" data-reveal="financing_detail"><span class="option-text">Yes</span></label>
+            <label class="option"><input type="radio" name="financing" value="no"><span class="option-text">No</span></label>
+            <label class="option"><input type="radio" name="financing" value="interested"><span class="option-text">Not currently but interested in offering it</span></label>
+          </div>
+          <div class="conditional" id="financing_detail">
+            <input type="text" name="financing_detail_text" placeholder="Who through? (GreenSky, Synchrony, in-house, etc.)">
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Do you require a deposit before starting work?</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="deposit" value="yes" data-reveal="deposit_detail"><span class="option-text">Yes</span></label>
+            <label class="option"><input type="radio" name="deposit" value="sometimes"><span class="option-text">On larger jobs only</span></label>
+            <label class="option"><input type="radio" name="deposit" value="no"><span class="option-text">No — invoice on completion</span></label>
+          </div>
+          <div class="conditional" id="deposit_detail">
+            <input type="text" name="deposit_detail_text" placeholder="What percentage or amount? (e.g., 50% upfront)">
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Do you offer maintenance plans or recurring service contracts?</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="maintenance_plan" value="yes"><span class="option-text">Yes — it's a core part of our business</span></label>
+            <label class="option"><input type="radio" name="maintenance_plan" value="sometimes"><span class="option-text">Sometimes / informally</span></label>
+            <label class="option"><input type="radio" name="maintenance_plan" value="no"><span class="option-text">No</span></label>
+            <label class="option"><input type="radio" name="maintenance_plan" value="interested"><span class="option-text">Not yet but interested in offering them</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label" for="specialty">Do you have a specialty or signature service that sets you apart?</label>
+          <span class="question-hint">Something competitors don't offer, or something you're known for locally</span>
+          <textarea id="specialty" name="specialty" rows="2" placeholder="e.g., We're the only Generac-certified installer in the county…"></textarea>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Typical job size or project value</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="job_size" value="under_500"><span class="option-text">Under $500 — mostly small repairs and service calls</span></label>
+            <label class="option"><input type="radio" name="job_size" value="500_2500"><span class="option-text">$500–$2,500</span></label>
+            <label class="option"><input type="radio" name="job_size" value="2500_10k"><span class="option-text">$2,500–$10,000</span></label>
+            <label class="option"><input type="radio" name="job_size" value="10k_plus"><span class="option-text">$10,000+</span></label>
+            <label class="option"><input type="radio" name="job_size" value="varies"><span class="option-text">Varies widely across all ranges</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Do you serve residential, commercial, or both?</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="client_type" value="residential"><span class="option-text">Residential only</span></label>
+            <label class="option"><input type="radio" name="client_type" value="commercial"><span class="option-text">Commercial only</span></label>
+            <label class="option"><input type="radio" name="client_type" value="both"><span class="option-text">Both</span></label>
+            <label class="option"><input type="radio" name="client_type" value="industrial"><span class="option-text">Industrial / agricultural as well</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">What's your busiest season?</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="busy_season" value="spring"><span class="option-text">Spring</span></label>
+            <label class="option"><input type="radio" name="busy_season" value="summer"><span class="option-text">Summer</span></label>
+            <label class="option"><input type="radio" name="busy_season" value="fall"><span class="option-text">Fall</span></label>
+            <label class="option"><input type="radio" name="busy_season" value="winter"><span class="option-text">Winter</span></label>
+            <label class="option"><input type="radio" name="busy_season" value="year_round"><span class="option-text">Consistently busy year-round</span></label>
+            <label class="option"><input type="radio" name="busy_season" value="varies"><span class="option-text">Varies — depends on the type of work</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ STEP 3: Trust & Credibility ══ -->
+      <div class="step" data-step="3">
+        <div class="step-header">
+          <div class="step-number">Section 3 of 8</div>
+          <h2 class="step-title">Trust &amp; credibility</h2>
+          <div class="step-divider"></div>
+          <p class="step-subtitle">What makes customers choose you with confidence</p>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Before/after photos of your work?</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="photos" value="yes_lots"><span class="option-text">Yes — plenty of good before/after shots</span></label>
+            <label class="option"><input type="radio" name="photos" value="yes_some"><span class="option-text">Some — not comprehensive</span></label>
+            <label class="option"><input type="radio" name="photos" value="phone_only"><span class="option-text">Phone photos only</span></label>
+            <label class="option"><input type="radio" name="photos" value="none"><span class="option-text">None — would need to start documenting jobs</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Video of your work or team in action?</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="video" value="yes"><span class="option-text">Yes</span></label>
+            <label class="option"><input type="radio" name="video" value="no"><span class="option-text">No</span></label>
+            <label class="option"><input type="radio" name="video" value="interested"><span class="option-text">Interested in having some produced</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Do you actively collect customer reviews?</label>
+          <span class="question-hint">Check all that apply</span>
+          <div class="option-group">
+            <label class="option"><input type="checkbox" name="reviews" value="google"><span class="option-text">Google</span></label>
+            <label class="option"><input type="checkbox" name="reviews" value="facebook"><span class="option-text">Facebook</span></label>
+            <label class="option"><input type="checkbox" name="reviews" value="yelp"><span class="option-text">Yelp</span></label>
+            <label class="option"><input type="checkbox" name="reviews" value="angi"><span class="option-text">Angi</span></label>
+            <label class="option"><input type="checkbox" name="reviews" value="none"><span class="option-text">We don't actively collect reviews</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label" for="google_review_count">Roughly how many Google reviews do you currently have?</label>
+          <input type="text" id="google_review_count" name="google_review_count" placeholder="e.g., about 40">
+        </div>
+
+        <div class="question">
+          <label class="question-label" for="years_in_area">How long have you been serving this area?</label>
+          <span class="question-hint">Local tenure is a strong trust signal — even if the business is newer, personal roots count</span>
+          <input type="text" id="years_in_area" name="years_in_area" placeholder="e.g., Born and raised in Willmar, serving the area for 12 years">
+        </div>
+
+        <div class="question">
+          <label class="question-label" for="press">Any press, awards, or community recognition?</label>
+          <span class="question-hint">Local news features, chamber awards, Best of Willmar, etc.</span>
+          <textarea id="press" name="press" rows="2"></textarea>
+        </div>
+
+        <div class="question">
+          <label class="question-label" for="customer_praise">What do your best customers say about working with you?</label>
+          <span class="question-hint">The things that come up in reviews or word of mouth — reliability, quality, communication, price, etc.</span>
+          <textarea id="customer_praise" name="customer_praise" rows="3"></textarea>
+        </div>
+      </div>
+
+      <!-- ══ STEP 4: Lead Generation ══ -->
+      <div class="step" data-step="4">
+        <div class="step-header">
+          <div class="step-number">Section 4 of 8</div>
+          <h2 class="step-title">Lead generation</h2>
+          <div class="step-divider"></div>
+          <p class="step-subtitle">How the site will bring in new customers</p>
+        </div>
+
+        <div class="question">
+          <label class="question-label">How do most new leads find you today?</label>
+          <span class="question-hint">Check all that apply</span>
+          <div class="option-group">
+            <label class="option"><input type="checkbox" name="lead_sources" value="word_of_mouth"><span class="option-text">Word of mouth / personal referrals</span></label>
+            <label class="option"><input type="checkbox" name="lead_sources" value="google"><span class="option-text">Google search</span></label>
+            <label class="option"><input type="checkbox" name="lead_sources" value="social"><span class="option-text">Social media</span></label>
+            <label class="option"><input type="checkbox" name="lead_sources" value="yard_signs"><span class="option-text">Yard signs / vehicle wraps / local visibility</span></label>
+            <label class="option"><input type="checkbox" name="lead_sources" value="past_clients"><span class="option-text">Repeat customers</span></label>
+            <label class="option"><input type="checkbox" name="lead_sources" value="angi_homeadvisor"><span class="option-text">Angi / HomeAdvisor / Thumbtack</span></label>
+            <label class="option"><input type="checkbox" name="lead_sources" value="struggling"><span class="option-text">Honestly struggling to get new leads consistently</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">How do you currently handle new inquiries?</label>
+          <span class="question-hint">Check all that apply</span>
+          <div class="option-group">
+            <label class="option"><input type="checkbox" name="inquiry_handling" value="phone"><span class="option-text">Phone calls</span></label>
+            <label class="option"><input type="checkbox" name="inquiry_handling" value="text"><span class="option-text">Text messages</span></label>
+            <label class="option"><input type="checkbox" name="inquiry_handling" value="email"><span class="option-text">Email</span></label>
+            <label class="option"><input type="checkbox" name="inquiry_handling" value="form"><span class="option-text">Online form</span></label>
+            <label class="option"><input type="checkbox" name="inquiry_handling" value="facebook"><span class="option-text">Facebook Messenger</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Preferred way to receive new leads from the site</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="preferred_lead" value="phone_call"><span class="option-text">Phone call — I want them to call me directly</span></label>
+            <label class="option"><input type="radio" name="preferred_lead" value="form_email"><span class="option-text">Form submission emailed to me</span></label>
+            <label class="option"><input type="radio" name="preferred_lead" value="text_notification"><span class="option-text">Text notification when a form comes in</span></label>
+            <label class="option"><input type="radio" name="preferred_lead" value="all"><span class="option-text">All of the above — more ways the better</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Do you want a quote request form on the site?</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="quote_form" value="yes"><span class="option-text">Yes — let customers describe the job and request a quote</span></label>
+            <label class="option"><input type="radio" name="quote_form" value="no"><span class="option-text">No — I'd rather they just call</span></label>
+            <label class="option"><input type="radio" name="quote_form" value="both"><span class="option-text">Both — form and a prominent phone number</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Do you want to show pricing ranges or keep it quote-only?</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="pricing_display" value="ranges"><span class="option-text">Show rough ranges — helps qualify leads upfront</span></label>
+            <label class="option"><input type="radio" name="pricing_display" value="quote_only"><span class="option-text">Quote-only — every job is different</span></label>
+            <label class="option"><input type="radio" name="pricing_display" value="starting_at"><span class="option-text">"Starting at" pricing — give a floor but not a ceiling</span></label>
+            <label class="option"><input type="radio" name="pricing_display" value="unsure"><span class="option-text">Not sure — want your recommendation</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Do you want an emergency / urgent call button prominently featured?</label>
+          <span class="question-hint">A highly visible call-to-action for urgent service calls — especially valuable if you offer after-hours service</span>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="emergency_cta" value="yes"><span class="option-text">Yes — make it impossible to miss</span></label>
+            <label class="option"><input type="radio" name="emergency_cta" value="maybe"><span class="option-text">Maybe — depends on how it looks</span></label>
+            <label class="option"><input type="radio" name="emergency_cta" value="no"><span class="option-text">No — not relevant to our business</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ STEP 5: Brand & Content ══ -->
+      <div class="step" data-step="5">
+        <div class="step-header">
+          <div class="step-number">Section 5 of 8</div>
+          <h2 class="step-title">Brand &amp; content</h2>
+          <div class="step-divider"></div>
+          <p class="step-subtitle">What we'll build with</p>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Existing brand assets</label>
+          <span class="question-hint">Check all you have</span>
+          <div class="option-group">
+            <label class="option"><input type="checkbox" name="brand_assets" value="logo"><span class="option-text">Logo</span></label>
+            <label class="option"><input type="checkbox" name="brand_assets" value="colors"><span class="option-text">Brand colors / palette</span></label>
+            <label class="option"><input type="checkbox" name="brand_assets" value="fonts"><span class="option-text">Brand fonts</span></label>
+            <label class="option"><input type="checkbox" name="brand_assets" value="vehicle_wrap"><span class="option-text">Vehicle wrap or uniforms with branding</span></label>
+            <label class="option"><input type="checkbox" name="brand_assets" value="none"><span class="option-text">None — would like help developing a brand identity</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Tone that fits your business</label>
+          <span class="question-hint">Check all that apply</span>
+          <div class="option-group">
+            <label class="option"><input type="checkbox" name="tone" value="trustworthy"><span class="option-text">Trustworthy / reliable / no-nonsense</span></label>
+            <label class="option"><input type="checkbox" name="tone" value="professional"><span class="option-text">Professional / polished / corporate</span></label>
+            <label class="option"><input type="checkbox" name="tone" value="local"><span class="option-text">Local / community-rooted / neighborly</span></label>
+            <label class="option"><input type="checkbox" name="tone" value="family"><span class="option-text">Family-owned / personal touch</span></label>
+            <label class="option"><input type="checkbox" name="tone" value="bold"><span class="option-text">Bold / confident / we're the best at what we do</span></label>
+            <label class="option"><input type="checkbox" name="tone" value="approachable"><span class="option-text">Approachable / friendly / easy to work with</span></label>
+            <label class="option"><input type="checkbox" name="tone" value="unsure"><span class="option-text">Not sure — let's figure it out together</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label" for="inspiration">2–3 websites whose look and feel you like</label>
+          <span class="question-hint">Competitors or businesses in other areas you admire — one URL per line</span>
+          <textarea id="inspiration" name="inspiration" rows="4" placeholder="https://…"></textarea>
+        </div>
+
+        <div class="question">
+          <label class="question-label" for="design_notes">Any specific colors, fonts, or design preferences?</label>
+          <span class="question-hint">Or things you absolutely do not want</span>
+          <textarea id="design_notes" name="design_notes" rows="3"></textarea>
+        </div>
+      </div>
+
+      <!-- ══ STEP 6: Marketing ══ -->
+      <div class="step" data-step="6">
+        <div class="step-header">
+          <div class="step-number">Section 6 of 8</div>
+          <h2 class="step-title">Marketing &amp; visibility</h2>
+          <div class="step-divider"></div>
+          <p class="step-subtitle">Getting found by the right customers</p>
+        </div>
+
+        <div class="question">
+          <label class="question-label" for="social_handles">Social media handles / URLs</label>
+          <span class="question-hint">Facebook, Instagram, YouTube, Nextdoor — whatever you're active on</span>
+          <textarea id="social_handles" name="social_handles" rows="3" placeholder="Facebook: facebook.com/…&#10;Instagram: @…"></textarea>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Are you running or interested in Google Local Services Ads?</label>
+          <span class="question-hint">The "Google Guaranteed" badge that appears above regular search results — very effective for trade businesses</span>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="google_lsa" value="yes_running"><span class="option-text">Yes — already running them</span></label>
+            <label class="option"><input type="radio" name="google_lsa" value="interested"><span class="option-text">Not yet but interested</span></label>
+            <label class="option"><input type="radio" name="google_lsa" value="no"><span class="option-text">Not interested right now</span></label>
+            <label class="option"><input type="radio" name="google_lsa" value="what_is_it"><span class="option-text">Not familiar with it — want to learn more</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Interest in ongoing marketing help</label>
+          <span class="question-hint">Check all that interest you</span>
+          <div class="option-group">
+            <label class="option"><input type="checkbox" name="marketing_interest" value="local_seo"><span class="option-text">Local SEO (show up higher on Google without paying per click)</span></label>
+            <label class="option"><input type="checkbox" name="marketing_interest" value="google_ads"><span class="option-text">Google Ads / Pay-Per-Click</span></label>
+            <label class="option"><input type="checkbox" name="marketing_interest" value="social_automation"><span class="option-text">Social media automation (consistent posting, content)</span></label>
+            <label class="option"><input type="checkbox" name="marketing_interest" value="review_generation"><span class="option-text">Automated review generation (text customers after a job)</span></label>
+            <label class="option"><input type="checkbox" name="marketing_interest" value="video"><span class="option-text">Video production (team intro, project walkthroughs, testimonials)</span></label>
+            <label class="option"><input type="checkbox" name="marketing_interest" value="none"><span class="option-text">Not right now — just need the site</span></label>
+            <label class="option"><input type="checkbox" name="marketing_interest" value="recommend"><span class="option-text">Not sure — want your recommendations</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ STEP 7: Operations ══ -->
+      <div class="step" data-step="7">
+        <div class="step-header">
+          <div class="step-number">Section 7 of 8</div>
+          <h2 class="step-title">Operations &amp; admin</h2>
+          <div class="step-divider"></div>
+          <p class="step-subtitle">How you'll use the site day-to-day</p>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Who handles new inquiries day-to-day?</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="inquiry_handler" value="owner"><span class="option-text">Me — the owner</span></label>
+            <label class="option"><input type="radio" name="inquiry_handler" value="office"><span class="option-text">An office manager or admin</span></label>
+            <label class="option"><input type="radio" name="inquiry_handler" value="shared"><span class="option-text">Shared between a few people</span></label>
+            <label class="option"><input type="radio" name="inquiry_handler" value="nobody" data-reveal="nobody_detail"><span class="option-text">Nobody formal — it falls through the cracks sometimes</span></label>
+          </div>
+          <div class="conditional" id="nobody_detail">
+            <textarea name="nobody_detail_text" rows="2" placeholder="Tell us more — this is actually a great thing for automation to solve…"></textarea>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">How comfortable are you with technology?</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="tech_comfort" value="very"><span class="option-text">Very comfortable — I can figure most things out</span></label>
+            <label class="option"><input type="radio" name="tech_comfort" value="somewhat"><span class="option-text">Somewhat — basics with a little guidance</span></label>
+            <label class="option"><input type="radio" name="tech_comfort" value="not_much"><span class="option-text">Not much — I'd rather hand it off and forget about it</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Do you want to update your own service list and content after launch?</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="self_update" value="yes"><span class="option-text">Yes — I want to be able to make changes myself</span></label>
+            <label class="option"><input type="radio" name="self_update" value="some"><span class="option-text">Basic things only — hours, contact info, announcements</span></label>
+            <label class="option"><input type="radio" name="self_update" value="no"><span class="option-text">No — I'd rather send changes to you</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">What do you want to spend less time on?</label>
+          <span class="question-hint">Check all that apply</span>
+          <div class="option-group">
+            <label class="option"><input type="checkbox" name="pain_points" value="phone_questions"><span class="option-text">Answering basic phone calls that don't turn into jobs</span></label>
+            <label class="option"><input type="checkbox" name="pain_points" value="quotes"><span class="option-text">Writing up quotes and estimates</span></label>
+            <label class="option"><input type="checkbox" name="pain_points" value="follow_up"><span class="option-text">Following up with leads who go cold</span></label>
+            <label class="option"><input type="checkbox" name="pain_points" value="scheduling"><span class="option-text">Managing scheduling and job coordination</span></label>
+            <label class="option"><input type="checkbox" name="pain_points" value="reviews"><span class="option-text">Asking customers for Google reviews</span></label>
+            <label class="option"><input type="checkbox" name="pain_points" value="social"><span class="option-text">Posting on social media consistently</span></label>
+            <label class="option"><input type="checkbox" name="pain_points" value="invoicing"><span class="option-text">Invoicing and collecting payment</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label" for="pain_other">Anything else you wish ran more smoothly?</label>
+          <textarea id="pain_other" name="pain_other" rows="2"></textarea>
+        </div>
+      </div>
+
+      <!-- ══ STEP 8: Budget, Timeline & Priorities ══ -->
+      <div class="step" data-step="8">
+        <div class="step-header">
+          <div class="step-number">Section 8 of 8</div>
+          <h2 class="step-title">Budget, timeline &amp; priorities</h2>
+          <div class="step-divider"></div>
+          <p class="step-subtitle">Setting expectations on both sides</p>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Ideal timeline for going live</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="timeline" value="asap"><span class="option-text">ASAP — this is urgent</span></label>
+            <label class="option"><input type="radio" name="timeline" value="1_2_months"><span class="option-text">Within 1–2 months</span></label>
+            <label class="option"><input type="radio" name="timeline" value="3_6_months"><span class="option-text">Within 3–6 months</span></label>
+            <label class="option"><input type="radio" name="timeline" value="no_rush"><span class="option-text">No rush — get it right</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Comfort with a one-time build investment</label>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="budget_build" value="under_1500"><span class="option-text">Under $1,500</span></label>
+            <label class="option"><input type="radio" name="budget_build" value="1500_3500"><span class="option-text">$1,500–$3,500</span></label>
+            <label class="option"><input type="radio" name="budget_build" value="3500_7500"><span class="option-text">$3,500–$7,500</span></label>
+            <label class="option"><input type="radio" name="budget_build" value="7500_plus"><span class="option-text">$7,500+</span></label>
+            <label class="option"><input type="radio" name="budget_build" value="unsure"><span class="option-text">Not sure — want to discuss options</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Comfort with ongoing monthly costs</label>
+          <span class="question-hint">Hosting, maintenance, retainer — everything combined</span>
+          <div class="option-group">
+            <label class="option"><input type="radio" name="budget_monthly" value="under_100"><span class="option-text">Under $100/mo</span></label>
+            <label class="option"><input type="radio" name="budget_monthly" value="100_250"><span class="option-text">$100–$250/mo</span></label>
+            <label class="option"><input type="radio" name="budget_monthly" value="250_500"><span class="option-text">$250–$500/mo</span></label>
+            <label class="option"><input type="radio" name="budget_monthly" value="value_based"><span class="option-text">Whatever makes sense for the value it delivers</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label class="question-label">Rank your priorities</label>
+          <span class="question-hint">Drag to reorder — 1 is most important</span>
+          <ul class="ranking-list" id="priorities-list">
+            <li class="ranking-item" draggable="true" data-value="more_leads"><span class="ranking-number">1</span><span class="option-text">Getting more qualified leads consistently</span><span class="ranking-handle">≡</span></li>
+            <li class="ranking-item" draggable="true" data-value="look_trustworthy"><span class="ranking-number">2</span><span class="option-text">Looking professional and trustworthy online</span><span class="ranking-handle">≡</span></li>
+            <li class="ranking-item" draggable="true" data-value="google_ranking"><span class="ranking-number">3</span><span class="option-text">Showing up higher on Google in my service area</span><span class="ranking-handle">≡</span></li>
+            <li class="ranking-item" draggable="true" data-value="save_time"><span class="ranking-number">4</span><span class="option-text">Reducing time spent on calls and repetitive questions</span><span class="ranking-handle">≡</span></li>
+            <li class="ranking-item" draggable="true" data-value="stand_out"><span class="ranking-number">5</span><span class="option-text">Standing out from competitors in my area</span><span class="ranking-handle">≡</span></li>
+            <li class="ranking-item" draggable="true" data-value="brand"><span class="ranking-number">6</span><span class="option-text">Building a brand people recognize and remember</span><span class="ranking-handle">≡</span></li>
+            <li class="ranking-item" draggable="true" data-value="expand"><span class="ranking-number">7</span><span class="option-text">Expanding service area or growing team capacity</span><span class="ranking-handle">≡</span></li>
+          </ul>
+          <input type="hidden" name="priorities_ranked" id="priorities_ranked">
+        </div>
+
+        <div class="question">
+          <label class="question-label" for="must_have">Anything you absolutely want on the site?</label>
+          <span class="question-hint">A feature you've seen elsewhere, something your current setup can't do, or a specific page or section you know you need</span>
+          <textarea id="must_have" name="must_have" rows="3"></textarea>
+        </div>
+
+        <div class="question">
+          <label class="question-label" for="anything_else">Anything else we should know?</label>
+          <span class="question-hint">Concerns, hesitations, edge cases, personal context, things that didn't fit anywhere else</span>
+          <textarea id="anything_else" name="anything_else" rows="4"></textarea>
+        </div>
+
+        <div class="error-message" id="error-message"></div>
+      </div>
+
+      <!-- ══ SUCCESS ══ -->
+      <div class="step" data-step="success">
+        <div class="success-screen">
+          <div class="success-ornament"></div>
+          <h2 class="success-title">Course Set</h2>
+          <div class="success-divider"></div>
+          <p class="success-text">
+            Your responses have landed safely aboard. Gabe will review everything and follow up within 1–2 business days with a written proposal covering scope, timeline, and investment.
+          </p>
+        </div>
+      </div>
+
+      <div class="nav-buttons" id="nav-buttons">
+        <button type="button" class="btn-secondary" id="btn-back">Back</button>
+        <button type="button" class="btn-primary" id="btn-next">Continue</button>
+        <button type="submit" class="btn-submit" id="btn-submit" style="display:none;">Submit Discovery</button>
+      </div>
+
+      <p class="draft-notice" id="draft-notice">Your progress saves automatically</p>
+    </form>
+  </div>
+</div>
+
+<footer>
+  <p class="footer-text"><a href="../index.html">Dread Pirate Studio</a> &middot; Willmar, MN</p>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  const SUBMIT_ENDPOINT = '/api/discovery';
+  const STORAGE_KEY = 'dps_discovery_trade_service_v1';
+
+  const form = document.getElementById('discovery-form');
+  const steps = Array.from(document.querySelectorAll('.step'));
+  const totalQuestionSteps = steps.filter(s => s.dataset.step !== 'success').length;
+  const progressFill = document.getElementById('progress-fill');
+  const progressText = document.getElementById('progress-text');
+  const progressPercent = document.getElementById('progress-percent');
+  const btnBack = document.getElementById('btn-back');
+  const btnNext = document.getElementById('btn-next');
+  const btnSubmit = document.getElementById('btn-submit');
+  const navButtons = document.getElementById('nav-buttons');
+  const draftNotice = document.getElementById('draft-notice');
+  const errorMessage = document.getElementById('error-message');
+
+  let currentStep = 0;
+  let saveTimeout;
+
+  // ── Conditional reveal ──
+  document.querySelectorAll('[data-reveal]').forEach(input => {
+    input.addEventListener('change', () => {
+      const target = document.getElementById(input.dataset.reveal);
+      if (!target) return;
+      if (input.type === 'radio') {
+        document.querySelectorAll(`input[name="${input.name}"][data-reveal]`).forEach(r => {
+          const t = document.getElementById(r.dataset.reveal);
+          if (t) t.classList.remove('show');
+        });
+        if (input.checked) target.classList.add('show');
+      } else {
+        target.classList.toggle('show', input.checked);
+      }
+    });
+  });
+
+  // ── Option visual state ──
+  document.querySelectorAll('.option input').forEach(input => {
+    const update = () => {
+      const label = input.closest('.option');
+      if (input.type === 'radio') {
+        document.querySelectorAll(`input[name="${input.name}"]`).forEach(r => r.closest('.option').classList.remove('selected'));
+        if (input.checked) label.classList.add('selected');
+      } else {
+        label.classList.toggle('selected', input.checked);
+      }
+    };
+    input.addEventListener('change', update);
+  });
+
+  // ── Ranking drag & drop ──
+  const rankingList = document.getElementById('priorities-list');
+  const prioritiesInput = document.getElementById('priorities_ranked');
+  let draggedItem = null;
+
+  function updateRankNumbers() {
+    Array.from(rankingList.children).forEach((item, idx) => {
+      item.querySelector('.ranking-number').textContent = idx + 1;
+    });
+    prioritiesInput.value = Array.from(rankingList.children).map(i => i.dataset.value).join(',');
+    saveDraft();
+  }
+
+  Array.from(rankingList.children).forEach(item => {
+    item.addEventListener('dragstart', e => { draggedItem = item; item.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+    item.addEventListener('dragend', () => { item.classList.remove('dragging'); draggedItem = null; updateRankNumbers(); });
+    item.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (!draggedItem || draggedItem === item) return;
+      const rect = item.getBoundingClientRect();
+      e.clientY < rect.top + rect.height / 2 ? rankingList.insertBefore(draggedItem, item) : rankingList.insertBefore(draggedItem, item.nextSibling);
+    });
+    item.addEventListener('touchstart', () => item.classList.add('dragging'), { passive: true });
+    item.addEventListener('touchmove', e => {
+      const touch = e.touches[0];
+      const below = document.elementFromPoint(touch.clientX, touch.clientY);
+      const itemBelow = below ? below.closest('.ranking-item') : null;
+      if (itemBelow && itemBelow !== item && rankingList.contains(itemBelow)) {
+        const rect = itemBelow.getBoundingClientRect();
+        touch.clientY < rect.top + rect.height / 2 ? rankingList.insertBefore(item, itemBelow) : rankingList.insertBefore(item, itemBelow.nextSibling);
+      }
+    }, { passive: true });
+    item.addEventListener('touchend', () => { item.classList.remove('dragging'); updateRankNumbers(); });
+  });
+  updateRankNumbers();
+
+  // ── Step navigation ──
+  function showStep(index) {
+    steps.forEach(s => s.classList.remove('active'));
+    const isSuccess = index >= totalQuestionSteps;
+    const target = isSuccess ? steps.find(s => s.dataset.step === 'success') : steps[index];
+    if (target) target.classList.add('active');
+    currentStep = index;
+
+    if (isSuccess) {
+      progressFill.style.width = '100%';
+      progressText.textContent = 'Complete';
+      progressPercent.textContent = '100%';
+      navButtons.style.display = 'none';
+      draftNotice.style.display = 'none';
+    } else {
+      const pct = Math.round((index / (totalQuestionSteps - 1)) * 100);
+      progressFill.style.width = pct + '%';
+      progressText.textContent = `Step ${index + 1} of ${totalQuestionSteps}`;
+      progressPercent.textContent = pct + '%';
+      navButtons.style.display = 'flex';
+    }
+
+    btnBack.style.visibility = index === 0 ? 'hidden' : 'visible';
+    const isLast = index === totalQuestionSteps - 1;
+    btnNext.style.display = isLast ? 'none' : 'inline-block';
+    btnSubmit.style.display = isLast ? 'inline-block' : 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  btnBack.addEventListener('click', () => { if (currentStep > 0) showStep(currentStep - 1); });
+  btnNext.addEventListener('click', () => { if (validateStep(currentStep)) { saveDraft(); showStep(currentStep + 1); } });
+
+  // ── Validation ──
+  function validateStep(index) {
+    const step = steps[index];
+    if (!step) return true;
+    for (const field of step.querySelectorAll('[required]')) {
+      if (!field.value.trim()) {
+        field.focus();
+        field.style.borderColor = 'var(--error)';
+        setTimeout(() => field.style.borderColor = '', 2000);
+        return false;
+      }
+      if (field.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value)) {
+        field.focus();
+        field.style.borderColor = 'var(--error)';
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // ── Draft save / restore ──
+  function collectFormData() {
+    const data = {};
+    const fd = new FormData(form);
+    for (const key of new Set(Array.from(fd.keys()))) {
+      const values = fd.getAll(key);
+      const inputs = form.querySelectorAll(`input[name="${key}"], textarea[name="${key}"], select[name="${key}"]`);
+      const isMulti = inputs.length > 1 && inputs[0].type === 'checkbox';
+      data[key] = isMulti ? values : values[0];
+    }
+    data._currentStep = currentStep;
+    return data;
+  }
+
+  function saveDraft() {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(collectFormData()));
+        draftNotice.innerHTML = '<span class="saved">✓ Saved</span>';
+        setTimeout(() => { draftNotice.textContent = 'Your progress saves automatically'; }, 2000);
+      } catch(e) {}
+    }, 400);
+  }
+
+  function restoreDraft() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      for (const [key, value] of Object.entries(data)) {
+        if (key.startsWith('_')) continue;
+        const inputs = form.querySelectorAll(`[name="${key}"]`);
+        if (!inputs.length) continue;
+        const values = Array.isArray(value) ? value : [value];
+        inputs.forEach(input => {
+          if (input.type === 'checkbox' || input.type === 'radio') {
+            input.checked = values.includes(input.value);
+            input.dispatchEvent(new Event('change'));
+          } else {
+            input.value = values[0] || '';
+          }
+        });
+      }
+      if (data.priorities_ranked) {
+        const order = data.priorities_ranked.split(',');
+        order.reverse().forEach(val => {
+          const item = rankingList.querySelector(`[data-value="${val}"]`);
+          if (item) rankingList.insertBefore(item, rankingList.firstChild);
+        });
+        updateRankNumbers();
+      }
+      if (typeof data._currentStep === 'number' && data._currentStep < totalQuestionSteps) {
+        showStep(data._currentStep);
+      }
+    } catch(e) { console.warn('Could not restore draft', e); }
+  }
+
+  form.addEventListener('input', saveDraft);
+  form.addEventListener('change', saveDraft);
+
+  // ── Submission ──
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!validateStep(currentStep)) return;
+    errorMessage.classList.remove('show');
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = 'Submitting…';
+
+    const payload = collectFormData();
+    delete payload._currentStep;
+    payload._submitted_at = new Date().toISOString();
+    payload._form_type = 'trade_service';
+
+    try {
+      const res = await fetch(SUBMIT_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`Server responded ${res.status}`);
+      localStorage.removeItem(STORAGE_KEY);
+      showStep(totalQuestionSteps);
+    } catch(err) {
+      errorMessage.textContent = `Submission failed: ${err.message}. Your responses are saved locally — please try again, or email Gabe directly at gabe@dreadpiratestudio.com.`;
+      errorMessage.classList.add('show');
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = 'Submit Discovery';
+    }
+  });
+
+  // ── Init ──
+  restoreDraft();
+  if (currentStep === 0) showStep(0);
+})();
+</script>
+</body>
+</html>
