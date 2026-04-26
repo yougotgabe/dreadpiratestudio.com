@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Deletion — DPS Autopilot</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a0e1a;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --cream: #f5f0e8;
+    --text: #2a2a2a;
+    --muted: #666;
+    --border: rgba(201,168,76,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--cream);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.8;
+  }
+
+  header {
+    background: var(--navy);
+    padding: 2rem 2rem 1.5rem;
+    text-align: center;
+    border-bottom: 2px solid var(--gold);
+  }
+
+  .logo-mark {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    color: var(--cream);
+    font-weight: 400;
+    letter-spacing: 0.05em;
+  }
+
+  header p {
+    color: var(--gold-light);
+    font-size: 0.9rem;
+    margin-top: 0.4rem;
+    font-style: italic;
+  }
+
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 3rem 2rem 5rem;
+  }
+
+  .effective {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--navy);
+    margin: 2.5rem 0 0.8rem;
+    text-transform: uppercase;
+  }
+
+  p { margin-bottom: 1rem; }
+
+  ul {
+    margin: 0.5rem 0 1rem 1.5rem;
+  }
+
+  ul li { margin-bottom: 0.6rem; }
+
+  a {
+    color: #8b6914;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  .steps {
+    counter-reset: steps;
+    list-style: none;
+    margin: 1rem 0 1.5rem 0;
+  }
+
+  .steps li {
+    counter-increment: steps;
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+    align-items: flex-start;
+  }
+
+  .steps li::before {
+    content: counter(steps);
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gold);
+    background: var(--navy);
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+  }
+
+  .card {
+    background: var(--navy);
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    margin: 2rem 0;
+    color: var(--cream);
+  }
+
+  .card .label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .card a {
+    color: var(--gold-light);
+    font-size: 1.1rem;
+  }
+
+  .card p {
+    color: rgba(245,240,232,0.7);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">Dread Pirate Studio</div>
+  <h1>Data Deletion Request</h1>
+  <p>How to request removal of your data from DPS Autopilot</p>
+</header>
+
+<main>
+  <p class="effective">Last Updated: April 26, 2026</p>
+
+  <p>If you have connected your Facebook account to DPS Autopilot and would like to request deletion of your data, you can do so at any time. We will remove all data associated with your account within 30 days of receiving your request.</p>
+
+  <hr class="divider">
+
+  <h2>What Data We Delete</h2>
+  <p>Upon a verified deletion request, we will permanently remove:</p>
+  <ul>
+    <li>Your account information (name, email address)</li>
+    <li>Your brand profile and all associated content parameters</li>
+    <li>Your Facebook Page Access Token and connection data</li>
+    <li>All generated posts, approval history, and feedback logs</li>
+    <li>All engagement metrics retrieved from your connected Page</li>
+    <li>Your billing records (note: Stripe may retain transaction records as required by law)</li>
+  </ul>
+
+  <h2>How to Request Deletion</h2>
+  <ol class="steps">
+    <li>Send an email to <a href="mailto:dreadpiratestudio@gmail.com">dreadpiratestudio@gmail.com</a> with the subject line <strong>"Data Deletion Request."</strong></li>
+    <li>Include the email address associated with your DPS Autopilot account so we can locate your data.</li>
+    <li>We will confirm receipt of your request within 2 business days.</li>
+    <li>All data will be permanently deleted within 30 days of confirmation.</li>
+    <li>We will send a final confirmation email once deletion is complete.</li>
+  </ol>
+
+  <div class="card">
+    <div class="label">Send your request to</div>
+    <a href="mailto:dreadpiratestudio@gmail.com">dreadpiratestudio@gmail.com</a>
+    <p>Subject line: "Data Deletion Request" · We respond within 2 business days</p>
+  </div>
+
+  <h2>Revoking Facebook Access Separately</h2>
+  <p>You can also revoke DPS Autopilot's access to your Facebook account at any time directly through Facebook, independent of a full data deletion request:</p>
+  <ul>
+    <li>Go to your <strong>Facebook Settings</strong></li>
+    <li>Navigate to <strong>Apps and Websites</strong></li>
+    <li>Find <strong>DPS Autopilot</strong> and click <strong>Remove</strong></li>
+  </ul>
+  <p>This immediately revokes our ability to post to your Page, but does not delete data already stored in our system. To remove stored data, please also submit a deletion request via email.</p>
+
+  <h2>Questions</h2>
+  <p>If you have any questions about your data or this process, contact us at <a href="mailto:dreadpiratestudio@gmail.com">dreadpiratestudio@gmail.com</a> or visit our <a href="/autopilot/privacy">Privacy Policy</a>.</p>
+</main>
+
+<footer>
+  &copy; 2026 Dread Pirate Studio &nbsp;·&nbsp;
+  <a href="/autopilot/privacy">Privacy Policy</a> &nbsp;·&nbsp;
+  <a href="/autopilot/terms">Terms of Service</a> &nbsp;·&nbsp;
+  <a href="https://dreadpiratestudio.com">dreadpiratestudio.com</a>
+</footer>
+
+</body>
+</html>
