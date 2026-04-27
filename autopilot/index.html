@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DPS Autopilot — AI Social Media for Local Businesses</title>
+<meta name="description" content="Automatically generate, approve, and publish on-brand Facebook posts for your business. Powered by AI. Built by Dread Pirate Studio.">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #080c18;
+    --navy-mid: #0f1628;
+    --navy-light: #1a2340;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gold-dim: rgba(201,168,76,0.15);
+    --cream: #f5f0e8;
+    --cream-dim: rgba(245,240,232,0.7);
+    --red: #8b1a1a;
+    --text: #f5f0e8;
+    --muted: rgba(245,240,232,0.5);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── GRAIN OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 1.2rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(8,12,24,0.95), transparent);
+  }
+
+  .nav-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .nav-logo span {
+    color: var(--cream-dim);
+    margin-left: 0.5rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+  }
+
+  .nav-link {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-link:hover { color: var(--gold); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 8rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(201,168,76,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(139,26,26,0.08) 0%, transparent 60%);
+  }
+
+  .hero-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+
+  .hero h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2.4rem, 6vw, 5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    max-width: 900px;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.4s;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--gold);
+  }
+
+  .hero-sub {
+    font-size: 1.2rem;
+    color: var(--cream-dim);
+    max-width: 540px;
+    font-style: italic;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.6s;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.8s;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--gold);
+    color: var(--navy);
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+
+  .btn-primary:hover {
+    background: var(--gold-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(201,168,76,0.3);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: transparent;
+    color: var(--cream-dim);
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    border: 1px solid rgba(245,240,232,0.2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  /* ── SCROLL INDICATOR ── */
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 1.2s;
+  }
+
+  .scroll-hint span {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    animation: scrollPulse 2s ease infinite;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .section {
+    padding: 6rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .section h2 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+
+  .section-intro {
+    color: var(--cream-dim);
+    font-style: italic;
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin-bottom: 4rem;
+  }
+
+  /* ── STEPS ── */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0;
+    position: relative;
+  }
+
+  .steps::before {
+    content: '';
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    right: 2rem;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold-dim), var(--gold-dim), transparent);
+  }
+
+  .step {
+    padding: 0 2rem 2rem;
+    position: relative;
+  }
+
+  .step-num {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    background: var(--navy);
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--gold-dim);
+    margin-bottom: 1.5rem;
+  }
+
+  .step h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+    letter-spacing: 0.05em;
+  }
+
+  .step p {
+    color: var(--cream-dim);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold-dim), transparent);
+    margin: 0 2rem;
+  }
+
+  /* ── PLANS ── */
+  .plans {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .plan {
+    border: 1px solid rgba(245,240,232,0.1);
+    padding: 2.5rem 2rem;
+    position: relative;
+    transition: border-color 0.3s, transform 0.3s;
+    background: var(--navy-mid);
+  }
+
+  .plan:hover {
+    border-color: var(--gold-dim);
+    transform: translateY(-4px);
+  }
+
+  .plan.featured {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, var(--navy-light), var(--navy-mid));
+  }
+
+  .plan-badge {
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gold);
+    color: var(--navy);
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0.3rem 1rem;
+    white-space: nowrap;
+  }
+
+  .plan-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .plan-price {
+    font-family: 'Cinzel', serif;
+    font-size: 3rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .plan-price sup {
+    font-size: 1.2rem;
+    vertical-align: top;
+    margin-top: 0.5rem;
+    display: inline-block;
+    color: var(--gold);
+  }
+
+  .plan-period {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .plan-feature {
+    font-size: 0.95rem;
+    color: var(--cream-dim);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(245,240,232,0.06);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .plan-feature::before {
+    content: '—';
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .plan-cta {
+    margin-top: 2rem;
+    width: 100%;
+    text-align: center;
+    display: block;
+  }
+
+  /* ── CONNECT SECTION ── */
+  .connect-section {
+    background: var(--navy-mid);
+    border-top: 1px solid var(--gold-dim);
+    border-bottom: 1px solid var(--gold-dim);
+    padding: 6rem 2rem;
+    text-align: center;
+  }
+
+  .connect-box {
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .connect-box h2 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .connect-box p {
+    color: var(--cream-dim);
+    font-style: italic;
+    margin-bottom: 2.5rem;
+  }
+
+  .connect-steps {
+    text-align: left;
+    margin-bottom: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .connect-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .connect-step-num {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    color: var(--navy);
+    background: var(--gold);
+    width: 1.8rem;
+    height: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-weight: 600;
+    margin-top: 0.15rem;
+  }
+
+  .connect-step p {
+    font-style: normal;
+    font-size: 0.95rem;
+    color: var(--cream-dim);
+    margin: 0;
+  }
+
+  /* ── SUCCESS / ERROR STATES ── */
+  .status-banner {
+    display: none;
+    padding: 1rem 1.5rem;
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .status-banner.success {
+    background: rgba(50, 120, 50, 0.2);
+    border: 1px solid rgba(50, 200, 50, 0.3);
+    color: #7ddf7d;
+  }
+
+  .status-banner.error {
+    background: rgba(139, 26, 26, 0.2);
+    border: 1px solid rgba(200, 50, 50, 0.3);
+    color: #df7d7d;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 3rem 2rem;
+    text-align: center;
+    border-top: 1px solid rgba(245,240,232,0.06);
+  }
+
+  .footer-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+
+  .footer-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--gold); }
+
+  .footer-copy {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .steps::before { display: none; }
+    .step { padding: 0 0 2rem; }
+    nav { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="https://dreadpiratestudio.com" class="nav-logo">
+    Dread Pirate Studio <span>/ Autopilot</span>
+  </a>
+  <a href="#connect" class="nav-link">Get Started</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow">DPS Autopilot &nbsp;·&nbsp; AI Social Media</p>
+  <h1>Your Facebook posts.<br><em>On autopilot.</em></h1>
+  <p class="hero-sub">AI generates on-brand content for your business twice a week. You approve it in seconds. We post it automatically.</p>
+  <div class="hero-cta">
+    <a href="#connect" class="btn-primary">Connect Your Page</a>
+    <a href="#how-it-works" class="btn-secondary">See How It Works</a>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how-it-works">
+  <span class="section-label">The Process</span>
+  <h2>Set it up once.<br>Then just approve.</h2>
+  <p class="section-intro">No social media manager. No monthly content stress. Just consistent, on-brand posts that sound like you.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <h3>Tell Us Your Brand</h3>
+      <p>Fill out a short questionnaire about your business, your customers, and your voice. Takes about five minutes.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <h3>Connect Your Page</h3>
+      <p>Link your Facebook Business Page through Facebook's secure login. We only ever post — never touch your other data.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <h3>Review & Approve</h3>
+      <p>We generate a post with copy and a branded graphic. You get a notification, tap Approve, and it's done.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <h3>It Gets Smarter</h3>
+      <p>Every approval and rejection teaches the system your preferences. Posts get better every week automatically.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- PLANS -->
+<section class="section" id="plans">
+  <span class="section-label">Pricing</span>
+  <h2>Simple, flat monthly rates.</h2>
+  <p class="section-intro">No contracts. Cancel anytime. API costs included — nothing hidden.</p>
+
+  <div class="plans">
+    <div class="plan">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price"><sup>$</sup>20</div>
+      <div class="plan-period">per month</div>
+      <div class="plan-feature">2 posts per week</div>
+      <div class="plan-feature">Facebook Page</div>
+      <div class="plan-feature">AI copy + branded graphic</div>
+      <div class="plan-feature">Approval dashboard</div>
+      <div class="plan-feature">Performance insights</div>
+      <a href="#connect" class="btn-secondary plan-cta">Get Started</a>
+    </div>
+
+    <div class="plan featured">
+      <div class="plan-badge">Most Popular</div>
+      <div class="plan-name">Growth</div>
+      <div class="plan-price"><sup>$</sup>50</div>
+      <div class="plan-period">per month</div>
+      <div class="plan-feature">4 posts per week</div>
+      <div class="plan-feature">Facebook + Instagram</div>
+      <div class="plan-feature">AI copy + branded graphic</div>
+      <div class="plan-feature">Approval dashboard</div>
+      <div class="plan-feature">Performance insights</div>
+      <a href="#connect" class="btn-primary plan-cta">Get Started</a>
+    </div>
+
+    <div class="plan">
+      <div class="plan-name">Daily</div>
+      <div class="plan-price"><sup>$</sup>80</div>
+      <div class="plan-period">per month</div>
+      <div class="plan-feature">7 posts per week</div>
+      <div class="plan-feature">Facebook + Instagram</div>
+      <div class="plan-feature">AI copy + branded graphic</div>
+      <div class="plan-feature">Approval dashboard</div>
+      <div class="plan-feature">Priority support</div>
+      <a href="#connect" class="btn-secondary plan-cta">Get Started</a>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CONNECT -->
+<section class="connect-section" id="connect">
+  <div class="connect-box">
+    <span class="section-label">Get Connected</span>
+    <h2>Ready to run on autopilot?</h2>
+    <p>Connect your Facebook Page in under two minutes. No technical setup required on your end.</p>
+
+    <div id="statusBanner" class="status-banner"></div>
+
+    <div class="connect-steps">
+      <div class="connect-step">
+        <div class="connect-step-num">1</div>
+        <p>Click the button below and log into Facebook when prompted.</p>
+      </div>
+      <div class="connect-step">
+        <div class="connect-step-num">2</div>
+        <p>Select your Business Page and grant the requested permissions.</p>
+      </div>
+      <div class="connect-step">
+        <div class="connect-step-num">3</div>
+        <p>You'll be redirected back here and we'll take it from there.</p>
+      </div>
+    </div>
+
+    <a href="https://autopilot-oauth.dreadpiratestudio.workers.dev/autopilot/oauth/start" class="btn-primary" style="width:100%; justify-content:center; font-size:0.85rem;">
+      ⚓ Connect My Facebook Page
+    </a>
+
+    <p style="margin-top:1.2rem; font-size:0.85rem; color:var(--muted); font-style:italic;">
+      By connecting, you agree to our <a href="/autopilot/terms" style="color:var(--gold);">Terms of Service</a> and <a href="/autopilot/privacy" style="color:var(--gold);">Privacy Policy</a>.
+    </p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Dread Pirate Studio</div>
+  <div class="footer-links">
+    <a href="https://dreadpiratestudio.com">Home</a>
+    <a href="/autopilot/privacy">Privacy Policy</a>
+    <a href="/autopilot/terms">Terms of Service</a>
+    <a href="/autopilot/data-deletion">Data Deletion</a>
+    <a href="mailto:dreadpiratestudio@gmail.com">Contact</a>
+  </div>
+  <p class="footer-copy">&copy; 2026 Dread Pirate Studio &nbsp;·&nbsp; Willmar, MN</p>
+</footer>
+
+<script>
+  // Handle success/error redirects from OAuth callback
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.get('success')) {
+    const pages = params.get('pages');
+    const banner = document.getElementById('statusBanner');
+    banner.className = 'status-banner success';
+    banner.textContent = `✓ Connected successfully! ${pages} page${pages > 1 ? 's' : ''} linked to DPS Autopilot.`;
+    banner.style.display = 'block';
+    // Scroll to connect section
+    document.getElementById('connect').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  if (params.get('error')) {
+    const errorMap = {
+      'no_pages': 'No Facebook Pages found on your account. Make sure you manage at least one Business Page.',
+      'token_failed': 'Could not complete authentication. Please try again.',
+      'db_failed': 'Connection succeeded but we had trouble saving your data. Please contact support.',
+      'no_code': 'Authentication was cancelled. Please try again.',
+    };
+    const banner = document.getElementById('statusBanner');
+    banner.className = 'status-banner error';
+    banner.textContent = errorMap[params.get('error')] || 'Something went wrong. Please try again or contact support.';
+    banner.style.display = 'block';
+    document.getElementById('connect').scrollIntoView({ behavior: 'smooth' });
+  }
+</script>
+
+</body>
+</html>
