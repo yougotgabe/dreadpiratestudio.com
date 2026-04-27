@@ -712,7 +712,7 @@
   </div>
 
   <!-- Main form — hidden until token validates -->
-  <div id="mainContent" style="display:none; width:100%; display:flex; flex-direction:column; align-items:center;">
+  <div id="mainContent" style="display:none; width:100%; flex-direction:column; align-items:center;">
 
     <div class="page-header">
       <span class="section-label">DPS Autopilot &nbsp;·&nbsp; Brand Setup</span>
@@ -1021,6 +1021,8 @@ let logoFile = null;
     } else {
       tokenError.classList.add('visible');
     }
+    // In both cases, keep the form hidden — no token = no access
+    mainContent.style.display = 'none';
     return;
   }
 
