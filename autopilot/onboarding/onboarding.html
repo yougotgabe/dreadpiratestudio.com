@@ -869,7 +869,7 @@
             <input type="file" id="logoFile" accept="image/png,image/jpeg,image/svg+xml,image/webp" />
             <div class="upload-icon">⚓</div>
             <div class="upload-title">Drop your logo here</div>
-            <div class="upload-hint">PNG, SVG, or JPG &nbsp;·&nbsp; Max 5MB</div>
+            <div class="upload-hint">PNG, SVG, or JPG &nbsp;·&nbsp; Max 10MB</div>
           </div>
 
           <div class="upload-preview" id="uploadPreview">
@@ -1185,8 +1185,8 @@ function handleLogoSelect(e) {
 }
 
 function setLogoFile(file) {
-  if (file.size > 5 * 1024 * 1024) {
-    showStatus('error', 'Logo file must be under 5MB.');
+  if (file.size > 10 * 1024 * 1024) {
+    showStatus('error', 'Logo file must be under 10MB.');
     return;
   }
   logoFile = file;
