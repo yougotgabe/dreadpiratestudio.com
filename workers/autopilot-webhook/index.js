@@ -121,16 +121,13 @@ async function handleCheckoutComplete(session, env) {
 
   // Create an empty brand_profile row so onboarding has a target to fill
   await supabaseRequest(env, "POST", "/rest/v1/brand_profiles", {
-    client_id: clientId,
-    business_name: name || "",
-    industry: "",
-    brand_voice: "",
-    target_audience: "",
-    posting_goals: "",
-    logo_url: null,
-    color_palette: null,
-    approved_count: 0,
-    rejected_count: 0,
+    client_id:            clientId,
+    business_name:        name || "",
+    industry:             "",
+    brand_voice:          "",
+    target_audience:      "",
+    posting_goals:        [],
+    color_palette:        {},
   });
 
   console.log(`Provisioned client: ${email} (${plan}), client_id: ${clientId}`);
