@@ -1009,11 +1009,18 @@ let logoFile = null;
 
   const loading = document.getElementById('loadingScreen');
   const tokenError = document.getElementById('tokenError');
+  const checkEmail = document.getElementById('checkEmailScreen');
   const mainContent = document.getElementById('mainContent');
 
   if (!clientToken) {
     loading.classList.add('hidden');
-    tokenError.classList.add('visible');
+    // If arriving from Stripe with session_id, show "check your email"
+    const sessionId = params.get('session_id');
+    if (sessionId) {
+      checkEmail.classList.add('visible');
+    } else {
+      tokenError.classList.add('visible');
+    }
     return;
   }
 
