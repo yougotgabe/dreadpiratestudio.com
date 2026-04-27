@@ -9,7 +9,7 @@
  * Env vars (set via wrangler secret put):
  *   SUPABASE_URL             — https://xxxx.supabase.co
  *   SUPABASE_SERVICE_KEY     — service_role key
- *   SUPABASE_STORAGE_BUCKET  — e.g. "logos" (create in Supabase dashboard → Storage)
+ *   SUPABASE_STORAGE_BUCKET  — e.g. "logos"
  */
 
 const CORS = {
@@ -91,6 +91,9 @@ async function handleLogoUpload(request, env) {
   const fileName = `${clientId}/logo.${ext}`;
   const bucket = env.SUPABASE_STORAGE_BUCKET || 'logos';
 
+  const fileBytes = await file.arrayBuffer();
+  const fileSizeKb = Math.round(fileBytes.byteLength / 1024);
+
   const uploadRes = await fetch(
     `${env.SUPABASE_URL}/storage/v1/object/${bucket}/${fileName}`,
     {
@@ -101,7 +104,7 @@ async function handleLogoUpload(request, env) {
         'Content-Type': file.type || 'image/png',
         'x-upsert': 'true',
       },
-      body: await file.arrayBuffer(),
+      body: fileBytes,
     }
   );
 
@@ -112,6 +115,21 @@ async function handleLogoUpload(request, env) {
   }
 
   const publicUrl = `${env.SUPABASE_URL}/storage/v1/object/public/${bucket}/${fileName}`;
+
+  // Upsert into brand_assets table
+  await supabase(env, 'POST', '/rest/v1/brand_assets', {
+    client_id:    clientId,
+    storage_path: fileName,
+    public_url:   publicUrl,
+    file_name:    file.name,
+    file_type:    file.type || 'image/png',
+    file_size_kb: fileSizeKb,
+    asset_type:   'logo_primary',
+    asset_label:  'Primary Logo',
+    is_active:    true,
+    sort_order:   0,
+  }, { Prefer: 'resolution=merge-duplicates,return=minimal' });
+
   return json({ url: publicUrl });
 }
 
@@ -133,21 +151,21 @@ async function handleSaveProfile(request, env) {
 
   const clientId = rows[0].id;
 
+  // Build profile — no logo_url, that lives in brand_assets
   const profile = {
-    client_id: clientId,
-    business_name: data.business_name || '',
-    industry: data.industry || '',
-    location: data.location || '',
+    client_id:            clientId,
+    business_name:        data.business_name || '',
+    industry:             data.industry || '',
+    location:             data.location || '',
     business_description: data.business_description || '',
-    target_audience: data.target_audience || '',
-    brand_voice: data.brand_voice || '',
-    posting_goals: JSON.stringify(data.posting_goals || []),
-    off_limits: data.off_limits || '',
-    extra_context: data.extra_context || '',
-    logo_url: data.logo_url || null,
-    color_palette: JSON.stringify(data.color_palette || {}),
-    website: data.website || '',
-    updated_at: new Date().toISOString(),
+    target_audience:      data.target_audience || '',
+    brand_voice:          data.brand_voice || '',
+    posting_goals:        data.posting_goals || [],
+    off_limits:           data.off_limits || '',
+    extra_context:        data.extra_context || '',
+    color_palette:        data.color_palette || {},
+    website:              data.website || '',
+    updated_at:           new Date().toISOString(),
   };
 
   // Upsert on client_id conflict
@@ -155,7 +173,7 @@ async function handleSaveProfile(request, env) {
     { Prefer: 'resolution=merge-duplicates,return=minimal' }
   );
 
-  // Mark onboarding complete on the client row
+  // Mark onboarding complete
   await supabase(env, 'PATCH',
     `/rest/v1/clients?id=eq.${clientId}`,
     { onboarding_complete: true },
