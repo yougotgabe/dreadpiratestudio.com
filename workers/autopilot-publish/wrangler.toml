@@ -1,0 +1,19 @@
+name = "autopilot-publish"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+SUPABASE_URL       = "https://efylfnnshmaauhiwqaxj.supabase.co"
+CAPTION_WORKER_URL = "https://autopilot-caption.dreadpiratestudio.workers.dev"
+IMAGE_WORKER_URL   = "https://autopilot-image.dreadpiratestudio.workers.dev"
+VAPID_SUBJECT      = "mailto:gabe@dreadpiratestudio.com"
+
+# Cron: runs every 5 minutes
+[triggers]
+crons = ["*/5 * * * *"]
+
+# Secrets — set via CLI:
+#   wrangler secret put SUPABASE_SERVICE_KEY
+#   wrangler secret put VAPID_PRIVATE_KEY
+#   wrangler secret put VAPID_PUBLIC_KEY
+#   wrangler secret put RESEND_API_KEY
