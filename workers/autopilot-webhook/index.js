@@ -99,8 +99,8 @@ async function handleCheckoutComplete(session, env) {
   const plan = sub.metadata?.plan || inferPlanFromAmount(sub.items?.data?.[0]?.price?.unit_amount);
   const stripePriceId = sub.items?.data?.[0]?.price?.id || null;
 
-  // Upsert client row
-  await supabaseRequest(env, "POST", "/rest/v1/clients", {
+  // Upsert client row (on_conflict=email handles re-subscriptions gracefully)
+  await supabaseRequest(env, "POST", "/rest/v1/clients?on_conflict=email", {
     email,
     name,
     plan,
@@ -410,7 +410,7 @@ async function supabaseRequest(env, method, path, body = null) {
       "Content-Type": "application/json",
       apikey: env.SUPABASE_SERVICE_KEY,
       Authorization: `Bearer ${env.SUPABASE_SERVICE_KEY}`,
-      Prefer: method === "POST" ? "return=representation" : "return=minimal",
+      Prefer: method === "POST" ? "return=representation,resolution=merge-duplicates" : "return=minimal",
     },
   };
   if (body) {
