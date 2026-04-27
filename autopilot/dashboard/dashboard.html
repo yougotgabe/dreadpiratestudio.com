@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#080808">
+  <title>DPS Autopilot — Dashboard</title>
+  <link rel="manifest" href="/autopilot-manifest.json">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black:      #080808;
+      --deep:       #0d0f14;
+      --surface:    #131620;
+      --surface2:   #1a1e2a;
+      --surface3:   #20263a;
+      --gold:       #c9a84c;
+      --gold-dim:   #8a6f2e;
+      --gold-glow:  rgba(201,168,76,0.18);
+      --gold-faint: rgba(201,168,76,0.07);
+      --white:      #e8e0d0;
+      --muted:      #6b6355;
+      --muted2:     #4a4438;
+      --border:     rgba(201,168,76,0.15);
+      --border2:    rgba(201,168,76,0.07);
+      --error:      #c0392b;
+      --success:    #27ae60;
+      --pending:    #e67e22;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { overflow-x: hidden; height: 100%; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 17px;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      overscroll-behavior: none;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.25rem;
+      background: linear-gradient(to bottom, rgba(8,8,8,0.98), rgba(8,8,8,0.80));
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .topbar-brand {
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold);
+      text-decoration: none;
+    }
+    .topbar-brand span { color: var(--muted); margin-left: 0.4rem; }
+    .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+    .notif-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .notif-btn.enabled { color: var(--gold); border-color: var(--gold); }
+    .plan-badge {
+      font-family: 'Cinzel', serif;
+      font-size: 0.5rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.2em 0.7em;
+    }
+
+    /* ── MAIN CONTENT ── */
+    main {
+      flex: 1;
+      padding: 70px 0 80px;
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ── SECTION HEADER ── */
+    .section-header {
+      padding: 1.5rem 1.25rem 0.75rem;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    .section-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .section-action {
+      font-size: 0.78rem;
+      color: var(--gold-dim);
+      text-decoration: none;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: 'Crimson Text', serif;
+      transition: color 0.2s;
+    }
+    .section-action:hover { color: var(--gold); }
+
+    /* ── WEEK STRIP ── */
+    .week-strip {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0 1.25rem 1rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .week-strip::-webkit-scrollbar { display: none; }
+    .day-chip {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.6rem 0.5rem;
+      border-radius: 10px;
+      border: 1px solid var(--border2);
+      background: var(--surface);
+      min-width: 52px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .day-chip.active { border-color: var(--gold); background: var(--gold-faint); }
+    .day-chip.has-pending::after {
+      content: '';
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--pending);
+    }
+    .day-chip.has-approved::after { background: var(--success); }
+    .day-chip-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.48rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .day-chip.active .day-chip-name { color: var(--gold); }
+    .day-chip-num {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--white);
+      line-height: 1;
+    }
+    .day-chip-time {
+      font-size: 0.65rem;
+      color: var(--muted);
+      line-height: 1;
+    }
+
+    /* ── BATCH APPROVE ── */
+    .batch-bar {
+      margin: 0 1.25rem 1rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--gold-faint);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .batch-bar-text {
+      font-size: 0.85rem;
+      color: var(--white);
+      line-height: 1.3;
+    }
+    .batch-bar-text strong { color: var(--gold); font-weight: 600; }
+    .batch-btn {
+      flex: 0 0 auto;
+      font-family: 'Cinzel', serif;
+      font-size: 0.5rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--black);
+      background: var(--gold);
+      border: none;
+      border-radius: 6px;
+      padding: 0.5em 1em;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .batch-btn:hover { opacity: 0.85; }
+
+    /* ── POST CARD ── */
+    .post-card {
+      margin: 0 1.25rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .post-card.status-approved { border-color: rgba(39,174,96,0.35); }
+    .post-card.status-pending  { border-color: rgba(230,126,34,0.35); }
+    .post-card.status-rejected { border-color: rgba(192,57,43,0.35); }
+    .post-card.status-manual   { border-color: rgba(201,168,76,0.35); }
+
+    .post-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1rem 0.6rem;
+      border-bottom: 1px solid var(--border2);
+    }
+    .post-meta { display: flex; align-items: center; gap: 0.6rem; }
+    .post-category {
+      font-family: 'Cinzel', serif;
+      font-size: 0.45rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.2em 0.7em;
+    }
+    .post-date { font-size: 0.78rem; color: var(--muted); }
+    .post-status-pill {
+      font-family: 'Cinzel', serif;
+      font-size: 0.42rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      border-radius: 20px;
+      padding: 0.25em 0.75em;
+      border: 1px solid;
+    }
+    .post-status-pill.pending  { color: var(--pending);  border-color: rgba(230,126,34,0.4); background: rgba(230,126,34,0.08); }
+    .post-status-pill.approved { color: var(--success);  border-color: rgba(39,174,96,0.4);  background: rgba(39,174,96,0.08); }
+    .post-status-pill.rejected { color: var(--error);    border-color: rgba(192,57,43,0.4);  background: rgba(192,57,43,0.08); }
+    .post-status-pill.manual   { color: var(--gold);     border-color: var(--border);        background: var(--gold-faint); }
+    .post-status-pill.published{ color: var(--muted);    border-color: var(--border2);       background: transparent; }
+
+    /* Image + caption layout */
+    .post-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .post-image-wrap {
+      position: relative;
+      background: var(--deep);
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+    }
+    .post-image-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.3s;
+    }
+    .post-image-placeholder {
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: var(--muted2);
+    }
+    .post-image-placeholder .icon { font-size: 2rem; }
+    .post-image-placeholder span { font-size: 0.8rem; }
+
+    .image-overlay-btns {
+      position: absolute;
+      bottom: 0.75rem;
+      right: 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .img-overlay-btn {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(8,8,8,0.7);
+      color: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 0.85rem;
+      backdrop-filter: blur(8px);
+      transition: background 0.2s;
+    }
+    .img-overlay-btn:hover { background: rgba(201,168,76,0.3); }
+
+    .attempts-bar {
+      position: absolute;
+      top: 0.6rem; left: 0.6rem;
+      display: flex;
+      gap: 0.3rem;
+      align-items: center;
+    }
+    .attempt-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .attempt-dot.used { background: var(--gold); border-color: var(--gold); }
+    .attempt-dot.exhausted { background: var(--error); border-color: var(--error); }
+
+    .post-caption {
+      padding: 1rem;
+      border-top: 1px solid var(--border2);
+    }
+    .post-caption p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--white);
+    }
+    .post-caption-empty {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+    .post-caption-attempts {
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* Action buttons */
+    .post-actions {
+      display: flex;
+      gap: 0;
+      border-top: 1px solid var(--border2);
+    }
+    .post-action-btn {
+      flex: 1;
+      padding: 0.85rem 0.5rem;
+      border: none;
+      background: transparent;
+      font-family: 'Cinzel', serif;
+      font-size: 0.48rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      color: var(--muted);
+    }
+    .post-action-btn + .post-action-btn { border-left: 1px solid var(--border2); }
+    .post-action-btn .btn-icon { font-size: 1.1rem; }
+    .post-action-btn:hover { background: var(--surface2); }
+    .post-action-btn.approve { color: var(--success); }
+    .post-action-btn.approve:hover { background: rgba(39,174,96,0.08); }
+    .post-action-btn.reject { color: var(--error); }
+    .post-action-btn.reject:hover { background: rgba(192,57,43,0.08); }
+    .post-action-btn.regen { color: var(--gold); }
+    .post-action-btn.regen:hover { background: var(--gold-faint); }
+    .post-action-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* Manual mode banner */
+    .manual-banner {
+      margin: 0.75rem 1rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 8px;
+      background: var(--gold-faint);
+      font-size: 0.82rem;
+      color: var(--white);
+      line-height: 1.4;
+    }
+    .manual-banner strong { color: var(--gold); }
+    .manual-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .manual-action-btn {
+      font-family: 'Cinzel', serif;
+      font-size: 0.45rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.4em 0.9em;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--gold-dim);
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .manual-action-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 100;
+      height: calc(60px + var(--safe-bottom));
+      padding-bottom: var(--safe-bottom);
+      display: flex;
+      background: rgba(8,8,8,0.95);
+      border-top: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .nav-tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.2rem;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      transition: color 0.2s;
+      padding: 0;
+    }
+    .nav-tab.active { color: var(--gold); }
+    .nav-tab-icon { font-size: 1.25rem; line-height: 1; }
+    .nav-tab-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.4rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      padding: 3rem 2rem;
+      text-align: center;
+      color: var(--muted);
+    }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+    .empty-state p { font-size: 0.9rem; line-height: 1.6; }
+
+    /* ── LOADING SKELETON ── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* ── MODALS ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(8,8,8,0.85);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-sheet {
+      width: 100%;
+      max-width: 600px;
+      background: var(--surface);
+      border-radius: 18px 18px 0 0;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      padding: 0 0 calc(1.5rem + var(--safe-bottom));
+      max-height: 92vh;
+      overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .modal-overlay.open .modal-sheet { transform: translateY(0); }
+
+    .modal-handle {
+      width: 36px; height: 4px;
+      border-radius: 2px;
+      background: var(--muted2);
+      margin: 0.75rem auto 0;
+    }
+    .modal-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      padding: 1.25rem 1.25rem 0.5rem;
+    }
+    .modal-subtitle {
+      font-size: 0.82rem;
+      color: var(--muted);
+      padding: 0 1.25rem 1rem;
+      line-height: 1.5;
+    }
+
+    /* Rejection modal */
+    .feedback-section {
+      padding: 0 1.25rem 0.75rem;
+    }
+    .feedback-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.5rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    .feedback-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.75rem;
+    }
+    .feedback-chip {
+      font-size: 0.8rem;
+      padding: 0.3em 0.8em;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--white);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      user-select: none;
+    }
+    .feedback-chip.selected {
+      border-color: var(--gold);
+      background: var(--gold-faint);
+      color: var(--gold);
+    }
+    .feedback-textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--white);
+      font-family: 'Crimson Text', serif;
+      font-size: 0.95rem;
+      padding: 0.75rem;
+      resize: none;
+      outline: none;
+      line-height: 1.5;
+      transition: border-color 0.2s;
+      min-height: 80px;
+    }
+    .feedback-textarea:focus { border-color: var(--gold); }
+    .feedback-textarea::placeholder { color: var(--muted2); }
+
+    .divider {
+      height: 1px;
+      background: var(--border2);
+      margin: 0.5rem 0 1rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem 0;
+    }
+    .modal-btn {
+      flex: 1;
+      padding: 0.9rem;
+      border-radius: 10px;
+      border: none;
+      font-family: 'Cinzel', serif;
+      font-size: 0.55rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .modal-btn:hover { opacity: 0.85; }
+    .modal-btn.primary { background: var(--gold); color: var(--black); }
+    .modal-btn.secondary { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+    .modal-btn.danger { background: var(--error); color: var(--white); }
+
+    /* Push permission banner */
+    .push-banner {
+      margin: 0 1.25rem 1rem;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--gold-faint);
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+    .push-banner-icon { font-size: 1.5rem; flex: 0 0 auto; margin-top: 0.1rem; }
+    .push-banner-text { flex: 1; }
+    .push-banner-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.55rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.3rem;
+    }
+    .push-banner-desc { font-size: 0.82rem; color: var(--white); line-height: 1.4; margin-bottom: 0.6rem; }
+    .push-enable-btn {
+      font-family: 'Cinzel', serif;
+      font-size: 0.48rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--black);
+      background: var(--gold);
+      border: none;
+      border-radius: 6px;
+      padding: 0.5em 1.1em;
+      cursor: pointer;
+    }
+    .push-dismiss-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1rem;
+      cursor: pointer;
+      flex: 0 0 auto;
+      padding: 0;
+      line-height: 1;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: calc(70px + var(--safe-bottom));
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.82rem;
+      color: var(--white);
+      white-space: nowrap;
+      z-index: 300;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.success { border-color: rgba(39,174,96,0.5); }
+    .toast.error { border-color: rgba(192,57,43,0.5); }
+
+    /* Generate button */
+    .generate-btn {
+      width: calc(100% - 2.5rem);
+      margin: 0.5rem 1.25rem;
+      padding: 1rem;
+      border-radius: 10px;
+      border: 1px dashed var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-family: 'Cinzel', serif;
+      font-size: 0.52rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .generate-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-faint); }
+    .generate-btn .btn-icon { font-size: 1rem; }
+
+    /* Spinner */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Image library tab */
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      padding: 0 1.25rem;
+    }
+    .image-thumb {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+    .image-thumb:hover { border-color: var(--gold); }
+    .image-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .image-thumb-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(8,8,8,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .image-thumb:hover .image-thumb-overlay { opacity: 1; }
+    .image-thumb-overlay span { font-size: 1.4rem; }
+
+    /* Settings tab */
+    .settings-group {
+      padding: 0 1.25rem 1rem;
+    }
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 0;
+      border-bottom: 1px solid var(--border2);
+    }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-label { font-size: 0.9rem; color: var(--white); }
+    .settings-sub { font-size: 0.75rem; color: var(--muted); margin-top: 0.1rem; }
+    .toggle {
+      width: 42px; height: 24px;
+      border-radius: 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex: 0 0 auto;
+    }
+    .toggle.on { background: var(--gold); border-color: var(--gold); }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--white);
+      transition: transform 0.2s;
+    }
+    .toggle.on::after { transform: translateX(18px); }
+
+    /* Tabs visibility */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Generating overlay on image */
+    .image-generating {
+      position: absolute;
+      inset: 0;
+      background: rgba(8,8,8,0.75);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+    .image-generating span {
+      font-family: 'Cinzel', serif;
+      font-size: 0.48rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Topbar -->
+<header class="topbar">
+  <a class="topbar-brand" href="#">DPS <span>Autopilot</span></a>
+  <div class="topbar-right">
+    <span class="plan-badge" id="plan-badge">—</span>
+    <button class="notif-btn" id="notif-btn" onclick="togglePushNotifications()" title="Notifications">🔔</button>
+  </div>
+</header>
+
+<!-- Main -->
+<main>
+
+  <!-- Posts Tab -->
+  <div class="tab-content active" id="tab-posts">
+
+    <!-- Push notification banner -->
+    <div class="push-banner" id="push-banner" style="display:none">
+      <div class="push-banner-icon">🔔</div>
+      <div class="push-banner-text">
+        <div class="push-banner-title">Never miss a review</div>
+        <div class="push-banner-desc">Get notified when new posts are ready for your approval.</div>
+        <button class="push-enable-btn" onclick="requestPushPermission()">Enable Notifications</button>
+      </div>
+      <button class="push-dismiss-btn" onclick="dismissPushBanner()">✕</button>
+    </div>
+
+    <!-- Week strip -->
+    <div class="section-header">
+      <span class="section-title">This Week</span>
+      <button class="section-action" onclick="batchApproveAll()">Approve All Ready</button>
+    </div>
+    <div class="week-strip" id="week-strip">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Batch bar (shown when multiple pending) -->
+    <div class="batch-bar" id="batch-bar" style="display:none">
+      <div class="batch-bar-text"><strong id="batch-count">0</strong> posts ready for review</div>
+      <button class="batch-btn" onclick="batchApproveAll()">Approve All</button>
+    </div>
+
+    <!-- Posts list -->
+    <div class="section-header" style="padding-top:0.5rem">
+      <span class="section-title" id="posts-list-title">Upcoming Posts</span>
+    </div>
+    <div id="posts-list">
+      <!-- Populated by JS -->
+    </div>
+
+  </div>
+
+  <!-- Library Tab -->
+  <div class="tab-content" id="tab-library">
+    <div class="section-header">
+      <span class="section-title">Image Library</span>
+      <span class="section-action" style="font-size:0.72rem;color:var(--muted)">Rolling 5 images</span>
+    </div>
+    <div class="image-grid" id="image-grid">
+      <!-- Populated by JS -->
+    </div>
+    <div style="height:1rem"></div>
+  </div>
+
+  <!-- Settings Tab -->
+  <div class="tab-content" id="tab-settings">
+    <div class="section-header">
+      <span class="section-title">Account</span>
+    </div>
+    <div class="settings-group">
+      <div class="settings-row">
+        <div>
+          <div class="settings-label" id="settings-name">—</div>
+          <div class="settings-sub" id="settings-email">—</div>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-label">Plan</div>
+          <div class="settings-sub" id="settings-plan">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <span class="section-title">Notifications</span>
+    </div>
+    <div class="settings-group">
+      <div class="settings-row">
+        <div>
+          <div class="settings-label">Push Notifications</div>
+          <div class="settings-sub">Alerts when posts need review</div>
+        </div>
+        <div class="toggle" id="push-toggle" onclick="togglePushNotifications()"></div>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-label">Email Fallback</div>
+          <div class="settings-sub">Also send email if push fails</div>
+        </div>
+        <div class="toggle on" id="email-toggle" onclick="toggleEmailFallback()"></div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <span class="section-title">Schedule</span>
+    </div>
+    <div class="settings-group" id="schedule-display">
+      <!-- Populated by JS -->
+    </div>
+
+    <div style="padding:1.25rem">
+      <button class="modal-btn secondary" style="width:100%;margin-bottom:0.75rem" onclick="window.location.href='/autopilot/onboarding/onboarding.html'">
+        Edit Brand Profile
+      </button>
+      <button class="modal-btn secondary" style="width:100%;color:var(--error);border-color:rgba(192,57,43,0.3)" onclick="signOut()">
+        Sign Out
+      </button>
+    </div>
+  </div>
+
+</main>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <button class="nav-tab active" id="nav-posts" onclick="switchTab('posts')">
+    <span class="nav-tab-icon">📋</span>
+    <span class="nav-tab-label">Posts</span>
+  </button>
+  <button class="nav-tab" id="nav-library" onclick="switchTab('library')">
+    <span class="nav-tab-icon">🖼️</span>
+    <span class="nav-tab-label">Library</span>
+  </button>
+  <button class="nav-tab" id="nav-settings" onclick="switchTab('settings')">
+    <span class="nav-tab-icon">⚙️</span>
+    <span class="nav-tab-label">Settings</span>
+  </button>
+</nav>
+
+<!-- Rejection Modal -->
+<div class="modal-overlay" id="rejection-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Why reject this post?</div>
+    <div class="modal-subtitle">Your feedback teaches the AI. The more specific, the better the next attempt.</div>
+
+    <div class="feedback-section">
+      <span class="feedback-label">Image feedback</span>
+      <div class="feedback-chips" id="image-feedback-chips">
+        <div class="feedback-chip" data-val="wrong_mood" onclick="toggleChip(this,'image')">Wrong mood/vibe</div>
+        <div class="feedback-chip" data-val="logo_missing" onclick="toggleChip(this,'image')">Logo missing</div>
+        <div class="feedback-chip" data-val="too_generic" onclick="toggleChip(this,'image')">Too generic</div>
+        <div class="feedback-chip" data-val="wrong_colors" onclick="toggleChip(this,'image')">Wrong colors</div>
+        <div class="feedback-chip" data-val="bad_composition" onclick="toggleChip(this,'image')">Bad composition</div>
+        <div class="feedback-chip" data-val="not_on_brand" onclick="toggleChip(this,'image')">Off-brand</div>
+        <div class="feedback-chip" data-val="regenerate_image" onclick="toggleChip(this,'image')">Just regenerate</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="feedback-section">
+      <span class="feedback-label">Caption feedback</span>
+      <div class="feedback-chips" id="caption-feedback-chips">
+        <div class="feedback-chip" data-val="too_long" onclick="toggleChip(this,'caption')">Too long</div>
+        <div class="feedback-chip" data-val="too_short" onclick="toggleChip(this,'caption')">Too short</div>
+        <div class="feedback-chip" data-val="wrong_tone" onclick="toggleChip(this,'caption')">Wrong tone</div>
+        <div class="feedback-chip" data-val="too_salesy" onclick="toggleChip(this,'caption')">Too salesy</div>
+        <div class="feedback-chip" data-val="wrong_info" onclick="toggleChip(this,'caption')">Wrong info</div>
+        <div class="feedback-chip" data-val="boring" onclick="toggleChip(this,'caption')">Boring</div>
+        <div class="feedback-chip" data-val="regenerate_caption" onclick="toggleChip(this,'caption')">Just regenerate</div>
+      </div>
+    </div>
+
+    <div class="feedback-section">
+      <span class="feedback-label">Be more specific (optional)</span>
+      <textarea class="feedback-textarea" id="rejection-notes" placeholder="e.g. Use a warmer color palette, mention our happy hour deal…" rows="3"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-btn secondary" onclick="closeModal('rejection-modal')">Cancel</button>
+      <button class="modal-btn danger" onclick="submitRejection()">Reject & Regenerate</button>
+    </div>
+  </div>
+</div>
+
+<!-- Image viewer modal -->
+<div class="modal-overlay" id="image-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="image-modal-title">Generated Image</div>
+    <div style="padding:0 1.25rem 1rem">
+      <img id="image-modal-img" src="" alt="" style="width:100%;border-radius:10px;border:1px solid var(--border)">
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn secondary" onclick="closeModal('image-modal')">Close</button>
+      <button class="modal-btn primary" id="image-modal-download" onclick="downloadCurrentImage()">⬇ Download</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://efylfnnshmaauhiwqaxj.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // replace with anon key
+const CAPTION_WORKER = 'https://autopilot-caption.dreadpiratestudio.workers.dev';
+const IMAGE_WORKER   = 'https://autopilot-image.dreadpiratestudio.workers.dev';
+const VAPID_PUBLIC_KEY = 'YOUR_VAPID_PUBLIC_KEY'; // replace after generating
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let client = null;
+let posts = [];
+let slots = [];
+let selectedWeekDay = null;
+let activeRejectionPostId = null;
+let selectedImageFeedback = [];
+let selectedCaptionFeedback = [];
+let currentViewImageUrl = null;
+
+// ── AUTH ───────────────────────────────────────────────────────────────────
+function getToken() {
+  return localStorage.getItem('autopilot_token');
+}
+
+async function sbFetch(path, opts = {}) {
+  const token = getToken();
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...opts,
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      ...(opts.headers || {}),
+    },
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function loadClient() {
+  const token = getToken();
+  if (!token) {
+    window.location.href = '/autopilot/index.html';
+    return;
+  }
+  const data = await sbFetch(`clients?onboarding_token=eq.${token}&select=*`);
+  if (!data || !data.length) {
+    signOut();
+    return;
+  }
+  client = data[0];
+
+  // Redirect to onboarding if not complete
+  if (!client.onboarding_complete) {
+    window.location.href = `/autopilot/onboarding/onboarding.html?token=${token}`;
+    return;
+  }
+
+  document.getElementById('plan-badge').textContent = client.plan;
+  document.getElementById('settings-name').textContent = client.name || 'Client';
+  document.getElementById('settings-email').textContent = client.email;
+  document.getElementById('settings-plan').textContent =
+    { starter: 'Starter — 2 posts/week', growth: 'Growth — 4 posts/week', daily: 'Daily — 7 posts/week' }[client.plan] || client.plan;
+
+  updatePushUI();
+}
+
+function signOut() {
+  localStorage.removeItem('autopilot_token');
+  window.location.href = '/autopilot/index.html';
+}
+
+// ── DATA LOADING ───────────────────────────────────────────────────────────
+async function loadSlots() {
+  if (!client) return;
+  const data = await sbFetch(`scheduled_slots?client_id=eq.${client.id}&is_active=eq.true&order=day_of_week.asc,post_time.asc`);
+  slots = data || [];
+  renderScheduleSettings();
+}
+
+async function loadPosts() {
+  if (!client) return;
+  // Load posts for the next 14 days
+  const from = new Date().toISOString();
+  const to = new Date(Date.now() + 14 * 86400000).toISOString();
+  const data = await sbFetch(
+    `posts?client_id=eq.${client.id}&scheduled_for=gte.${from}&scheduled_for=lte.${to}&is_latest_attempt=eq.true&order=scheduled_for.asc&select=*`
+  );
+  posts = data || [];
+  renderWeekStrip();
+  renderPostsList();
+  renderBatchBar();
+}
+
+async function loadImageLibrary() {
+  if (!client) return;
+  const data = await sbFetch(
+    `generated_images?client_id=eq.${client.id}&order=created_at.desc&limit=5`
+  );
+  renderImageLibrary(data || []);
+}
+
+// ── WEEK STRIP ─────────────────────────────────────────────────────────────
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function renderWeekStrip() {
+  const strip = document.getElementById('week-strip');
+  strip.innerHTML = '';
+
+  const today = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const dayStr = d.toDateString();
+
+    const dayPosts = posts.filter(p => new Date(p.scheduled_for).toDateString() === dayStr);
+    const hasPending = dayPosts.some(p => p.status === 'pending');
+    const hasApproved = dayPosts.some(p => p.status === 'approved');
+    const hasSlot = slots.some(s => s.day_of_week === d.getDay());
+
+    const chip = document.createElement('div');
+    chip.className = 'day-chip' +
+      (i === 0 ? ' active' : '') +
+      (hasPending ? ' has-pending' : hasApproved ? ' has-approved' : '');
+    chip.innerHTML = `
+      <span class="day-chip-name">${DAY_NAMES[d.getDay()]}</span>
+      <span class="day-chip-num">${d.getDate()}</span>
+      ${hasSlot ? `<span class="day-chip-time">${dayPosts.length ? '📌' : '·'}</span>` : ''}
+    `;
+    chip.onclick = () => filterByDay(d, chip);
+    strip.appendChild(chip);
+  }
+}
+
+function filterByDay(date, chipEl) {
+  document.querySelectorAll('.day-chip').forEach(c => c.classList.remove('active'));
+  chipEl.classList.add('active');
+  selectedWeekDay = date.toDateString();
+  renderPostsList();
+}
+
+// ── POSTS LIST ─────────────────────────────────────────────────────────────
+function renderPostsList() {
+  const container = document.getElementById('posts-list');
+  container.innerHTML = '';
+
+  let filtered = posts;
+  if (selectedWeekDay) {
+    filtered = posts.filter(p => new Date(p.scheduled_for).toDateString() === selectedWeekDay);
+  }
+
+  if (!filtered.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <span class="icon">⚓</span>
+        <p>No posts scheduled for this period.<br>Your crew's standing by.</p>
+      </div>`;
+    return;
+  }
+
+  filtered.forEach(post => {
+    container.appendChild(buildPostCard(post));
+  });
+}
+
+function buildPostCard(post) {
+  const card = document.createElement('div');
+  card.className = `post-card status-${post.status}`;
+  card.id = `post-card-${post.id}`;
+
+  const schedDate = new Date(post.scheduled_for);
+  const dateStr = schedDate.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+  const timeStr = schedDate.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+
+  const maxAttempts = post.max_attempts || 3;
+  const attemptNum  = post.attempt_number || 1;
+  const attemptsLeft = maxAttempts - attemptNum;
+  const isManual = post.status === 'manual' || attemptsLeft <= 0 && post.status === 'rejected';
+  const canRegen = post.status !== 'approved' && post.status !== 'published' && !isManual && attemptNum < maxAttempts;
+
+  // Attempt dots
+  let dotsHtml = '';
+  for (let i = 0; i < maxAttempts; i++) {
+    const cls = i < attemptNum ? (attemptsLeft <= 0 ? 'used exhausted' : 'used') : '';
+    dotsHtml += `<div class="attempt-dot ${cls}"></div>`;
+  }
+
+  const categoryLabel = (post.post_category || 'general').replace(/_/g,' ');
+
+  card.innerHTML = `
+    <div class="post-card-header">
+      <div class="post-meta">
+        <span class="post-category">${categoryLabel}</span>
+        <span class="post-date">${dateStr} · ${timeStr}</span>
+      </div>
+      <span class="post-status-pill ${post.status}">${post.status}</span>
+    </div>
+    <div class="post-body">
+      <div class="post-image-wrap">
+        ${post.image_url
+          ? `<img src="${post.image_url}" alt="Generated image" loading="lazy" onclick="viewImage('${post.image_url}', '${post.post_category || ''}')">`
+          : post.status === 'generating'
+            ? `<div class="post-image-placeholder"><div class="image-generating"><div class="spinner"></div><span>Generating…</span></div></div>`
+            : `<div class="post-image-placeholder"><span class="icon">🖼️</span><span>No image yet</span></div>`
+        }
+        <div class="attempts-bar">${dotsHtml}</div>
+        ${post.image_url ? `
+        <div class="image-overlay-btns">
+          <button class="img-overlay-btn" onclick="viewImage('${post.image_url}','${post.post_category||''}')" title="View full size">🔍</button>
+        </div>` : ''}
+      </div>
+      <div class="post-caption">
+        ${post.caption
+          ? `<p>${escHtml(post.caption)}</p><div class="post-caption-attempts">Attempt ${attemptNum} of ${maxAttempts}</div>`
+          : `<p class="post-caption-empty">Caption not yet generated.</p>`
+        }
+      </div>
+      ${isManual ? `
+      <div class="manual-banner">
+        <strong>Attempts exhausted.</strong> You can write your own caption, upload your own image, or publish the last generation as-is.
+        <div class="manual-actions">
+          <button class="manual-action-btn" onclick="publishAsIs('${post.id}')">Publish As-Is</button>
+          <button class="manual-action-btn" onclick="saveDraft('${post.id}')">Save as Draft</button>
+          <button class="manual-action-btn" onclick="skipPost('${post.id}')">Skip This Slot</button>
+        </div>
+      </div>` : ''}
+    </div>
+    <div class="post-actions">
+      ${post.status !== 'approved' && post.status !== 'published' ? `
+        <button class="post-action-btn approve" onclick="approvePost('${post.id}')">
+          <span class="btn-icon">✓</span>Approve
+        </button>` : `
+        <button class="post-action-btn" disabled>
+          <span class="btn-icon">✓</span>Approved
+        </button>`
+      }
+      ${canRegen && post.caption ? `
+        <button class="post-action-btn regen" onclick="openRejectionModal('${post.id}')">
+          <span class="btn-icon">↻</span>Reject
+        </button>` : `
+        <button class="post-action-btn" disabled>
+          <span class="btn-icon">↻</span>Reject
+        </button>`
+      }
+      ${!post.caption && post.status !== 'generating' ? `
+        <button class="post-action-btn regen" onclick="generatePost('${post.id}')">
+          <span class="btn-icon">✦</span>Generate
+        </button>` : `
+        <button class="post-action-btn" ${post.status === 'generating' ? 'disabled' : 'style="display:none"'}>
+          <span class="btn-icon">✦</span>Gen…
+        </button>`
+      }
+    </div>
+  `;
+
+  return card;
+}
+
+// ── BATCH BAR ──────────────────────────────────────────────────────────────
+function renderBatchBar() {
+  const pendingCount = posts.filter(p => p.status === 'pending' && p.caption).length;
+  const bar = document.getElementById('batch-bar');
+  if (pendingCount >= 2) {
+    document.getElementById('batch-count').textContent = pendingCount;
+    bar.style.display = 'flex';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+async function batchApproveAll() {
+  const pending = posts.filter(p => p.status === 'pending' && p.caption);
+  if (!pending.length) { showToast('No ready posts to approve', 'error'); return; }
+  for (const p of pending) {
+    await approvePost(p.id, true);
+  }
+  showToast(`✓ Approved ${pending.length} posts`, 'success');
+  await loadPosts();
+}
+
+// ── POST ACTIONS ───────────────────────────────────────────────────────────
+async function approvePost(postId, silent = false) {
+  try {
+    await sbFetch(`posts?id=eq.${postId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: 'approved' }),
+    });
+    if (!silent) {
+      showToast('✓ Post approved', 'success');
+      await loadPosts();
+    } else {
+      const p = posts.find(x => x.id === postId);
+      if (p) p.status = 'approved';
+    }
+  } catch(e) {
+    showToast('Failed to approve', 'error');
+  }
+}
+
+async function generatePost(postId) {
+  const card = document.getElementById(`post-card-${postId}`);
+  if (card) {
+    const wrap = card.querySelector('.post-image-wrap');
+    if (wrap) wrap.innerHTML = `<div class="post-image-placeholder"><div class="image-generating"><div class="spinner"></div><span>Generating…</span></div></div>`;
+  }
+  try {
+    // Generate caption
+    await fetch(`${CAPTION_WORKER}/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ post_id: postId }),
+    });
+    // Generate image
+    await fetch(`${IMAGE_WORKER}/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ post_id: postId }),
+    });
+    showToast('✦ Generation complete', 'success');
+  } catch(e) {
+    showToast('Generation failed', 'error');
+  }
+  await loadPosts();
+}
+
+async function publishAsIs(postId) {
+  await sbFetch(`posts?id=eq.${postId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status: 'approved' }),
+  });
+  showToast('✓ Marked for publish', 'success');
+  await loadPosts();
+}
+
+async function saveDraft(postId) {
+  await sbFetch(`posts?id=eq.${postId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status: 'draft' }),
+  });
+  showToast('Saved as Facebook draft', 'success');
+  await loadPosts();
+}
+
+async function skipPost(postId) {
+  await sbFetch(`posts?id=eq.${postId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status: 'skipped' }),
+  });
+  showToast('Slot skipped', 'success');
+  await loadPosts();
+}
+
+// ── REJECTION MODAL ────────────────────────────────────────────────────────
+function openRejectionModal(postId) {
+  activeRejectionPostId = postId;
+  selectedImageFeedback = [];
+  selectedCaptionFeedback = [];
+  document.getElementById('rejection-notes').value = '';
+  document.querySelectorAll('.feedback-chip').forEach(c => c.classList.remove('selected'));
+  openModal('rejection-modal');
+}
+
+function toggleChip(el, type) {
+  el.classList.toggle('selected');
+  const arr = type === 'image' ? selectedImageFeedback : selectedCaptionFeedback;
+  const val = el.dataset.val;
+  const idx = arr.indexOf(val);
+  if (idx === -1) arr.push(val);
+  else arr.splice(idx, 1);
+}
+
+async function submitRejection() {
+  if (!activeRejectionPostId) return;
+  const notes = document.getElementById('rejection-notes').value.trim();
+
+  try {
+    // Update post with feedback and mark rejected
+    const post = posts.find(p => p.id === activeRejectionPostId);
+    const newImageFeedback = [...(post?.image_feedback || []), ...selectedImageFeedback];
+    const newCaptionFeedback = [...(post?.caption_feedback || []), ...selectedCaptionFeedback];
+
+    await sbFetch(`posts?id=eq.${activeRejectionPostId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        status: 'rejected',
+        image_feedback: newImageFeedback,
+        caption_feedback: newCaptionFeedback,
+        rejection_notes: notes,
+      }),
+    });
+
+    closeModal('rejection-modal');
+    showToast('↻ Regenerating…');
+
+    // Trigger regeneration
+    await fetch(`${CAPTION_WORKER}/regenerate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        post_id: activeRejectionPostId,
+        image_feedback: selectedImageFeedback,
+        caption_feedback: selectedCaptionFeedback,
+        notes,
+      }),
+    });
+
+    if (selectedImageFeedback.length > 0) {
+      await fetch(`${IMAGE_WORKER}/regenerate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          post_id: activeRejectionPostId,
+          image_feedback: selectedImageFeedback,
+          notes,
+        }),
+      });
+    }
+
+    showToast('✦ Regeneration complete', 'success');
+    await loadPosts();
+  } catch(e) {
+    showToast('Failed to regenerate', 'error');
+  }
+}
+
+// ── IMAGE LIBRARY ──────────────────────────────────────────────────────────
+function renderImageLibrary(images) {
+  const grid = document.getElementById('image-grid');
+  grid.innerHTML = '';
+
+  if (!images.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><span class="icon">🖼️</span><p>No images generated yet.</p></div>`;
+    return;
+  }
+
+  images.forEach(img => {
+    const thumb = document.createElement('div');
+    thumb.className = 'image-thumb';
+    thumb.innerHTML = `
+      <img src="${img.public_url}" alt="" loading="lazy">
+      <div class="image-thumb-overlay"><span>🔍</span></div>
+    `;
+    thumb.onclick = () => viewImage(img.public_url, img.post_category || 'Image');
+    grid.appendChild(thumb);
+  });
+}
+
+function viewImage(url, category) {
+  currentViewImageUrl = url;
+  document.getElementById('image-modal-img').src = url;
+  document.getElementById('image-modal-title').textContent =
+    (category || 'Generated Image').replace(/_/g,' ');
+  openModal('image-modal');
+}
+
+function downloadCurrentImage() {
+  if (!currentViewImageUrl) return;
+  const a = document.createElement('a');
+  a.href = currentViewImageUrl;
+  a.download = `autopilot-${Date.now()}.png`;
+  a.target = '_blank';
+  a.click();
+}
+
+// ── SCHEDULE SETTINGS ──────────────────────────────────────────────────────
+function renderScheduleSettings() {
+  const container = document.getElementById('schedule-display');
+  container.innerHTML = '';
+
+  if (!slots.length) {
+    container.innerHTML = `<div class="settings-row"><div class="settings-label" style="color:var(--muted)">No schedule set — complete onboarding</div></div>`;
+    return;
+  }
+
+  slots.forEach(slot => {
+    const dayName = DAY_NAMES[slot.day_of_week];
+    const time = slot.post_time.slice(0,5);
+    const row = document.createElement('div');
+    row.className = 'settings-row';
+    row.innerHTML = `
+      <div>
+        <div class="settings-label">${dayName}</div>
+        <div class="settings-sub">${time} · ${slot.timezone}</div>
+      </div>
+      <span style="color:var(--gold);font-size:0.8rem">📌</span>
+    `;
+    container.appendChild(row);
+  });
+}
+
+// ── PUSH NOTIFICATIONS ─────────────────────────────────────────────────────
+function updatePushUI() {
+  const enabled = client?.push_enabled;
+  const btn = document.getElementById('notif-btn');
+  const toggle = document.getElementById('push-toggle');
+  if (btn) btn.classList.toggle('enabled', !!enabled);
+  if (toggle) toggle.classList.toggle('on', !!enabled);
+
+  // Show banner if not enabled and not dismissed
+  const dismissed = localStorage.getItem('push_banner_dismissed');
+  if (!enabled && !dismissed && 'Notification' in window) {
+    document.getElementById('push-banner').style.display = 'flex';
+  }
+}
+
+function dismissPushBanner() {
+  localStorage.setItem('push_banner_dismissed', '1');
+  document.getElementById('push-banner').style.display = 'none';
+}
+
+async function togglePushNotifications() {
+  if (client?.push_enabled) {
+    // Disable
+    await sbFetch(`clients?id=eq.${client.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ push_enabled: false }),
+    });
+    client.push_enabled = false;
+    updatePushUI();
+    showToast('Notifications disabled');
+  } else {
+    await requestPushPermission();
+  }
+}
+
+async function requestPushPermission() {
+  if (!('Notification' in window)) {
+    showToast('Push not supported on this device', 'error');
+    return;
+  }
+  const permission = await Notification.requestPermission();
+  if (permission !== 'granted') {
+    showToast('Permission denied', 'error');
+    return;
+  }
+
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+    });
+
+    await sbFetch(`clients?id=eq.${client.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        push_enabled: true,
+        push_subscription: sub.toJSON(),
+      }),
+    });
+    client.push_enabled = true;
+    client.push_subscription = sub.toJSON();
+    updatePushUI();
+    dismissPushBanner();
+    showToast('🔔 Notifications enabled', 'success');
+  } catch(e) {
+    showToast('Could not enable push', 'error');
+  }
+}
+
+async function toggleEmailFallback() {
+  const toggle = document.getElementById('email-toggle');
+  const newVal = !toggle.classList.contains('on');
+  toggle.classList.toggle('on', newVal);
+  await sbFetch(`clients?id=eq.${client.id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ push_fallback_email: newVal }),
+  });
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  return new Uint8Array([...rawData].map(c => c.charCodeAt(0)));
+}
+
+// ── TABS ───────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.getElementById(`nav-${tab}`).classList.add('active');
+  if (tab === 'library') loadImageLibrary();
+}
+
+// ── MODALS ─────────────────────────────────────────────────────────────────
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeModal(overlay.id);
+  });
+});
+
+// ── TOAST ──────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── UTILS ──────────────────────────────────────────────────────────────────
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    await loadClient();
+    await Promise.all([loadSlots(), loadPosts()]);
+    // Register service worker for PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/autopilot-sw.js', { scope: '/' }).catch(() => {});
+    }
+  } catch(e) {
+    console.error('Init error:', e);
+    showToast('Failed to load. Please refresh.', 'error');
+  }
+}
+
+init();
+
+// Auto-refresh every 30s to catch new generations
+setInterval(() => {
+  if (document.visibilityState === 'visible') loadPosts();
+}, 30000);
+</script>
+</body>
+</html>
