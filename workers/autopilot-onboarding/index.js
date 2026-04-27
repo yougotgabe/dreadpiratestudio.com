@@ -94,6 +94,12 @@ async function handleLogoUpload(request, env) {
   const fileBytes = await file.arrayBuffer();
   const fileSizeKb = Math.round(fileBytes.byteLength / 1024);
 
+  // Delete any existing primary logo asset for this client before inserting
+  await supabase(env, 'DELETE',
+    `/rest/v1/brand_assets?client_id=eq.${clientId}&asset_type=eq.logo_primary`,
+    null, { Prefer: 'return=minimal' }
+  );
+
   const uploadRes = await fetch(
     `${env.SUPABASE_URL}/storage/v1/object/${bucket}/${fileName}`,
     {
@@ -169,7 +175,7 @@ async function handleSaveProfile(request, env) {
   };
 
   // Upsert on client_id conflict
-  await supabase(env, 'POST', '/rest/v1/brand_profiles', profile,
+  await supabase(env, 'POST', '/rest/v1/brand_profiles?on_conflict=client_id', profile,
     { Prefer: 'resolution=merge-duplicates,return=minimal' }
   );
 

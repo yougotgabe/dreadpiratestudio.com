@@ -74,14 +74,14 @@ export default {
       // Handle Facebook errors (user denied permission etc.)
       if (error) {
         const dest = clientToken
-          ? `${SITE_URL}/autopilot/onboarding?token=${clientToken}&fb_error=${error}`
+          ? `${SITE_URL}/autopilot/onboarding/onboarding.html?token=${clientToken}&fb_error=${error}`
           : `${SITE_URL}/autopilot?error=${error}`;
         return Response.redirect(dest, 302);
       }
 
       if (!code) {
         const dest = clientToken
-          ? `${SITE_URL}/autopilot/onboarding?token=${clientToken}&fb_error=no_code`
+          ? `${SITE_URL}/autopilot/onboarding/onboarding.html?token=${clientToken}&fb_error=no_code`
           : `${SITE_URL}/autopilot?error=no_code`;
         return Response.redirect(dest, 302);
       }
@@ -100,7 +100,7 @@ export default {
       if (tokenData.error) {
         console.error('Token exchange failed:', tokenData.error);
         const dest = clientToken
-          ? `${SITE_URL}/autopilot/onboarding?token=${clientToken}&fb_error=token_failed`
+          ? `${SITE_URL}/autopilot/onboarding/onboarding.html?token=${clientToken}&fb_error=token_failed`
           : `${SITE_URL}/autopilot?error=token_failed`;
         return Response.redirect(dest, 302);
       }
@@ -116,7 +116,7 @@ export default {
       if (pagesData.error || !pagesData.data?.length) {
         console.error('Pages fetch failed:', pagesData.error);
         const dest = clientToken
-          ? `${SITE_URL}/autopilot/onboarding?token=${clientToken}&fb_error=no_pages`
+          ? `${SITE_URL}/autopilot/onboarding/onboarding.html?token=${clientToken}&fb_error=no_pages`
           : `${SITE_URL}/autopilot?error=no_pages`;
         return Response.redirect(dest, 302);
       }
@@ -155,7 +155,7 @@ export default {
       } catch (err) {
         console.error('Supabase insert failed:', err.message);
         const dest = clientToken
-          ? `${SITE_URL}/autopilot/onboarding?token=${clientToken}&fb_error=db_failed`
+          ? `${SITE_URL}/autopilot/onboarding/onboarding.html?token=${clientToken}&fb_error=db_failed`
           : `${SITE_URL}/autopilot?error=db_failed`;
         return Response.redirect(dest, 302);
       }
@@ -176,8 +176,8 @@ export default {
       // Success — send back to dashboard if we know who they are,
       // otherwise back to the autopilot landing page
       const successDest = clientToken
-        ? `${SITE_URL}/autopilot/dashboard?token=${clientToken}&fb_connected=true`
-        : `${SITE_URL}/autopilot?success=true&pages=${pages.length}`;
+        ? `${SITE_URL}/autopilot/dashboard/dashboard.html?token=${clientToken}&fb_connected=true`
+        : `${SITE_URL}/autopilot/?connected=true&pages=${pages.length}`;
 
       return Response.redirect(successDest, 302);
     }
