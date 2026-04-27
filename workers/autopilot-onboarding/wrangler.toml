@@ -1,0 +1,10 @@
+name = "autopilot-onboarding"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+SUPABASE_URL = "https://efylfnnshmaauhiwqaxj.supabase.co"
+SUPABASE_STORAGE_BUCKET = "logos"
+
+# Secrets — set via CLI:
+#   wrangler secret put SUPABASE_SERVICE_KEY

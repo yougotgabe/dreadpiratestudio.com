@@ -1,0 +1,12 @@
+name = "autopilot-oauth"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+SUPABASE_URL    = "https://efylfnnshmaauhiwqaxj.supabase.co"
+FB_REDIRECT_URI = "https://autopilot-oauth.dreadpiratestudio.workers.dev/autopilot/oauth/callback"
+
+# Secrets — set via CLI:
+#   wrangler secret put FB_APP_ID
+#   wrangler secret put FB_APP_SECRET
+#   wrangler secret put SUPABASE_SERVICE_KEY

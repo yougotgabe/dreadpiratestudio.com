@@ -1,0 +1,10 @@
+name = "autopilot-checkout"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+SUCCESS_URL = "https://autopilot.dreadpiratestudio.com/onboarding.html"
+CANCEL_URL  = "https://autopilot.dreadpiratestudio.com/checkout.html"
+
+# Set these as secrets via Wrangler CLI:
+#   wrangler secret put STRIPE_SECRET_KEY
