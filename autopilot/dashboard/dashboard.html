@@ -919,6 +919,9 @@
       <button class="modal-btn secondary" style="width:100%;margin-bottom:0.75rem" onclick="window.location.href='/autopilot/onboarding/onboarding.html'">
         Edit Brand Profile
       </button>
+      <button class="modal-btn secondary" style="width:100%;margin-bottom:0.75rem" onclick="openManageSubscription()">
+        Manage Subscription
+      </button>
       <button class="modal-btn secondary" style="width:100%;color:var(--error);border-color:rgba(192,57,43,0.3)" onclick="signOut()">
         Sign Out
       </button>
@@ -1011,12 +1014,10 @@
 <script>
 // ── CONFIG ─────────────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://efylfnnshmaauhiwqaxj.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVmeWxmbm5zaG1hYXVoaXdxYXhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMDU0MzksImV4cCI6MjA4OTY4MTQzOX0.L82EZAoRb2cTW71N1jAMLapwNBndL6aIp5ewlEw-lV4'; // replace with anon key
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // replace with anon key
 const CAPTION_WORKER = 'https://autopilot-caption.dreadpiratestudio.workers.dev';
 const IMAGE_WORKER   = 'https://autopilot-image.dreadpiratestudio.workers.dev';
-const VAPID_PUBLIC_KEY = 'BEUKw3ABuC4Im6Ra8RALn-StCXR0SDiGERmywjFEOBtFA0zsH9G8jf7VSL9uj8SEDi0AjQveqWOb6fH6Bhro3m4'; // replace after generating
-// ── DEV MODE ───────────────────────────────────────────────────────────────
-const DEV_MODE = new URLSearchParams(window.location.search).get('dev') === '1';
+const VAPID_PUBLIC_KEY = 'YOUR_VAPID_PUBLIC_KEY'; // replace after generating
 
 // ── STATE ──────────────────────────────────────────────────────────────────
 let client = null;
@@ -1033,35 +1034,32 @@ function getToken() {
   return localStorage.getItem('autopilot_token');
 }
 
+async function sbFetch(path, opts = {}) {
+  const token = getToken();
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...opts,
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      ...(opts.headers || {}),
+    },
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
 async function loadClient() {
   const token = getToken();
-  if (!token && !DEV_MODE) {
+  if (!token) {
     window.location.href = '/autopilot/index.html';
     return;
   }
-
-  if (DEV_MODE) {
-    client = {
-      id: 'dev-client',
-      name: 'Gabe (Dev)',
-      email: 'gabe@dreadpiratestudio.com',
-      plan: 'growth',
-      status: 'active',
-      onboarding_complete: true,
-      push_enabled: false,
-      push_fallback_email: true,
-    };
-    document.getElementById('plan-badge').textContent = client.plan;
-    document.getElementById('settings-name').textContent = client.name;
-    document.getElementById('settings-email').textContent = client.email;
-    document.getElementById('settings-plan').textContent = 'Growth — 4 posts/week';
-    updatePushUI();
-    renderWeekStrip();
-    renderPostsList();
-    renderBatchBar();
-    return;
-  }
-
   const data = await sbFetch(`clients?onboarding_token=eq.${token}&select=*`);
   if (!data || !data.length) {
     signOut();
@@ -1082,6 +1080,24 @@ async function loadClient() {
     { starter: 'Starter — 2 posts/week', growth: 'Growth — 4 posts/week', daily: 'Daily — 7 posts/week' }[client.plan] || client.plan;
 
   updatePushUI();
+}
+
+async function openManageSubscription() {
+  const token = getToken();
+  if (!token) return;
+  showToast('Opening Stripe portal…');
+  try {
+    const res = await fetch('https://autopilot-portal.dreadpiratestudio.workers.dev/portal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+    else showToast('Could not open portal', 'error');
+  } catch(e) {
+    showToast('Could not open portal', 'error');
+  }
 }
 
 function signOut() {

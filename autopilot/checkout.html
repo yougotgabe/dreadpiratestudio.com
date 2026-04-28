@@ -442,6 +442,16 @@
     <div class="divider-line"></div>
   </div>
 
+  <!-- Already a client banner -->
+  <div id="already-client" style="display:none;margin-bottom:2rem;padding:1.25rem 1.5rem;border:1px solid rgba(201,168,76,0.3);border-radius:12px;background:rgba(201,168,76,0.07);text-align:center;">
+    <p style="font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;">You're Already Aboard</p>
+    <p style="font-size:0.9rem;color:var(--white);margin-bottom:1rem;line-height:1.5;">You already have an active DPS Autopilot subscription. Head to your dashboard or manage your plan.</p>
+    <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+      <a href="/autopilot/dashboard/dashboard.html" style="font-family:'Cinzel',serif;font-size:0.5rem;letter-spacing:0.18em;text-transform:uppercase;padding:0.7em 1.5em;border-radius:8px;background:var(--gold);color:var(--black);text-decoration:none;">Go to Dashboard</a>
+      <button onclick="manageSubscription()" style="font-family:'Cinzel',serif;font-size:0.5rem;letter-spacing:0.18em;text-transform:uppercase;padding:0.7em 1.5em;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;">Manage Subscription</button>
+    </div>
+  </div>
+
   <!-- Plan Cards -->
   <div class="plans-grid">
 
@@ -610,6 +620,51 @@
   function hideError() {
     document.getElementById('error-msg').textContent = '';
   }
+
+  // ── Already-client check ───────────────────────────────────────────────
+  async function checkExistingClient() {
+    const token = localStorage.getItem('autopilot_token');
+    if (!token) return;
+
+    try {
+      const res = await fetch(
+        `https://efylfnnshmaauhiwqaxj.supabase.co/rest/v1/clients?onboarding_token=eq.${token}&select=id,status&limit=1`,
+        {
+          headers: {
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVmeWxmbm5zaG1hYXVoaXdxYXhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMDU0MzksImV4cCI6MjA4OTY4MTQzOX0.L82EZAoRb2cTW71N1jAMLapwNBndL6aIp5ewlEw-lV4',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVmeWxmbm5zaG1hYXVoaXdxYXhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMDU0MzksImV4cCI6MjA4OTY4MTQzOX0.L82EZAoRb2cTW71N1jAMLapwNBndL6aIp5ewlEw-lV4',
+          }
+        }
+      );
+      const data = await res.json();
+      if (data?.length && data[0].status === 'active') {
+        document.getElementById('already-client').style.display = 'block';
+        document.getElementById('plans-grid').style.opacity = '0.4';
+        document.getElementById('plans-grid').style.pointerEvents = 'none';
+        document.getElementById('cta').disabled = true;
+      }
+    } catch(e) {
+      // Silent fail — just show the normal checkout page
+    }
+  }
+
+  async function manageSubscription() {
+    const token = localStorage.getItem('autopilot_token');
+    try {
+      const res = await fetch('https://autopilot-portal.dreadpiratestudio.workers.dev/portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else showError('Could not open portal. Please contact support.');
+    } catch(e) {
+      showError('Could not open portal. Please contact support.');
+    }
+  }
+
+  checkExistingClient();
 </script>
 </body>
 </html>

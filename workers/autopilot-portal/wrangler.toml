@@ -1,0 +1,11 @@
+name = "autopilot-portal"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+SUPABASE_URL       = "https://efylfnnshmaauhiwqaxj.supabase.co"
+PORTAL_RETURN_URL  = "https://dreadpiratestudio.com/autopilot/dashboard/dashboard.html"
+
+# Secrets — set via CLI:
+#   wrangler secret put STRIPE_SECRET_KEY
+#   wrangler secret put SUPABASE_SERVICE_KEY
