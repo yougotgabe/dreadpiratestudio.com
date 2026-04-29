@@ -1961,6 +1961,16 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// ── SAVE TOKEN IMMEDIATELY — must run before any redirect logic ─────────────
+(function() {
+  const p = new URLSearchParams(window.location.search);
+  const t = p.get('token');
+  if (t) {
+    localStorage.setItem('autopilot_token', t);
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+})();
+
 // ── CONFIG ─────────────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://efylfnnshmaauhiwqaxj.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVmeWxmbm5zaG1hYXVoaXdxYXhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMDU0MzksImV4cCI6MjA4OTY4MTQzOX0.L82EZAoRb2cTW71N1jAMLapwNBndL6aIp5ewlEw-lV4'; // replace with anon key
@@ -2026,31 +2036,14 @@ async function loadClient() {
     window.location.href = '/autopilot/index.html';
     return;
   }
-
-  // Validate token via worker (uses service role key, bypasses RLS)
-  const res = await fetch('https://autopilot-onboarding.dreadpiratestudio.workers.dev/validate-token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token }),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok || !data.valid) {
+  const data = await sbFetch(`clients?onboarding_token=eq.${token}&select=*`);
+  if (!data || !data.length) {
     signOut();
     return;
   }
+  client = data[0];
 
-  // Build client object from worker response
-  client = {
-    id:                  data.client_id,
-    email:               data.email,
-    plan:                data.plan || 'starter',
-    onboarding_complete: data.onboarding_complete,
-    push_enabled:        data.push_enabled || false,
-    name:                data.business_name || '',
-  };
-
+  // Redirect to onboarding if not complete
   if (!client.onboarding_complete) {
     window.location.href = `/autopilot/onboarding/onboarding.html?token=${token}`;
     return;
