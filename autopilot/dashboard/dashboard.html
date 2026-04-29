@@ -1936,33 +1936,21 @@
     <div class="slot-panel-section">
       <span class="slot-panel-label">Post Type</span>
       <div class="post-type-grid" id="post-type-grid">
-        <div class="post-type-chip selected" data-type="promotional" onclick="selectPostType(this)">
-          <span class="post-type-chip-name">Promotional</span>
-          <span class="post-type-chip-desc">Drive sales, visits, or a specific offer</span>
-        </div>
-        <div class="post-type-chip" data-type="behind_the_scenes" onclick="selectPostType(this)">
-          <span class="post-type-chip-name">Behind the Scenes</span>
-          <span class="post-type-chip-desc">Show the human side of your business</span>
-        </div>
-        <div class="post-type-chip" data-type="product_feature" onclick="selectPostType(this)">
-          <span class="post-type-chip-name">Product Feature</span>
-          <span class="post-type-chip-desc">Spotlight a specific product or service</span>
-        </div>
-        <div class="post-type-chip" data-type="community" onclick="selectPostType(this)">
-          <span class="post-type-chip-name">Community</span>
-          <span class="post-type-chip-desc">Local love, shoutouts, and engagement</span>
+        <div class="post-type-chip selected" data-type="general" onclick="selectPostType(this)">
+          <span class="post-type-chip-name">General</span>
+          <span class="post-type-chip-desc">Brand voice post — showcase your business naturally</span>
         </div>
         <div class="post-type-chip" data-type="event" onclick="selectPostType(this)">
           <span class="post-type-chip-name">Event</span>
-          <span class="post-type-chip-desc">Promote or recap an upcoming event</span>
+          <span class="post-type-chip-desc">Shoutout or reminder for an upcoming event</span>
         </div>
-        <div class="post-type-chip" data-type="lifestyle" onclick="selectPostType(this)">
-          <span class="post-type-chip-name">Lifestyle</span>
-          <span class="post-type-chip-desc">Relatable content that fits your brand vibe</span>
+        <div class="post-type-chip" data-type="cta" onclick="selectPostType(this)">
+          <span class="post-type-chip-name">Call to Action</span>
+          <span class="post-type-chip-desc">Drive customers to visit, call, or buy</span>
         </div>
-        <div class="post-type-chip" data-type="testimonial" onclick="selectPostType(this)">
-          <span class="post-type-chip-name">Testimonial</span>
-          <span class="post-type-chip-desc">Customer love and social proof</span>
+        <div class="post-type-chip" data-type="joke" onclick="selectPostType(this)">
+          <span class="post-type-chip-name">Joke / Pun</span>
+          <span class="post-type-chip-desc">A business-specific joke or pun to boost engagement</span>
         </div>
       </div>
     </div>
@@ -2178,13 +2166,10 @@ let clientPhotosB64 = []; // up to 3 session-only client photos
 const PUBLISH_WORKER = 'https://autopilot-publish.dreadpiratestudio.workers.dev';
 
 const POST_TYPES = {
-  promotional:       'Promotional',
-  behind_the_scenes: 'Behind the Scenes',
-  product_feature:   'Product Feature',
-  community:         'Community',
-  event:             'Event',
-  lifestyle:         'Lifestyle',
-  testimonial:       'Testimonial',
+  general: 'General',
+  event:   'Event',
+  cta:     'Call to Action',
+  joke:    'Joke / Pun',
 };
 
 // ── AUTH ───────────────────────────────────────────────────────────────────
