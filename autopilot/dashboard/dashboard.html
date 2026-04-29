@@ -733,15 +733,34 @@
     .image-thumb-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(8,8,8,0.6);
+      background: rgba(8,8,8,0.72);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 0.4rem;
       opacity: 0;
       transition: opacity 0.2s;
+      padding: 0.5rem;
     }
     .image-thumb:hover .image-thumb-overlay { opacity: 1; }
     .image-thumb-overlay span { font-size: 1.4rem; }
+    .image-thumb-action {
+      font-family: 'Cinzel', serif;
+      font-size: 0.38rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      border-radius: 6px;
+      border: none;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+      width: 100%;
+      transition: opacity 0.15s;
+    }
+    .image-thumb-action:hover { opacity: 0.85; }
+    .image-thumb-action.view  { background: var(--surface); color: var(--white); border: 1px solid var(--border); }
+    .image-thumb-action.draft { background: var(--gold); color: var(--black); }
+    .image-thumb-action:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* Settings tab */
     .settings-group {
@@ -1795,6 +1814,7 @@
     </div>
     <div class="modal-actions">
       <button class="modal-btn secondary" onclick="closeModal('image-modal')">Close</button>
+      <button class="modal-btn secondary" id="image-modal-draft" onclick="saveLibraryAsDraft(this.dataset.postId, this)" style="display:none">Save as Draft</button>
       <button class="modal-btn primary" id="image-modal-download" onclick="downloadCurrentImage()">⬇ Download</button>
     </div>
   </div>
@@ -2086,7 +2106,7 @@ async function loadPosts() {
 async function loadImageLibrary() {
   if (!client) return;
   const data = await sbFetch(
-    `generated_images?client_id=eq.${client.id}&order=created_at.desc&limit=5`
+    `generated_images?client_id=eq.${client.id}&order=created_at.desc&limit=5&select=id,public_url,post_category,post_id,created_at`
   );
   renderImageLibrary(data || []);
 }
@@ -2503,19 +2523,59 @@ function renderImageLibrary(images) {
     thumb.className = 'image-thumb';
     thumb.innerHTML = `
       <img src="${img.public_url}" alt="" loading="lazy">
-      <div class="image-thumb-overlay"><span>🔍</span></div>
+      <div class="image-thumb-overlay">
+        <button class="image-thumb-action view" onclick="event.stopPropagation();viewImage('${img.public_url}','${img.post_category || 'Image'}','${img.post_id || ''}')">
+          🔍 View
+        </button>
+        ${img.post_id ? `
+        <button class="image-thumb-action draft" id="lib-draft-${img.post_id}" onclick="event.stopPropagation();saveLibraryAsDraft('${img.post_id}',this)">
+          Save as Draft
+        </button>` : ''}
+      </div>
     `;
-    thumb.onclick = () => viewImage(img.public_url, img.post_category || 'Image');
+    thumb.onclick = () => viewImage(img.public_url, img.post_category || 'Image', img.post_id || '');
     grid.appendChild(thumb);
   });
 }
 
-function viewImage(url, category) {
+function viewImage(url, category, postId = '') {
   currentViewImageUrl = url;
   document.getElementById('image-modal-img').src = url;
   document.getElementById('image-modal-title').textContent =
     (category || 'Generated Image').replace(/_/g,' ');
+  // Wire modal draft button
+  const draftBtn = document.getElementById('image-modal-draft');
+  if (draftBtn) {
+    if (postId) {
+      draftBtn.style.display = '';
+      draftBtn.dataset.postId = postId;
+      draftBtn.disabled = false;
+      draftBtn.textContent = 'Save as Draft';
+    } else {
+      draftBtn.style.display = 'none';
+    }
+  }
   openModal('image-modal');
+}
+
+async function saveLibraryAsDraft(postId, btn) {
+  if (!postId) return;
+  const original = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+  try {
+    const res = await fetch(`${PUBLISH_WORKER}/draft`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ post_id: postId, client_photos: [] }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    showToast('Saved to Facebook drafts ✦', 'success');
+    if (btn) { btn.textContent = '✓ Drafted'; btn.style.background = 'var(--success)'; }
+  } catch(e) {
+    showToast('Could not save draft', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = original; }
+  }
 }
 
 function downloadCurrentImage() {
