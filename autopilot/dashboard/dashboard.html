@@ -783,6 +783,554 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
+    /* ── SLOT CARDS ── */
+    .slot-cards-section {
+      padding: 0 1.25rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .slot-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      gap: 0.75rem;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .slot-card:hover { border-color: var(--gold-dim); background: var(--surface2); }
+    .slot-card.slot-locked {
+      opacity: 0.55;
+      cursor: default;
+      pointer-events: none;
+    }
+    .slot-card.slot-drafted {
+      border-color: rgba(201,168,76,0.25);
+      background: var(--gold-faint);
+      opacity: 0.75;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .slot-card-left { display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 0; }
+
+    .slot-number-badge {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cinzel', serif;
+      font-size: 0.5rem;
+      letter-spacing: 0.1em;
+      color: var(--gold-dim);
+      flex: 0 0 auto;
+    }
+
+    .slot-card-info { flex: 1; min-width: 0; }
+    .slot-card-day {
+      font-family: 'Cinzel', serif;
+      font-size: 0.55rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+    .slot-card-time { font-size: 0.78rem; color: var(--muted); margin-top: 0.1rem; }
+
+    .slot-type-badge {
+      font-family: 'Cinzel', serif;
+      font-size: 0.42rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-radius: 20px;
+      padding: 0.25em 0.7em;
+      border: 1px solid var(--border);
+      color: var(--gold-dim);
+      background: var(--surface2);
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .slot-card-arrow {
+      color: var(--muted2);
+      font-size: 0.75rem;
+      flex: 0 0 auto;
+    }
+
+    .slot-status-tag {
+      font-family: 'Cinzel', serif;
+      font-size: 0.42rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      flex: 0 0 auto;
+    }
+    .slot-status-tag.drafted { color: var(--gold-dim); }
+    .slot-status-tag.approved { color: var(--success); }
+    .slot-status-tag.published { color: var(--muted); }
+
+    /* ── SLOT PANEL MODAL ── */
+    .slot-panel-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(8,8,8,0.85);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .slot-panel-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .slot-panel-sheet {
+      width: 100%;
+      max-width: 600px;
+      background: var(--surface);
+      border-radius: 18px 18px 0 0;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      max-height: 92vh;
+      overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      padding-bottom: calc(1.5rem + var(--safe-bottom));
+    }
+    .slot-panel-overlay.open .slot-panel-sheet { transform: translateY(0); }
+
+    .slot-panel-header {
+      padding: 0.75rem 1.25rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border2);
+      padding-bottom: 0.75rem;
+    }
+    .slot-panel-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .slot-panel-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0.2rem;
+      line-height: 1;
+    }
+
+    .slot-panel-section {
+      padding: 1rem 1.25rem 0;
+    }
+    .slot-panel-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.48rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 0.6rem;
+      display: block;
+    }
+
+    /* Post type chips in slot panel */
+    .post-type-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .post-type-chip {
+      padding: 0.65rem 0.75rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      text-align: left;
+    }
+    .post-type-chip.selected {
+      border-color: var(--gold);
+      background: var(--gold-faint);
+    }
+    .post-type-chip-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.48rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--white);
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+    .post-type-chip.selected .post-type-chip-name { color: var(--gold); }
+    .post-type-chip-desc {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    /* Manual prompt + reference image */
+    .slot-panel-textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--white);
+      font-family: 'Crimson Text', serif;
+      font-size: 0.95rem;
+      padding: 0.75rem;
+      resize: none;
+      outline: none;
+      line-height: 1.5;
+      transition: border-color 0.2s;
+      min-height: 90px;
+    }
+    .slot-panel-textarea:focus { border-color: var(--gold); }
+    .slot-panel-textarea::placeholder { color: var(--muted2); }
+
+    .ref-image-upload-area {
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      background: var(--surface2);
+      position: relative;
+    }
+    .ref-image-upload-area:hover { border-color: var(--gold-dim); background: var(--gold-faint); }
+    .ref-image-upload-area input[type=file] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .ref-image-upload-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.48rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      pointer-events: none;
+    }
+    .ref-image-preview {
+      display: none;
+      position: relative;
+      margin-top: 0.75rem;
+    }
+    .ref-image-preview img {
+      width: 100%;
+      max-height: 140px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .ref-image-remove {
+      position: absolute;
+      top: 0.3rem; right: 0.3rem;
+      background: rgba(8,8,8,0.8);
+      border: none;
+      color: var(--white);
+      border-radius: 50%;
+      width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 0.75rem;
+    }
+
+    /* Generate Now result area */
+    .slot-panel-result {
+      display: none;
+      padding: 1rem 1.25rem 0;
+    }
+    .slot-panel-result.visible { display: block; }
+    .slot-panel-result-image {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+    .slot-panel-result-caption {
+      font-size: 0.92rem;
+      color: var(--white);
+      line-height: 1.6;
+      padding: 0.75rem;
+      background: var(--surface2);
+      border-radius: 8px;
+      border: 1px solid var(--border2);
+      margin-bottom: 0.75rem;
+    }
+    .slot-panel-regen-notes {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--white);
+      font-family: 'Crimson Text', serif;
+      font-size: 0.9rem;
+      padding: 0.65rem 0.75rem;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s;
+      min-height: 60px;
+      margin-bottom: 0.5rem;
+    }
+    .slot-panel-regen-notes:focus { border-color: var(--gold); }
+    .slot-panel-regen-notes::placeholder { color: var(--muted2); }
+    .slot-panel-attempts-left {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .slot-panel-actions {
+      display: flex;
+      gap: 0.6rem;
+      padding: 1rem 1.25rem 0;
+      flex-wrap: wrap;
+    }
+    .slot-panel-btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 0.85rem 0.5rem;
+      border-radius: 10px;
+      border: none;
+      font-family: 'Cinzel', serif;
+      font-size: 0.5rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .slot-panel-btn:hover { opacity: 0.85; }
+    .slot-panel-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .slot-panel-btn.primary { background: var(--gold); color: var(--black); }
+    .slot-panel-btn.secondary { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+    .slot-panel-btn.success { background: var(--success); color: var(--white); }
+    .slot-panel-btn.danger { background: var(--surface2); color: var(--error); border: 1px solid rgba(192,57,43,0.3); }
+
+    /* ── SCHEDULE SETUP OVERLAY ── */
+    .schedule-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: var(--black);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+    .schedule-overlay.hidden { display: none; }
+
+    .schedule-overlay-inner {
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 0 1.25rem 3rem;
+      flex: 1;
+    }
+
+    .schedule-overlay-top {
+      height: 3px;
+      background: linear-gradient(to right, #8a6f2e, #c9a84c, #8a6f2e);
+      margin-bottom: 2.5rem;
+    }
+
+    .schedule-overlay-eyebrow {
+      font-family: 'Cinzel', serif;
+      font-size: 0.52rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .schedule-overlay-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+    }
+
+    .schedule-overlay-desc {
+      font-family: 'Crimson Text', serif;
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .schedule-step-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.5rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+    }
+
+    .schedule-day-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.4rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .sched-day-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.6rem 0.25rem;
+      border-radius: 10px;
+      border: 1px solid var(--border2);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .sched-day-btn.selected {
+      border-color: var(--gold);
+      background: var(--gold-faint);
+      color: var(--gold);
+    }
+    .sched-day-btn.over-limit {
+      border-color: rgba(192,57,43,0.4);
+      animation: shake 0.3s ease;
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+    .sched-day-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.42rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .sched-day-check {
+      font-size: 0.75rem;
+      line-height: 1;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .sched-day-btn.selected .sched-day-check { opacity: 1; }
+
+    .schedule-slot-limit {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+      line-height: 1.4;
+    }
+    .schedule-slot-limit strong { color: var(--gold); }
+
+    .schedule-times-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-bottom: 2rem;
+    }
+
+    .schedule-time-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      gap: 1rem;
+    }
+
+    .schedule-time-day {
+      font-family: 'Cinzel', serif;
+      font-size: 0.55rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--white);
+      min-width: 2.5rem;
+    }
+
+    .schedule-time-input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--white);
+      font-family: 'Crimson Text', serif;
+      font-size: 0.95rem;
+      padding: 0.4rem 0.6rem;
+      outline: none;
+      transition: border-color 0.2s;
+      color-scheme: dark;
+      flex: 1;
+      max-width: 130px;
+    }
+    .schedule-time-input:focus { border-color: var(--gold); }
+
+    .schedule-tz {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 1.75rem;
+      line-height: 1.5;
+    }
+    .schedule-tz select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--white);
+      font-family: 'Crimson Text', serif;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.5rem;
+      outline: none;
+      margin-top: 0.3rem;
+      width: 100%;
+      color-scheme: dark;
+    }
+
+    .schedule-save-btn {
+      width: 100%;
+      padding: 1.1rem;
+      border-radius: 10px;
+      border: none;
+      background: var(--gold);
+      color: var(--black);
+      font-family: 'Cinzel', serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .schedule-save-btn:hover { opacity: 0.85; }
+    .schedule-save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .schedule-error {
+      margin-top: 0.75rem;
+      font-size: 0.82rem;
+      color: var(--error);
+      text-align: center;
+      min-height: 1.2rem;
+    }
+
     /* Generating overlay on image */
     .image-generating {
       position: absolute;
@@ -916,6 +1464,9 @@
     </div>
 
     <div style="padding:1.25rem">
+      <button class="modal-btn secondary" style="width:100%;margin-bottom:0.75rem" onclick="openEditSchedule()">
+        Edit Posting Schedule
+      </button>
       <button class="modal-btn secondary" style="width:100%;margin-bottom:0.75rem" onclick="window.location.href='/autopilot/onboarding/onboarding.html'">
         Edit Brand Profile
       </button>
@@ -1008,6 +1559,130 @@
   </div>
 </div>
 
+<!-- Slot Panel -->
+<div class="slot-panel-overlay" id="slot-panel">
+  <div class="slot-panel-sheet">
+
+    <div class="modal-handle" style="margin:0.75rem auto 0"></div>
+
+    <div class="slot-panel-header">
+      <span class="slot-panel-title" id="slot-panel-title">Slot 1 — Monday</span>
+      <button class="slot-panel-close" onclick="closeSlotPanel()">✕</button>
+    </div>
+
+    <!-- Post type -->
+    <div class="slot-panel-section">
+      <span class="slot-panel-label">Post Type</span>
+      <div class="post-type-grid" id="post-type-grid">
+        <div class="post-type-chip selected" data-type="general" onclick="selectPostType(this)">
+          <span class="post-type-chip-name">General</span>
+          <span class="post-type-chip-desc">Brand voice post — showcase your business naturally</span>
+        </div>
+        <div class="post-type-chip" data-type="event" onclick="selectPostType(this)">
+          <span class="post-type-chip-name">Event</span>
+          <span class="post-type-chip-desc">Shoutout or reminder for an upcoming event</span>
+        </div>
+        <div class="post-type-chip" data-type="cta" onclick="selectPostType(this)">
+          <span class="post-type-chip-name">Call to Action</span>
+          <span class="post-type-chip-desc">Drive customers to visit, call, or buy</span>
+        </div>
+        <div class="post-type-chip" data-type="joke" onclick="selectPostType(this)">
+          <span class="post-type-chip-name">Joke / Pun</span>
+          <span class="post-type-chip-desc">A business-specific joke or pun to boost engagement</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manual prompt -->
+    <div class="slot-panel-section">
+      <span class="slot-panel-label">Custom Prompt <span style="color:var(--muted2);font-size:0.9em">(optional)</span></span>
+      <textarea
+        class="slot-panel-textarea"
+        id="slot-manual-prompt"
+        placeholder="Add specific details, topics, promotions, or anything you want included in this post…"
+        rows="3"
+      ></textarea>
+    </div>
+
+    <!-- Reference image -->
+    <div class="slot-panel-section">
+      <span class="slot-panel-label">Reference Image <span style="color:var(--muted2);font-size:0.9em">(optional — session only)</span></span>
+      <div class="ref-image-upload-area" id="ref-image-area">
+        <input type="file" accept="image/*" id="ref-image-input" onchange="handleRefImageUpload(this)">
+        <span class="ref-image-upload-label">⬆ Tap to upload a reference image</span>
+      </div>
+      <div class="ref-image-preview" id="ref-image-preview">
+        <img id="ref-image-thumb" src="" alt="Reference">
+        <button class="ref-image-remove" onclick="removeRefImage()">✕</button>
+      </div>
+    </div>
+
+    <!-- Generate Now actions (pre-generation) -->
+    <div id="slot-panel-pre-actions" class="slot-panel-actions">
+      <button class="slot-panel-btn secondary" id="slot-save-type-btn" onclick="saveSlotType()">
+        Save Type
+      </button>
+      <button class="slot-panel-btn primary" id="slot-generate-btn" onclick="generateNow()">
+        ✦ Generate Now
+      </button>
+    </div>
+
+    <!-- Result area (post-generation) -->
+    <div class="slot-panel-result" id="slot-panel-result">
+      <span class="slot-panel-label">Generated Post</span>
+      <img class="slot-panel-result-image" id="slot-result-image" src="" alt="Generated">
+      <div class="slot-panel-result-caption" id="slot-result-caption"></div>
+      <div class="slot-panel-attempts-left" id="slot-attempts-left"></div>
+      <textarea
+        class="slot-panel-regen-notes"
+        id="slot-regen-notes"
+        placeholder="What should change? e.g. warmer colors, mention our weekend special…"
+        rows="2"
+      ></textarea>
+      <div class="slot-panel-actions" style="padding:0 0 0.5rem">
+        <button class="slot-panel-btn danger" id="slot-regen-btn" onclick="regenNow()">↻ Regenerate</button>
+        <button class="slot-panel-btn secondary" id="slot-draft-btn" onclick="saveNowAsDraft()">Save as Draft</button>
+        <button class="slot-panel-btn success" id="slot-approve-btn" onclick="approveNow()">✓ Approve</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Schedule Setup Overlay -->
+<div class="schedule-overlay hidden" id="schedule-overlay">
+  <div class="schedule-overlay-top"></div>
+  <div class="schedule-overlay-inner">
+    <div class="schedule-overlay-eyebrow">Step 5 of 5 — Almost There</div>
+    <div class="schedule-overlay-title">Set Your Posting Schedule</div>
+    <div class="schedule-overlay-desc">
+      Choose which days your posts go out. Each slot gets its own AI-generated post, reviewed and approved by you before it publishes.
+    </div>
+
+    <div class="schedule-step-label">Pick your posting days</div>
+    <div class="schedule-slot-limit">
+      Select <strong id="sched-slot-count">2</strong> days — one post per day, per week.
+    </div>
+
+    <div class="schedule-day-grid" id="sched-day-grid"></div>
+
+    <div class="schedule-step-label">Set posting times</div>
+    <div class="schedule-times-list" id="sched-times-list">
+      <div style="color:var(--muted);font-size:0.85rem;font-style:italic">Select days above to set times.</div>
+    </div>
+
+    <div class="schedule-tz">
+      <div>Timezone</div>
+      <select id="sched-timezone"></select>
+    </div>
+
+    <button class="schedule-save-btn" id="sched-save-btn" onclick="saveSlots()" disabled>
+      Set Schedule &amp; Enter Dashboard
+    </button>
+    <div class="schedule-error" id="sched-error"></div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -1028,6 +1703,20 @@ let activeRejectionPostId = null;
 let selectedImageFeedback = [];
 let selectedCaptionFeedback = [];
 let currentViewImageUrl = null;
+
+// Slot panel state
+let activeSlot = null;          // the slot object currently open in panel
+let activeSlotPostId = null;    // post.id after generation
+let slotPanelAttempts = 0;      // attempts used in this session
+let slotRefImageFile = null;    // reference image File object (session-only)
+let slotRefImageB64 = null;     // base64 for sending to worker
+
+const POST_TYPES = {
+  general: 'General',
+  event:   'Event',
+  cta:     'Call to Action',
+  joke:    'Joke / Pun',
+};
 
 // ── AUTH ───────────────────────────────────────────────────────────────────
 function getToken() {
@@ -1108,9 +1797,19 @@ function signOut() {
 // ── DATA LOADING ───────────────────────────────────────────────────────────
 async function loadSlots() {
   if (!client) return;
-  const data = await sbFetch(`scheduled_slots?client_id=eq.${client.id}&is_active=eq.true&order=day_of_week.asc,post_time.asc`);
+  const data = await sbFetch(`scheduled_slots?client_id=eq.${client.id}&is_active=eq.true&order=slot_number.asc`);
   slots = data || [];
   renderScheduleSettings();
+}
+
+// Returns the Monday of the current week as a Date (used for drafted_week key)
+function getWeekStart(date) {
+  const d = new Date(date);
+  const day = d.getDay(); // 0=Sun
+  const diff = day === 0 ? -6 : 1 - day; // shift to Monday
+  d.setDate(d.getDate() + diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
 }
 
 async function loadPosts() {
@@ -1184,7 +1883,11 @@ function renderPostsList() {
     filtered = posts.filter(p => new Date(p.scheduled_for).toDateString() === selectedWeekDay);
   }
 
-  if (!filtered.length) {
+  // Build slot cards for slots that don't have a post in the current view window
+  const today = new Date();
+  const slotCardsHtml = buildSlotCards(filtered, today);
+
+  if (!filtered.length && !slotCardsHtml) {
     container.innerHTML = `
       <div class="empty-state">
         <span class="icon">⚓</span>
@@ -1193,9 +1896,79 @@ function renderPostsList() {
     return;
   }
 
+  // Render slot cards section if any
+  if (slotCardsHtml) {
+    const section = document.createElement('div');
+    section.className = 'slot-cards-section';
+    section.innerHTML = slotCardsHtml;
+    container.appendChild(section);
+  }
+
   filtered.forEach(post => {
     container.appendChild(buildPostCard(post));
   });
+}
+
+function buildSlotCards(currentPosts, today) {
+  if (!slots.length) return '';
+
+  const thisMonday = getWeekStart(new Date()).toISOString().slice(0, 10);
+  const cards = [];
+
+  for (const slot of slots) {
+    // Find next occurrence of this slot's day_of_week
+    const next = new Date(today);
+    const diff = (slot.day_of_week - today.getDay() + 7) % 7;
+    next.setDate(today.getDate() + (diff === 0 ? 0 : diff));
+    const nextStr = next.toDateString();
+
+    // Skip if a post already exists for this slot this week
+    const hasPost = currentPosts.some(p =>
+      new Date(p.scheduled_for).toDateString() === nextStr
+    );
+    if (hasPost) continue;
+
+    // Drafted this week via drafted_week column
+    const isDraftedThisWeek = slot.drafted_week === thisMonday;
+
+    // Check if approved or published this week via posts array
+    const weekPost = posts.find(p => {
+      const pd = new Date(p.scheduled_for);
+      return pd.toDateString() === nextStr &&
+        (p.status === 'approved' || p.status === 'published');
+    });
+
+    const isApproved  = weekPost?.status === 'approved';
+    const isPublished = weekPost?.status === 'published';
+    const isLocked = isDraftedThisWeek || isApproved || isPublished;
+
+    const dayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][slot.day_of_week];
+    const timeStr = slot.post_time.slice(0, 5);
+    const typeName = POST_TYPES[slot.post_type] || 'General';
+
+    let statusTag = '';
+    if (isDraftedThisWeek) statusTag = `<span class="slot-status-tag drafted">Drafted</span>`;
+    else if (isApproved)   statusTag = `<span class="slot-status-tag approved">Approved</span>`;
+    else if (isPublished)  statusTag = `<span class="slot-status-tag published">Published</span>`;
+
+    cards.push(`
+      <div
+        class="slot-card ${isDraftedThisWeek ? 'slot-drafted' : isLocked ? 'slot-locked' : ''}"
+        onclick="${isLocked ? '' : `openSlotPanel(${slot.slot_number})`}"
+      >
+        <div class="slot-card-left">
+          <div class="slot-number-badge">${slot.slot_number}</div>
+          <div class="slot-card-info">
+            <div class="slot-card-day">${dayName}</div>
+            <div class="slot-card-time">${timeStr} · ${slot.timezone}</div>
+          </div>
+        </div>
+        <span class="slot-type-badge">${typeName}</span>
+        ${statusTag || '<span class="slot-card-arrow">›</span>'}
+      </div>
+    `);
+  }
+  return cards.join('');
 }
 
 function buildPostCard(post) {
@@ -1652,11 +2425,555 @@ function escHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function openEditSchedule() {
+  // Reset and re-open the overlay, pre-seeding with existing slots
+  schedSelectedDays = [];
+  document.querySelectorAll('.sched-day-btn').forEach(b => b.classList.remove('selected'));
+
+  showScheduleOverlay(); // rebuilds grid fresh
+
+  // After overlay renders, pre-select current days + times
+  if (window.slots && window.slots.length) {
+    window.slots.forEach(slot => {
+      schedSelectedDays.push(slot.day_of_week);
+      const btn = document.querySelector(`#sched-day-grid .sched-day-btn[data-dow="${slot.day_of_week}"]`);
+      if (btn) btn.classList.add('selected');
+    });
+    renderTimePickers();
+    // Set existing times after pickers render
+    window.slots.forEach(slot => {
+      const input = document.querySelector(`#sched-times-list input[data-dow="${slot.day_of_week}"]`);
+      if (input) input.value = slot.post_time.slice(0,5);
+    });
+    updateSaveBtn();
+  }
+
+  // Change button label for edit mode
+  document.getElementById('sched-save-btn').textContent = 'Save New Schedule';
+  document.querySelector('.schedule-overlay-eyebrow').textContent = 'Settings — Posting Schedule';
+  document.querySelector('.schedule-overlay-title').textContent = 'Edit Your Schedule';
+}
+
+// ── SLOT PANEL ─────────────────────────────────────────────────────────────
+
+function openSlotPanel(slotNumber) {
+  activeSlot = slots.find(s => s.slot_number === slotNumber);
+  if (!activeSlot) return;
+
+  activeSlotPostId = null;
+  slotPanelAttempts = 0;
+  slotRefImageFile = null;
+  slotRefImageB64 = null;
+
+  // Reset UI
+  const dayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][activeSlot.day_of_week];
+  document.getElementById('slot-panel-title').textContent = `Slot ${activeSlot.slot_number} — ${dayName}`;
+  document.getElementById('slot-manual-prompt').value = '';
+  document.getElementById('slot-regen-notes').value = '';
+  document.getElementById('ref-image-preview').style.display = 'none';
+  document.getElementById('ref-image-thumb').src = '';
+  document.getElementById('ref-image-input').value = '';
+
+  // Set post type chips
+  document.querySelectorAll('.post-type-chip').forEach(chip => {
+    chip.classList.toggle('selected', chip.dataset.type === (activeSlot.post_type || 'general'));
+  });
+
+  // Hide result, show pre-actions
+  document.getElementById('slot-panel-result').classList.remove('visible');
+  document.getElementById('slot-panel-pre-actions').style.display = 'flex';
+  document.getElementById('slot-generate-btn').disabled = false;
+  document.getElementById('slot-generate-btn').textContent = '✦ Generate Now';
+
+  document.getElementById('slot-panel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSlotPanel() {
+  document.getElementById('slot-panel').classList.remove('open');
+  document.body.style.overflow = '';
+  // Clear session ref image
+  slotRefImageFile = null;
+  slotRefImageB64 = null;
+}
+
+function selectPostType(chip) {
+  document.querySelectorAll('.post-type-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+}
+
+function getSelectedPostType() {
+  const chip = document.querySelector('.post-type-chip.selected');
+  return chip ? chip.dataset.type : 'general';
+}
+
+async function saveSlotType() {
+  if (!activeSlot) return;
+  const newType = getSelectedPostType();
+  const btn = document.getElementById('slot-save-type-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    await sbFetch(`scheduled_slots?id=eq.${activeSlot.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ post_type: newType }),
+    });
+    activeSlot.post_type = newType;
+    // Update local slots array
+    const idx = slots.findIndex(s => s.id === activeSlot.id);
+    if (idx > -1) slots[idx].post_type = newType;
+    showToast('Post type saved', 'success');
+    renderPostsList(); // refresh slot cards
+  } catch(e) {
+    showToast('Could not save type', 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Save Type';
+}
+
+function handleRefImageUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  slotRefImageFile = file;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    slotRefImageB64 = e.target.result.split(',')[1]; // base64 only
+    document.getElementById('ref-image-thumb').src = e.target.result;
+    document.getElementById('ref-image-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeRefImage() {
+  slotRefImageFile = null;
+  slotRefImageB64 = null;
+  document.getElementById('ref-image-thumb').src = '';
+  document.getElementById('ref-image-preview').style.display = 'none';
+  document.getElementById('ref-image-input').value = '';
+}
+
+async function generateNow() {
+  if (!activeSlot) return;
+  const btn = document.getElementById('slot-generate-btn');
+  btn.disabled = true;
+  btn.textContent = '✦ Generating…';
+
+  const postType = getSelectedPostType();
+  const manualPrompt = document.getElementById('slot-manual-prompt').value.trim();
+
+  try {
+    // Save type first if changed
+    if (postType !== activeSlot.post_type) {
+      await sbFetch(`scheduled_slots?id=eq.${activeSlot.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ post_type: postType }),
+      });
+      activeSlot.post_type = postType;
+    }
+
+    // Create a post row for this slot (or find existing draft)
+    const today = new Date();
+    const diff = (activeSlot.day_of_week - today.getDay() + 7) % 7;
+    const slotDate = new Date(today);
+    slotDate.setDate(today.getDate() + (diff === 0 ? 0 : diff));
+    const [h, m] = activeSlot.post_time.split(':');
+    slotDate.setHours(parseInt(h), parseInt(m), 0, 0);
+
+    // Create post row
+    const maxAttempts = { starter: 3, growth: 4, daily: 5 }[client.plan] || 3;
+    const newPost = await sbFetch('posts', {
+      method: 'POST',
+      body: JSON.stringify({
+        client_id:       client.id,
+        slot_id:         activeSlot.id,
+        scheduled_for:   slotDate.toISOString(),
+        status:          'generating',
+        post_category:   postType,
+        attempt_number:  1,
+        max_attempts:    maxAttempts,
+        is_latest_attempt: true,
+      }),
+    });
+
+    const postId = Array.isArray(newPost) ? newPost[0].id : newPost.id;
+    activeSlotPostId = postId;
+    slotPanelAttempts = 1;
+
+    // Fire caption worker with extra context
+    await fetch(`${CAPTION_WORKER}/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        post_id:       postId,
+        post_type:     postType,
+        manual_prompt: manualPrompt || null,
+      }),
+    });
+
+    // Fire image worker with optional reference image
+    await fetch(`${IMAGE_WORKER}/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        post_id:         postId,
+        ref_image_b64:   slotRefImageB64 || null,
+      }),
+    });
+
+    // Poll for result
+    await pollForSlotResult(postId, maxAttempts);
+
+  } catch(e) {
+    showToast('Generation failed', 'error');
+    btn.disabled = false;
+    btn.textContent = '✦ Generate Now';
+  }
+}
+
+async function pollForSlotResult(postId, maxAttempts) {
+  let attempts = 0;
+  const poll = async () => {
+    attempts++;
+    const data = await sbFetch(`posts?id=eq.${postId}&select=*`);
+    const post = Array.isArray(data) ? data[0] : null;
+
+    if (!post) {
+      if (attempts < 30) setTimeout(poll, 3000);
+      return;
+    }
+
+    if (post.status === 'generating' && attempts < 30) {
+      setTimeout(poll, 3000);
+      return;
+    }
+
+    // Show result
+    showSlotPanelResult(post, maxAttempts);
+  };
+  setTimeout(poll, 3000);
+}
+
+function showSlotPanelResult(post, maxAttempts) {
+  document.getElementById('slot-panel-pre-actions').style.display = 'none';
+
+  if (post.image_url) {
+    document.getElementById('slot-result-image').src = post.image_url;
+    document.getElementById('slot-result-image').style.display = 'block';
+  } else {
+    document.getElementById('slot-result-image').style.display = 'none';
+  }
+
+  document.getElementById('slot-result-caption').textContent = post.caption || '(No caption generated)';
+
+  const attemptsLeft = maxAttempts - slotPanelAttempts;
+  document.getElementById('slot-attempts-left').textContent =
+    `${attemptsLeft} regeneration${attemptsLeft !== 1 ? 's' : ''} remaining`;
+
+  const regenBtn = document.getElementById('slot-regen-btn');
+  regenBtn.disabled = attemptsLeft <= 0;
+
+  document.getElementById('slot-panel-result').classList.add('visible');
+  showToast('✦ Post generated', 'success');
+  loadPosts(); // refresh main list in background
+}
+
+async function regenNow() {
+  if (!activeSlotPostId) return;
+  const maxAttempts = { starter: 3, growth: 4, daily: 5 }[client.plan] || 3;
+  if (slotPanelAttempts >= maxAttempts) {
+    showToast('No regenerations left', 'error');
+    return;
+  }
+
+  const notes = document.getElementById('slot-regen-notes').value.trim();
+  const regenBtn = document.getElementById('slot-regen-btn');
+  regenBtn.disabled = true;
+  regenBtn.textContent = '↻ Regenerating…';
+
+  try {
+    // Mark current post as rejected
+    await sbFetch(`posts?id=eq.${activeSlotPostId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: 'rejected', rejection_notes: notes }),
+    });
+
+    slotPanelAttempts++;
+
+    // Create new attempt row
+    const existing = await sbFetch(`posts?id=eq.${activeSlotPostId}&select=*`);
+    const prev = Array.isArray(existing) ? existing[0] : existing;
+
+    // Mark previous as not latest
+    await sbFetch(`posts?slot_id=eq.${activeSlot.id}&is_latest_attempt=eq.true`, {
+      method: 'PATCH',
+      body: JSON.stringify({ is_latest_attempt: false }),
+    });
+
+    const newPost = await sbFetch('posts', {
+      method: 'POST',
+      body: JSON.stringify({
+        client_id:         client.id,
+        slot_id:           activeSlot.id,
+        scheduled_for:     prev.scheduled_for,
+        status:            'generating',
+        post_category:     prev.post_category,
+        attempt_number:    slotPanelAttempts,
+        max_attempts:      prev.max_attempts,
+        is_latest_attempt: true,
+        rejection_notes:   notes,
+      }),
+    });
+
+    const newPostId = Array.isArray(newPost) ? newPost[0].id : newPost.id;
+    activeSlotPostId = newPostId;
+
+    // Fire workers again with regen context
+    await fetch(`${CAPTION_WORKER}/regenerate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ post_id: newPostId, notes }),
+    });
+    await fetch(`${IMAGE_WORKER}/regenerate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        post_id:       newPostId,
+        notes,
+        ref_image_b64: slotRefImageB64 || null,
+      }),
+    });
+
+    await pollForSlotResult(newPostId, prev.max_attempts);
+
+  } catch(e) {
+    showToast('Regeneration failed', 'error');
+    regenBtn.disabled = false;
+    regenBtn.textContent = '↻ Regenerate';
+  }
+}
+
+async function approveNow() {
+  if (!activeSlotPostId) return;
+  try {
+    await sbFetch(`posts?id=eq.${activeSlotPostId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: 'approved' }),
+    });
+    showToast('✓ Post approved', 'success');
+    closeSlotPanel();
+    await loadPosts();
+  } catch(e) {
+    showToast('Could not approve', 'error');
+  }
+}
+
+async function saveNowAsDraft() {
+  if (!activeSlotPostId) return;
+  try {
+    await sbFetch(`posts?id=eq.${activeSlotPostId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: 'draft' }),
+    });
+    // Mark slot as drafted for this week (auto-clears next week)
+    const thisMonday = getWeekStart(new Date()).toISOString().slice(0, 10);
+    await sbFetch(`scheduled_slots?id=eq.${activeSlot.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ drafted_week: thisMonday }),
+    });
+    showToast('Saved to Facebook drafts', 'success');
+    closeSlotPanel();
+    await loadSlots();
+    await loadPosts();
+  } catch(e) {
+    showToast('Could not save draft', 'error');
+  }
+}
+
+// Close slot panel on overlay click
+document.getElementById('slot-panel').addEventListener('click', e => {
+  if (e.target === document.getElementById('slot-panel')) closeSlotPanel();
+});
+
+// ── SCHEDULE SETUP OVERLAY ─────────────────────────────────────────────────
+const SLOT_LIMITS = { starter: 2, growth: 4, daily: 7 };
+const FULL_DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const SHORT_DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+let schedSelectedDays = []; // array of day_of_week integers (0-6)
+
+const COMMON_TIMEZONES = [
+  'America/New_York','America/Chicago','America/Denver','America/Phoenix',
+  'America/Los_Angeles','America/Anchorage','Pacific/Honolulu',
+  'America/Toronto','America/Vancouver','America/Winnipeg',
+  'Europe/London','Europe/Paris','Europe/Berlin','Europe/Amsterdam',
+  'Asia/Tokyo','Asia/Seoul','Asia/Shanghai','Asia/Kolkata',
+  'Australia/Sydney','Australia/Melbourne','Pacific/Auckland',
+];
+
+function checkScheduleSetup() {
+  if (!client || slots.length > 0) return; // already has slots, skip
+  showScheduleOverlay();
+}
+
+function showScheduleOverlay() {
+  const overlay = document.getElementById('schedule-overlay');
+  overlay.classList.remove('hidden');
+
+  const limit = SLOT_LIMITS[client.plan] || 2;
+  document.getElementById('sched-slot-count').textContent = limit;
+
+  // Build timezone picker
+  const tzSelect = document.getElementById('sched-timezone');
+  const browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const tzList = COMMON_TIMEZONES.includes(browserTz)
+    ? COMMON_TIMEZONES
+    : [browserTz, ...COMMON_TIMEZONES];
+
+  tzSelect.innerHTML = tzList.map(tz =>
+    `<option value="${tz}" ${tz === browserTz ? 'selected' : ''}>${tz.replace(/_/g,' ')}</option>`
+  ).join('');
+
+  // Build day grid (Mon–Sun order, starting Monday=1)
+  const orderedDays = [1,2,3,4,5,6,0]; // Mon through Sun
+  const grid = document.getElementById('sched-day-grid');
+  grid.innerHTML = orderedDays.map(dow => `
+    <button
+      class="sched-day-btn"
+      data-dow="${dow}"
+      onclick="toggleScheduleDay(${dow}, this)"
+      type="button"
+    >
+      <span class="sched-day-name">${SHORT_DAY_NAMES[dow]}</span>
+      <span class="sched-day-check">✦</span>
+    </button>
+  `).join('');
+}
+
+function toggleScheduleDay(dow, btn) {
+  const limit = SLOT_LIMITS[client.plan] || 2;
+  const idx = schedSelectedDays.indexOf(dow);
+
+  if (idx > -1) {
+    // Deselect
+    schedSelectedDays.splice(idx, 1);
+    btn.classList.remove('selected');
+  } else {
+    if (schedSelectedDays.length >= limit) {
+      // Flash over-limit on the button
+      btn.classList.add('over-limit');
+      setTimeout(() => btn.classList.remove('over-limit'), 400);
+      document.getElementById('sched-error').textContent =
+        `Your ${client.plan} plan includes ${limit} post${limit > 1 ? 's' : ''} per week. Deselect a day to swap.`;
+      return;
+    }
+    schedSelectedDays.push(dow);
+    btn.classList.add('selected');
+  }
+
+  document.getElementById('sched-error').textContent = '';
+  renderTimePickers();
+  updateSaveBtn();
+}
+
+function renderTimePickers() {
+  const container = document.getElementById('sched-times-list');
+
+  if (!schedSelectedDays.length) {
+    container.innerHTML = `<div style="color:var(--muted);font-size:0.85rem;font-style:italic">Select days above to set times.</div>`;
+    return;
+  }
+
+  // Sort by day of week (Mon-first order)
+  const sorted = [...schedSelectedDays].sort((a, b) => {
+    const order = [1,2,3,4,5,6,0];
+    return order.indexOf(a) - order.indexOf(b);
+  });
+
+  container.innerHTML = sorted.map(dow => {
+    // Preserve existing time input value if it exists
+    const existing = container.querySelector(`input[data-dow="${dow}"]`);
+    const val = existing ? existing.value : '09:00';
+    return `
+      <div class="schedule-time-row">
+        <span class="schedule-time-day">${FULL_DAY_NAMES[dow]}</span>
+        <input
+          class="schedule-time-input"
+          type="time"
+          data-dow="${dow}"
+          value="${val}"
+          onchange="updateSaveBtn()"
+        >
+      </div>
+    `;
+  }).join('');
+}
+
+function updateSaveBtn() {
+  const limit = SLOT_LIMITS[client.plan] || 2;
+  const allTimesSet = schedSelectedDays.every(dow => {
+    const input = document.querySelector(`#sched-times-list input[data-dow="${dow}"]`);
+    return input && input.value;
+  });
+  const btn = document.getElementById('sched-save-btn');
+  btn.disabled = !(schedSelectedDays.length === limit && allTimesSet);
+}
+
+async function saveSlots() {
+  const btn = document.getElementById('sched-save-btn');
+  const errEl = document.getElementById('sched-error');
+  const timezone = document.getElementById('sched-timezone').value;
+
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  errEl.textContent = '';
+
+  const slots = schedSelectedDays.map(dow => {
+    const input = document.querySelector(`#sched-times-list input[data-dow="${dow}"]`);
+    return {
+      day_of_week: dow,
+      post_time: input.value + ':00', // HH:MM → HH:MM:SS
+      timezone,
+    };
+  });
+
+  try {
+    const res = await fetch('https://autopilot-onboarding.dreadpiratestudio.workers.dev/save-slots', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: getToken(), slots }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err);
+    }
+
+    // Reload slots into state, hide overlay, show dashboard
+    const data = await sbFetch(
+      `scheduled_slots?client_id=eq.${client.id}&is_active=eq.true&order=day_of_week.asc,post_time.asc`
+    );
+    window.slots = data || [];
+    renderScheduleSettings();
+    renderWeekStrip();
+
+    document.getElementById('schedule-overlay').classList.add('hidden');
+    showToast('✦ Schedule saved — welcome aboard!', 'success');
+  } catch(e) {
+    errEl.textContent = 'Could not save schedule. Please try again.';
+    btn.disabled = false;
+    btn.textContent = 'Set Schedule & Enter Dashboard';
+  }
+}
+
 // ── INIT ───────────────────────────────────────────────────────────────────
 async function init() {
   try {
     await loadClient();
     await Promise.all([loadSlots(), loadPosts()]);
+    checkScheduleSetup();
     // Register service worker for PWA
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/autopilot-sw.js', { scope: '/' }).catch(() => {});
