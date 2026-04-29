@@ -36,6 +36,9 @@ export default {
       if (path === '/save-profile' && request.method === 'POST') {
         return handleSaveProfile(request, env);
       }
+      if (path === '/save-slots' && request.method === 'POST') {
+        return handleSaveSlots(request, env);
+      }
       return json({ error: 'Not found' }, 404);
     } catch (err) {
       console.error('Worker error:', err);
@@ -188,6 +191,82 @@ async function handleSaveProfile(request, env) {
 
   console.log(`Onboarding complete for client ${clientId}`);
   return json({ success: true });
+}
+
+// ─── Save Slots ───────────────────────────────────────────────────────────────
+
+async function handleSaveSlots(request, env) {
+  const { token, slots } = await request.json();
+
+  if (!token) return json({ error: 'Missing token' }, 400);
+  if (!Array.isArray(slots) || slots.length === 0) {
+    return json({ error: 'No slots provided' }, 400);
+  }
+
+  // Resolve client from token
+  const rows = await supabase(env, 'GET',
+    `/rest/v1/clients?onboarding_token=eq.${encodeURIComponent(token)}&select=id,plan&limit=1`
+  );
+
+  if (!Array.isArray(rows) || rows.length === 0) {
+    return json({ error: 'Invalid token' }, 401);
+  }
+
+  const { id: clientId, plan } = rows[0];
+
+  // Enforce slot limit per plan
+  const SLOT_LIMITS = { starter: 2, growth: 4, daily: 7 };
+  const limit = SLOT_LIMITS[plan] || 2;
+
+  if (slots.length > limit) {
+    return json({
+      error: `Plan "${plan}" allows ${limit} slot(s). Received ${slots.length}.`
+    }, 400);
+  }
+
+  // Validate each slot shape
+  for (const slot of slots) {
+    const dow = slot.day_of_week;
+    if (typeof dow !== 'number' || dow < 0 || dow > 6) {
+      return json({ error: `Invalid day_of_week: ${dow}` }, 400);
+    }
+    if (!slot.post_time || !/^\d{2}:\d{2}(:\d{2})?$/.test(slot.post_time)) {
+      return json({ error: `Invalid post_time: ${slot.post_time}` }, 400);
+    }
+    if (!slot.timezone) {
+      return json({ error: 'Missing timezone' }, 400);
+    }
+  }
+
+  // Delete all existing slots for this client, then insert fresh
+  await supabase(env, 'DELETE',
+    `/rest/v1/scheduled_slots?client_id=eq.${clientId}`,
+    null,
+    { Prefer: 'return=minimal' }
+  );
+
+  // Build slot rows with slot_number (1-based, sorted by day then time)
+  const sorted = [...slots].sort((a, b) => {
+    if (a.day_of_week !== b.day_of_week) return a.day_of_week - b.day_of_week;
+    return a.post_time.localeCompare(b.post_time);
+  });
+
+  const rows_to_insert = sorted.map((slot, i) => ({
+    client_id:    clientId,
+    slot_number:  i + 1,
+    day_of_week:  slot.day_of_week,
+    post_time:    slot.post_time.length === 5 ? slot.post_time + ':00' : slot.post_time,
+    timezone:     slot.timezone,
+    post_type:    slot.post_type || 'general',
+    is_active:    true,
+  }));
+
+  await supabase(env, 'POST', '/rest/v1/scheduled_slots', rows_to_insert,
+    { Prefer: 'return=minimal' }
+  );
+
+  console.log(`Saved ${rows_to_insert.length} slot(s) for client ${clientId}`);
+  return json({ success: true, slots_saved: rows_to_insert.length });
 }
 
 // ─── Supabase helper ──────────────────────────────────────────────────────────
