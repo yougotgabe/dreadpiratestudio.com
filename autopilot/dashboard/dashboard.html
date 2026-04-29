@@ -1504,6 +1504,104 @@
       text-transform: uppercase;
       color: var(--gold);
     }
+    /* ── LIBRARY POST CARDS ── */
+    .lib-post-card {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid var(--border2);
+      align-items: flex-start;
+    }
+    .lib-post-card:last-child { border-bottom: none; }
+    .lib-post-thumb {
+      flex: 0 0 72px;
+      width: 72px; height: 72px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .lib-post-thumb:hover { border-color: var(--gold-dim); }
+    .lib-post-thumb-empty {
+      flex: 0 0 72px;
+      width: 72px; height: 72px;
+      border-radius: 8px;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted2);
+      font-size: 1.2rem;
+    }
+    .lib-post-body { flex: 1; min-width: 0; }
+    .lib-post-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.3rem;
+      flex-wrap: wrap;
+    }
+    .lib-post-date { font-size: 0.72rem; color: var(--muted); }
+    .lib-post-caption {
+      font-size: 0.85rem;
+      color: var(--white);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .lib-post-caption.empty { color: var(--muted); font-style: italic; }
+    .lib-post-actions {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .lib-post-action-btn {
+      font-family: 'Cinzel', serif;
+      font-size: 0.4rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      padding: 0.3em 0.75em;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .lib-post-action-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+    .lib-post-action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Logo management in library */
+    .lib-logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border2);
+    }
+    .lib-logo-img {
+      width: 72px; height: 72px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      padding: 0.4rem;
+    }
+    .lib-logo-info { flex: 1; }
+    .lib-logo-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.42rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 0.25rem;
+    }
+    .lib-logo-name { font-size: 0.82rem; color: var(--muted); }
+
   </style>
 </head>
 <body>
@@ -1552,6 +1650,7 @@
     <!-- Posts list -->
     <div class="section-header" style="padding-top:0.5rem">
       <span class="section-title" id="posts-list-title">Upcoming Posts</span>
+      <button class="section-action" onclick="openEditSchedule()">Edit Schedule</button>
     </div>
     <div id="posts-list">
       <!-- Populated by JS -->
@@ -1562,13 +1661,21 @@
   <!-- Library Tab -->
   <div class="tab-content" id="tab-library">
     <div class="section-header">
-      <span class="section-title">Image Library</span>
-      <span class="section-action" style="font-size:0.72rem;color:var(--muted)">Rolling 5 images</span>
+      <span class="section-title">Post Library</span>
+      <span class="section-action" style="font-size:0.72rem;color:var(--muted)" id="lib-post-count"></span>
     </div>
-    <div class="image-grid" id="image-grid">
+    <div id="lib-posts-list" style="padding:0 1.25rem">
       <!-- Populated by JS -->
     </div>
-    <div style="height:1rem"></div>
+
+    <div class="section-header" style="margin-top:0.5rem">
+      <span class="section-title">Logo</span>
+      <button class="section-action" onclick="document.getElementById('logo-upload-input').click()">Upload New</button>
+      <input type="file" id="logo-upload-input" accept="image/*" style="display:none" onchange="uploadLogoFromLibrary(this)">
+    </div>
+    <div id="lib-logo-area" style="padding:0 1.25rem 2rem">
+      <!-- Populated by JS -->
+    </div>
   </div>
 
   <!-- Settings Tab -->
@@ -1619,12 +1726,6 @@
     </div>
 
     <div style="padding:1.25rem">
-      <button class="modal-btn secondary" style="width:100%;margin-bottom:0.75rem" onclick="openEditSchedule()">
-        Edit Posting Schedule
-      </button>
-      <button class="modal-btn secondary" style="width:100%;margin-bottom:0.75rem" onclick="window.location.href='/autopilot/onboarding/onboarding.html'">
-        Edit Brand Profile
-      </button>
       <button class="modal-btn secondary" style="width:100%;margin-bottom:0.75rem" onclick="openManageSubscription()">
         Manage Subscription
       </button>
@@ -1728,7 +1829,7 @@
     </div>
 
     <div style="padding:1.25rem 1.25rem 2rem">
-      <button class="modal-btn secondary" style="width:100%" onclick="window.location.href='/autopilot/onboarding/onboarding.html'">
+      <button class="modal-btn secondary" style="width:100%" onclick="openBrandEditPanel()">
         ✎ Edit Brand Profile
       </button>
     </div>
@@ -1957,6 +2058,72 @@
   </div>
 </div>
 
+<!-- Brand Edit Panel -->
+<div class="slot-panel-overlay" id="brand-edit-panel">
+  <div class="slot-panel-sheet">
+    <div class="modal-handle" style="margin:0.75rem auto 0"></div>
+    <div class="slot-panel-header">
+      <span class="slot-panel-title">Edit Brand Profile</span>
+      <button class="slot-panel-close" onclick="closeBrandEditPanel()">✕</button>
+    </div>
+
+    <div style="padding:0 1.25rem 1rem">
+
+      <div style="margin-top:1rem">
+        <span class="slot-panel-label">Business Name</span>
+        <input class="schedule-time-input" style="width:100%;max-width:none" type="text" id="bep-business-name" placeholder="Your business name">
+      </div>
+
+      <div style="margin-top:1rem">
+        <span class="slot-panel-label">Industry</span>
+        <input class="schedule-time-input" style="width:100%;max-width:none" type="text" id="bep-industry" placeholder="e.g. Restaurant, Retail, Fitness…">
+      </div>
+
+      <div style="margin-top:1rem">
+        <span class="slot-panel-label">Location</span>
+        <input class="schedule-time-input" style="width:100%;max-width:none" type="text" id="bep-location" placeholder="City, State">
+      </div>
+
+      <div style="margin-top:1rem">
+        <span class="slot-panel-label">Website</span>
+        <input class="schedule-time-input" style="width:100%;max-width:none" type="url" id="bep-website" placeholder="https://…">
+      </div>
+
+      <div style="margin-top:1rem">
+        <span class="slot-panel-label">About the Business</span>
+        <textarea class="slot-panel-textarea" id="bep-description" rows="3" placeholder="What does your business do? What makes it special?"></textarea>
+      </div>
+
+      <div style="margin-top:1rem">
+        <span class="slot-panel-label">Target Audience</span>
+        <textarea class="slot-panel-textarea" id="bep-audience" rows="2" placeholder="Who are your customers?"></textarea>
+      </div>
+
+      <div style="margin-top:1rem">
+        <span class="slot-panel-label">Brand Voice</span>
+        <input class="schedule-time-input" style="width:100%;max-width:none" type="text" id="bep-voice" placeholder="e.g. Friendly, Professional, Playful…">
+      </div>
+
+      <div style="margin-top:1rem">
+        <span class="slot-panel-label">Off-Limits Topics</span>
+        <textarea class="slot-panel-textarea" id="bep-offlimits" rows="2" placeholder="Anything the AI should never mention or post about…"></textarea>
+      </div>
+
+      <div style="margin-top:1rem">
+        <span class="slot-panel-label">Extra Context for AI</span>
+        <textarea class="slot-panel-textarea" id="bep-extra" rows="2" placeholder="Anything else that helps the AI write better posts…"></textarea>
+      </div>
+
+      <div style="margin-top:1.25rem;color:var(--error);font-size:0.82rem;min-height:1.2rem" id="bep-error"></div>
+
+      <button class="schedule-save-btn" style="margin-top:0.5rem" id="bep-save-btn" onclick="saveBrandEdit()">
+        Save Changes
+      </button>
+
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -2050,7 +2217,6 @@ async function loadClient() {
   }
 
   document.getElementById('plan-badge').textContent = client.plan;
-  document.getElementById('settings-name').textContent = client.name || 'Client';
   document.getElementById('settings-email').textContent = client.email;
   document.getElementById('settings-plan').textContent =
     { starter: 'Starter — 2 posts/week', growth: 'Growth — 4 posts/week', daily: 'Daily — 7 posts/week' }[client.plan] || client.plan;
@@ -2115,13 +2281,118 @@ async function loadPosts() {
 
 async function loadImageLibrary() {
   if (!client) return;
-  const data = await sbFetch(
-    `generated_images?client_id=eq.${client.id}&order=created_at.desc&limit=5&select=id,public_url,post_category,post_id,created_at`
-  );
-  renderImageLibrary(data || []);
+  // Load last 20 posts with images or captions
+  const [imageData, logoData] = await Promise.all([
+    sbFetch(
+      `posts?client_id=eq.${client.id}&is_latest_attempt=eq.true&order=scheduled_for.desc&limit=20&select=id,caption,image_url,post_category,scheduled_for,status`
+    ),
+    sbFetch(
+      `brand_assets?client_id=eq.${client.id}&asset_type=eq.logo_primary&is_active=eq.true&limit=1`
+    ),
+  ]);
+  renderLibraryPosts(imageData || []);
+  renderLibraryLogo(Array.isArray(logoData) ? logoData[0] : null);
 }
 
-// ── WEEK STRIP ─────────────────────────────────────────────────────────────
+function renderLibraryPosts(posts) {
+  const container = document.getElementById('lib-posts-list');
+  const countEl = document.getElementById('lib-post-count');
+  const withContent = posts.filter(p => p.caption || p.image_url);
+  countEl.textContent = withContent.length ? `${withContent.length} posts` : '';
+
+  if (!withContent.length) {
+    container.innerHTML = `<div class="empty-state"><span class="icon">📋</span><p>No posts generated yet.<br>Approve your first slot to get started.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = withContent.map(post => {
+    const schedDate = new Date(post.scheduled_for);
+    const dateStr = schedDate.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+    const categoryLabel = (post.post_category || 'general').replace(/_/g,' ');
+    const statusColor = { approved:'var(--success)', published:'var(--muted)', pending:'var(--pending)', rejected:'var(--error)' }[post.status] || 'var(--muted)';
+
+    return `
+      <div class="lib-post-card">
+        ${post.image_url
+          ? `<img class="lib-post-thumb" src="${post.image_url}" alt="" loading="lazy" onclick="viewImage('${post.image_url}','${categoryLabel}','${post.id}')">`
+          : `<div class="lib-post-thumb-empty">🖼️</div>`
+        }
+        <div class="lib-post-body">
+          <div class="lib-post-meta">
+            <span class="post-category">${categoryLabel}</span>
+            <span class="lib-post-date">${dateStr}</span>
+            <span style="font-family:'Cinzel',serif;font-size:0.38rem;letter-spacing:0.12em;text-transform:uppercase;color:${statusColor}">${post.status}</span>
+          </div>
+          ${post.caption
+            ? `<div class="lib-post-caption">${escHtml(post.caption)}</div>`
+            : `<div class="lib-post-caption empty">Caption not generated.</div>`
+          }
+          <div class="lib-post-actions">
+            ${post.image_url ? `<button class="lib-post-action-btn" onclick="viewImage('${post.image_url}','${categoryLabel}','${post.id}')">🔍 View Image</button>` : ''}
+            ${post.image_url ? `<button class="lib-post-action-btn" id="lib-draft-${post.id}" onclick="saveLibraryAsDraft('${post.id}',this)">Save as Draft</button>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderLibraryLogo(logo) {
+  const area = document.getElementById('lib-logo-area');
+  if (logo?.public_url) {
+    area.innerHTML = `
+      <div class="lib-logo-wrap">
+        <img class="lib-logo-img" src="${logo.public_url}" alt="Logo">
+        <div class="lib-logo-info">
+          <div class="lib-logo-label">Current Logo</div>
+          <div class="lib-logo-name">Active</div>
+        </div>
+        <button class="lib-post-action-btn" onclick="document.getElementById('logo-upload-input').click()">Replace</button>
+      </div>`;
+  } else {
+    area.innerHTML = `
+      <div style="padding:1rem 0;color:var(--muted);font-size:0.85rem;font-style:italic">No logo uploaded yet.</div>
+      <button class="lib-post-action-btn" style="margin-top:0.25rem" onclick="document.getElementById('logo-upload-input').click()">Upload Logo</button>`;
+  }
+}
+
+async function uploadLogoFromLibrary(input) {
+  const file = input.files[0];
+  if (!file || !client) return;
+
+  const area = document.getElementById('lib-logo-area');
+  area.innerHTML = `<div style="padding:1rem 0;color:var(--muted);font-size:0.85rem">Uploading…</div>`;
+
+  try {
+    // Read as base64
+    const b64 = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = e => res(e.target.result.split(',')[1]);
+      r.onerror = rej;
+      r.readAsDataURL(file);
+    });
+
+    const token = getToken();
+    const uploadRes = await fetch('https://autopilot-onboarding.dreadpiratestudio.workers.dev/upload-logo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, file_base64: b64, file_name: file.name, mime_type: file.type }),
+    });
+
+    if (!uploadRes.ok) throw new Error(await uploadRes.text());
+    const { public_url } = await uploadRes.json();
+
+    renderLibraryLogo({ public_url });
+    // Also refresh brand profile logo in brand tab
+    const logoWrap = document.getElementById('bp-logo-wrap');
+    if (logoWrap) logoWrap.innerHTML = `<img class="brand-logo-img" src="${public_url}" alt="Brand logo">`;
+    showToast('✦ Logo updated', 'success');
+  } catch(e) {
+    showToast('Logo upload failed', 'error');
+    renderLibraryLogo(null);
+  }
+  input.value = '';
+}
 const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
 function renderWeekStrip() {
@@ -2519,34 +2790,6 @@ async function submitRejection() {
 }
 
 // ── IMAGE LIBRARY ──────────────────────────────────────────────────────────
-function renderImageLibrary(images) {
-  const grid = document.getElementById('image-grid');
-  grid.innerHTML = '';
-
-  if (!images.length) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><span class="icon">🖼️</span><p>No images generated yet.</p></div>`;
-    return;
-  }
-
-  images.forEach(img => {
-    const thumb = document.createElement('div');
-    thumb.className = 'image-thumb';
-    thumb.innerHTML = `
-      <img src="${img.public_url}" alt="" loading="lazy">
-      <div class="image-thumb-overlay">
-        <button class="image-thumb-action view" onclick="event.stopPropagation();viewImage('${img.public_url}','${img.post_category || 'Image'}','${img.post_id || ''}')">
-          🔍 View
-        </button>
-        ${img.post_id ? `
-        <button class="image-thumb-action draft" id="lib-draft-${img.post_id}" onclick="event.stopPropagation();saveLibraryAsDraft('${img.post_id}',this)">
-          Save as Draft
-        </button>` : ''}
-      </div>
-    `;
-    thumb.onclick = () => viewImage(img.public_url, img.post_category || 'Image', img.post_id || '');
-    grid.appendChild(thumb);
-  });
-}
 
 function viewImage(url, category, postId = '') {
   currentViewImageUrl = url;
@@ -2626,6 +2869,7 @@ async function loadBrandProfile() {
     }
 
     renderBrandProfile(profile, logo);
+    _cachedBrandProfile = profile;
     brandProfileLoaded = true;
 
   } catch(e) {
@@ -2648,6 +2892,9 @@ function renderBrandProfile(profile, logo) {
   };
 
   set('bp-business-name', profile.business_name);
+  // Also update the settings tab name display
+  const settingsName = document.getElementById('settings-name');
+  if (settingsName && profile.business_name) settingsName.textContent = profile.business_name;
   set('bp-industry',      profile.industry);
   set('bp-location',      profile.location);
   set('bp-website',       profile.website);
@@ -2697,6 +2944,84 @@ function renderBrandProfile(profile, logo) {
 
   document.getElementById('brand-content').style.display = 'block';
 }
+
+// ── BRAND EDIT PANEL ───────────────────────────────────────────────────────
+let _cachedBrandProfile = null;
+
+function openBrandEditPanel() {
+  // Pre-fill from cached profile
+  const p = _cachedBrandProfile;
+  if (p) {
+    document.getElementById('bep-business-name').value = p.business_name || '';
+    document.getElementById('bep-industry').value      = p.industry || '';
+    document.getElementById('bep-location').value      = p.location || '';
+    document.getElementById('bep-website').value       = p.website || '';
+    document.getElementById('bep-description').value   = p.business_description || '';
+    document.getElementById('bep-audience').value      = p.target_audience || '';
+    document.getElementById('bep-voice').value         = p.brand_voice || '';
+    document.getElementById('bep-offlimits').value     = p.off_limits || '';
+    document.getElementById('bep-extra').value         = p.extra_context || '';
+  }
+  document.getElementById('bep-error').textContent = '';
+  const btn = document.getElementById('bep-save-btn');
+  btn.disabled = false;
+  btn.textContent = 'Save Changes';
+
+  document.getElementById('brand-edit-panel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeBrandEditPanel() {
+  document.getElementById('brand-edit-panel').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function saveBrandEdit() {
+  const btn = document.getElementById('bep-save-btn');
+  const errEl = document.getElementById('bep-error');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  errEl.textContent = '';
+
+  const updates = {
+    business_name:       document.getElementById('bep-business-name').value.trim(),
+    industry:            document.getElementById('bep-industry').value.trim(),
+    location:            document.getElementById('bep-location').value.trim(),
+    website:             document.getElementById('bep-website').value.trim(),
+    business_description:document.getElementById('bep-description').value.trim(),
+    target_audience:     document.getElementById('bep-audience').value.trim(),
+    brand_voice:         document.getElementById('bep-voice').value.trim(),
+    off_limits:          document.getElementById('bep-offlimits').value.trim(),
+    extra_context:       document.getElementById('bep-extra').value.trim(),
+  };
+
+  try {
+    await sbFetch(`brand_profiles?client_id=eq.${client.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(updates),
+    });
+
+    // Merge updates into cached profile and re-render
+    _cachedBrandProfile = { ..._cachedBrandProfile, ...updates };
+    renderBrandProfile(_cachedBrandProfile, null); // logo unchanged
+
+    // Update settings name
+    const settingsName = document.getElementById('settings-name');
+    if (settingsName && updates.business_name) settingsName.textContent = updates.business_name;
+
+    showToast('✦ Brand profile updated', 'success');
+    closeBrandEditPanel();
+  } catch(e) {
+    errEl.textContent = 'Could not save. Please try again.';
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+  }
+}
+
+// Close brand edit panel on overlay click
+document.getElementById('brand-edit-panel').addEventListener('click', e => {
+  if (e.target === document.getElementById('brand-edit-panel')) closeBrandEditPanel();
+});
 
 // ── SCHEDULE SETTINGS ──────────────────────────────────────────────────────
 function renderScheduleSettings() {
@@ -3534,7 +3859,7 @@ async function init() {
 
   try {
     await loadClient();
-    await Promise.all([loadSlots(), loadPosts()]);
+    await Promise.all([loadSlots(), loadPosts(), loadBrandProfile()]);
     checkScheduleSetup();
     // Register service worker for PWA + push
     if ('serviceWorker' in navigator) {
