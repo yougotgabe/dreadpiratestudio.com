@@ -2026,14 +2026,31 @@ async function loadClient() {
     window.location.href = '/autopilot/index.html';
     return;
   }
-  const data = await sbFetch(`clients?onboarding_token=eq.${token}&select=*`);
-  if (!data || !data.length) {
+
+  // Validate token via worker (uses service role key, bypasses RLS)
+  const res = await fetch('https://autopilot-onboarding.dreadpiratestudio.workers.dev/validate-token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || !data.valid) {
     signOut();
     return;
   }
-  client = data[0];
 
-  // Redirect to onboarding if not complete
+  // Build client object from worker response
+  client = {
+    id:                  data.client_id,
+    email:               data.email,
+    plan:                data.plan || 'starter',
+    onboarding_complete: data.onboarding_complete,
+    push_enabled:        data.push_enabled || false,
+    name:                data.business_name || '',
+  };
+
   if (!client.onboarding_complete) {
     window.location.href = `/autopilot/onboarding/onboarding.html?token=${token}`;
     return;

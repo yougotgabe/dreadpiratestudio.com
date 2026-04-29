@@ -54,7 +54,7 @@ async function handleValidateToken(request, env) {
   if (!token) return json({ valid: false, error: 'No token provided' }, 400);
 
   const rows = await supabase(env, 'GET',
-    `/rest/v1/clients?onboarding_token=eq.${encodeURIComponent(token)}&select=id,email,onboarding_complete,brand_profiles(business_name)&limit=1`
+    `/rest/v1/clients?onboarding_token=eq.${encodeURIComponent(token)}&select=id,email,plan,onboarding_complete,push_enabled,brand_profiles(business_name)&limit=1`
   );
 
   if (!Array.isArray(rows) || rows.length === 0) {
@@ -64,10 +64,12 @@ async function handleValidateToken(request, env) {
   const client = rows[0];
   return json({
     valid: true,
-    client_id: client.id,
-    email: client.email,
+    client_id:           client.id,
+    email:               client.email,
+    plan:                client.plan || 'starter',
     onboarding_complete: client.onboarding_complete,
-    business_name: client.brand_profiles?.[0]?.business_name || '',
+    push_enabled:        client.push_enabled || false,
+    business_name:       client.brand_profiles?.[0]?.business_name || '',
   });
 }
 
