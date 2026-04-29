@@ -446,41 +446,301 @@ async function getFacebookToken(clientId, env) {
 // ─── PUSH NOTIFICATIONS ───────────────────────────────────────────────────────
 
 async function sendPushNotification(clientId, { title, body, url }, env) {
-  // Get all push subscriptions for this client
   const subs = await supabase(env, 'GET',
-    `/rest/v1/notification_log?client_id=eq.${clientId}&subscription_active=eq.true&select=push_subscription`
+    `/rest/v1/push_subscriptions?client_id=eq.${clientId}&is_active=eq.true&select=id,endpoint,p256dh,auth`
   );
 
-  if (!Array.isArray(subs) || subs.length === 0) return;
+  if (!Array.isArray(subs) || subs.length === 0) {
+    console.log(`No active push subscriptions for client ${clientId}`);
+    return;
+  }
 
-  const payload = JSON.stringify({ title, body, url });
+  const payload = JSON.stringify({ title, body, url, tag: 'autopilot-review' });
 
   await Promise.allSettled(subs.map(sub =>
-    sendWebPush(sub.push_subscription, payload, env)
+    sendWebPush(sub, payload, env).catch(async err => {
+      console.error(`Push failed for sub ${sub.id}:`, err.message);
+      // If subscription is gone (410), mark it inactive
+      if (err.message?.includes('410') || err.message?.includes('404')) {
+        await supabase(env, 'PATCH',
+          `/rest/v1/push_subscriptions?id=eq.${sub.id}`,
+          { is_active: false },
+          { Prefer: 'return=minimal' }
+        ).catch(() => {});
+      }
+    })
   ));
 }
 
-async function sendWebPush(subscription, payload, env) {
-  // Minimal Web Push via Cloudflare — requires VAPID keys
-  // For now logs intent; replace with full VAPID implementation when push is wired up
-  console.log('Push notification queued for subscription:', JSON.stringify(subscription), payload);
+async function sendWebPush(sub, payload, env) {
+  // Build VAPID authorization header
+  const vapidHeaders = await buildVapidHeaders(
+    sub.endpoint,
+    env.VAPID_PUBLIC_KEY,
+    env.VAPID_PRIVATE_KEY,
+    env.VAPID_SUBJECT
+  );
+
+  const encrypted = await encryptPayload(payload, sub.p256dh, sub.auth);
+
+  const res = await fetch(sub.endpoint, {
+    method: 'POST',
+    headers: {
+      ...vapidHeaders,
+      'Content-Type':     'application/octet-stream',
+      'Content-Encoding': 'aes128gcm',
+      'Content-Length':   encrypted.byteLength.toString(),
+      'TTL':              '86400',
+    },
+    body: encrypted,
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Push endpoint returned ${res.status}: ${text}`);
+  }
+}
+
+// ── VAPID JWT Builder ──────────────────────────────────────────────────────────
+
+async function buildVapidHeaders(endpoint, publicKeyB64, privateKeyB64, subject) {
+  const audience = new URL(endpoint).origin;
+  const expiry = Math.floor(Date.now() / 1000) + 12 * 3600;
+
+  const header  = b64url(JSON.stringify({ typ: 'JWT', alg: 'ES256' }));
+  const payload = b64url(JSON.stringify({ aud: audience, exp: expiry, sub: subject }));
+  const sigInput = `${header}.${payload}`;
+
+  // Import private key
+  const privateKeyBytes = base64urlToBytes(privateKeyB64);
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw', privateKeyBytes,
+    { name: 'ECDSA', namedCurve: 'P-256' },
+    false, ['sign']
+  );
+
+  const signature = await crypto.subtle.sign(
+    { name: 'ECDSA', hash: 'SHA-256' },
+    cryptoKey,
+    new TextEncoder().encode(sigInput)
+  );
+
+  const jwt = `${sigInput}.${bytesToBase64url(new Uint8Array(signature))}`;
+
+  return {
+    'Authorization': `vapid t=${jwt}, k=${publicKeyB64}`,
+  };
+}
+
+// ── Web Push Payload Encryption (RFC 8291 / aes128gcm) ────────────────────────
+
+async function encryptPayload(payload, p256dhB64, authB64) {
+  const encoder = new TextEncoder();
+  const plaintext = encoder.encode(payload);
+
+  // Decode client keys
+  const clientPublicKey = base64urlToBytes(p256dhB64);
+  const authSecret      = base64urlToBytes(authB64);
+
+  // Generate server ECDH key pair
+  const serverKeyPair = await crypto.subtle.generateKey(
+    { name: 'ECDH', namedCurve: 'P-256' },
+    true, ['deriveBits']
+  );
+
+  const serverPublicKeyBytes = new Uint8Array(
+    await crypto.subtle.exportKey('raw', serverKeyPair.publicKey)
+  );
+
+  // Import client public key
+  const clientKey = await crypto.subtle.importKey(
+    'raw', clientPublicKey,
+    { name: 'ECDH', namedCurve: 'P-256' },
+    false, []
+  );
+
+  // ECDH shared secret
+  const sharedSecret = new Uint8Array(
+    await crypto.subtle.deriveBits(
+      { name: 'ECDH', public: clientKey },
+      serverKeyPair.privateKey,
+      256
+    )
+  );
+
+  // Generate salt
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+
+  // HKDF to derive content encryption key and nonce
+  const prk = await hkdf(authSecret, sharedSecret,
+    buildInfo('auth', new Uint8Array(0), new Uint8Array(0)), 32);
+
+  const cek = await hkdf(salt, prk,
+    buildInfo('aesgcm', clientPublicKey, serverPublicKeyBytes), 16);
+
+  const nonce = await hkdf(salt, prk,
+    buildInfo('nonce', clientPublicKey, serverPublicKeyBytes), 12);
+
+  // Encrypt with AES-GCM
+  const aesKey = await crypto.subtle.importKey('raw', cek, 'AES-GCM', false, ['encrypt']);
+  const ciphertext = new Uint8Array(
+    await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce }, aesKey, plaintext)
+  );
+
+  // Build aes128gcm content (RFC 8291)
+  // Header: salt(16) + rs(4) + idlen(1) + serverPublicKey(65)
+  const rs = new Uint8Array(4);
+  new DataView(rs.buffer).setUint32(0, 4096, false);
+
+  const header = new Uint8Array(16 + 4 + 1 + serverPublicKeyBytes.length);
+  header.set(salt, 0);
+  header.set(rs, 16);
+  header[20] = serverPublicKeyBytes.length;
+  header.set(serverPublicKeyBytes, 21);
+
+  // Combine header + ciphertext
+  const result = new Uint8Array(header.length + ciphertext.length);
+  result.set(header, 0);
+  result.set(ciphertext, header.length);
+
+  return result;
+}
+
+async function hkdf(salt, ikm, info, length) {
+  const saltKey = await crypto.subtle.importKey('raw', salt, 'HKDF', false, ['deriveBits']);
+  // Extract
+  const prk = await crypto.subtle.deriveBits(
+    { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(32), info: ikm },
+    saltKey, 256
+  );
+  // Expand
+  const prkKey = await crypto.subtle.importKey('raw', prk, 'HKDF', false, ['deriveBits']);
+  return new Uint8Array(
+    await crypto.subtle.deriveBits(
+      { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(32), info },
+      prkKey, length * 8
+    )
+  );
+}
+
+function buildInfo(type, clientKey, serverKey) {
+  const encoder = new TextEncoder();
+  const typeBytes = encoder.encode(`Content-Encoding: ${type}\0`);
+  const info = new Uint8Array(typeBytes.length + 1 + 2 + clientKey.length + 2 + serverKey.length);
+  let offset = 0;
+  info.set(typeBytes, offset); offset += typeBytes.length;
+  info[offset++] = 0x41; // 'A'
+  new DataView(info.buffer).setUint16(offset, clientKey.length, false); offset += 2;
+  info.set(clientKey, offset); offset += clientKey.length;
+  new DataView(info.buffer).setUint16(offset, serverKey.length, false); offset += 2;
+  info.set(serverKey, offset);
+  return info;
+}
+
+// ── Encoding helpers ──────────────────────────────────────────────────────────
+
+function b64url(str) {
+  return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+function bytesToBase64url(bytes) {
+  return btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+function base64urlToBytes(b64) {
+  const padded = b64.replace(/-/g, '+').replace(/_/g, '/');
+  const binary = atob(padded);
+  return Uint8Array.from(binary, c => c.charCodeAt(0));
 }
 
 // ─── SLOT HELPERS ─────────────────────────────────────────────────────────────
 
 function nextSlotOccurrence(slot, fromDate) {
-  // Parse post_time as HH:MM:SS in slot's timezone
+  const tz = slot.timezone || 'America/Chicago';
   const [h, m] = slot.post_time.split(':').map(Number);
+  const targetDow = slot.day_of_week; // 0=Sun, 6=Sat
 
-  // Find next occurrence of slot.day_of_week from fromDate
-  const d = new Date(fromDate);
-  const diff = (slot.day_of_week - d.getDay() + 7) % 7;
-  d.setDate(d.getDate() + (diff === 0 ? 7 : diff)); // always next occurrence, not today
-  d.setHours(h, m, 0, 0);
+  // We need to find the next date where:
+  //   - day of week in the slot's timezone === targetDow
+  //   - time in the slot's timezone === h:m
+  // Then return that moment as a UTC Date.
 
-  // Note: this uses UTC. For timezone-accurate scheduling, convert using slot.timezone.
-  // Full tz conversion can be added once Intl.DateTimeFormat is confirmed available in worker.
-  return d;
+  // Start from now and iterate forward day by day (max 8 days)
+  // to find the next occurrence of the target day_of_week in the slot's tz.
+  for (let daysAhead = 1; daysAhead <= 8; daysAhead++) {
+    const candidate = new Date(fromDate.getTime() + daysAhead * 24 * 60 * 60 * 1000);
+
+    // Get the day of week in the slot's timezone for this candidate date
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      weekday: 'short',
+      year:    'numeric',
+      month:   '2-digit',
+      day:     '2-digit',
+    }).formatToParts(candidate);
+
+    const partMap = {};
+    parts.forEach(p => { partMap[p.type] = p.value; });
+
+    const dowMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    const candidateDow = dowMap[partMap.weekday];
+
+    if (candidateDow !== targetDow) continue;
+
+    // Found the right day — now build a Date at h:m in the slot's timezone.
+    // Construct an ISO-like string and parse it in that timezone.
+    const dateStr = `${partMap.year}-${partMap.month}-${partMap.day}`;
+
+    // Use Intl to find the UTC offset for this tz on this date at this time.
+    // We do this by formatting a UTC date and comparing to local time.
+    const approxLocal = new Date(`${dateStr}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`);
+
+    // Get what UTC time corresponds to h:m local in tz on this date
+    // by using the offset between UTC and the tz at that moment.
+    const utcTime = localToUTC(dateStr, h, m, tz);
+    return utcTime;
+  }
+
+  // Fallback — shouldn't happen but return 25hrs from now
+  return new Date(fromDate.getTime() + 25 * 60 * 60 * 1000);
+}
+
+function localToUTC(dateStr, h, m, tz) {
+  // Build a temp date at noon UTC on the target date to get the tz offset
+  const noonUTC = new Date(`${dateStr}T12:00:00Z`);
+
+  // Format noon UTC in the target timezone to find what UTC offset applies
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    hour:     '2-digit',
+    minute:   '2-digit',
+    hour12:   false,
+    year:     'numeric',
+    month:    '2-digit',
+    day:      '2-digit',
+  });
+
+  const parts = formatter.formatToParts(noonUTC);
+  const pm = {};
+  parts.forEach(p => { pm[p.type] = p.value; });
+
+  // Reconstruct what noon UTC looks like in local time
+  const localNoonH = parseInt(pm.hour, 10);
+  const localNoonM = parseInt(pm.minute, 10);
+
+  // Offset in minutes: local = UTC + offset → offset = local - UTC
+  const offsetMins = (localNoonH * 60 + localNoonM) - (12 * 60);
+
+  // Target time in UTC = target local time - offset
+  const targetUTCMins = h * 60 + m - offsetMins;
+  const targetUTCH = Math.floor(targetUTCMins / 60);
+  const targetUTCM = ((targetUTCMins % 60) + 60) % 60;
+
+  // Build the final UTC date
+  const result = new Date(`${dateStr}T00:00:00Z`);
+  result.setUTCHours(targetUTCH, targetUTCM, 0, 0);
+  return result;
 }
 
 function getWeekStart(date) {
