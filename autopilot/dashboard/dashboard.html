@@ -3512,6 +3512,16 @@ async function saveSlots() {
 
 // ── INIT ───────────────────────────────────────────────────────────────────
 async function init() {
+  // Capture token from URL if present and save to localStorage
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlToken = urlParams.get('token');
+  if (urlToken) {
+    localStorage.setItem('autopilot_token', urlToken);
+    // Clean token from URL without reload
+    const cleanUrl = window.location.pathname;
+    window.history.replaceState({}, '', cleanUrl);
+  }
+
   try {
     await loadClient();
     await Promise.all([loadSlots(), loadPosts()]);
