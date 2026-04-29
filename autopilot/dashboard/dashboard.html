@@ -783,6 +783,95 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
+    /* ── BRAND TAB ── */
+    .brand-section {
+      padding: 0 0 0.5rem;
+    }
+    .brand-section-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.5rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold);
+      padding: 1rem 1.25rem 0.5rem;
+      border-top: 1px solid var(--border2);
+      margin-top: 0.25rem;
+    }
+    .brand-section:first-child .brand-section-label { border-top: none; }
+
+    .brand-field {
+      padding: 0.6rem 1.25rem;
+      border-bottom: 1px solid var(--border2);
+    }
+    .brand-field:last-child { border-bottom: none; }
+    .brand-field-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.42rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+    }
+    .brand-field-value {
+      font-size: 0.92rem;
+      color: var(--white);
+      line-height: 1.5;
+    }
+    .brand-field-value.empty { color: var(--muted); font-style: italic; }
+
+    .brand-logo-img {
+      max-width: 160px;
+      max-height: 80px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      padding: 0.5rem;
+    }
+
+    .brand-colors-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      padding: 0.5rem 1.25rem 1rem;
+    }
+    .brand-color-swatch {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.3rem 0.7rem 0.3rem 0.4rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .brand-color-dot {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.15);
+      flex: 0 0 auto;
+    }
+    .brand-color-hex {
+      font-family: 'Cinzel', serif;
+      font-size: 0.42rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .brand-goals-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.25rem;
+    }
+    .brand-goal-chip {
+      font-size: 0.78rem;
+      padding: 0.2em 0.7em;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--white);
+    }
+
     /* ── SLOT CARDS ── */
     .slot-cards-section {
       padding: 0 1.25rem 0.5rem;
@@ -1479,6 +1568,107 @@
     </div>
   </div>
 
+  <!-- Brand Tab -->
+  <div class="tab-content" id="tab-brand">
+
+    <div class="section-header">
+      <span class="section-title">Brand Profile</span>
+    </div>
+
+    <!-- Loading state -->
+    <div id="brand-loading" style="padding:2rem 1.25rem;text-align:center;color:var(--muted);font-size:0.85rem">
+      Loading brand profile…
+    </div>
+
+    <!-- Profile content -->
+    <div id="brand-content" style="display:none">
+
+      <!-- Business -->
+      <div class="brand-section">
+        <div class="brand-section-label">Business</div>
+        <div class="brand-field">
+          <div class="brand-field-label">Name</div>
+          <div class="brand-field-value" id="bp-business-name">—</div>
+        </div>
+        <div class="brand-field">
+          <div class="brand-field-label">Industry</div>
+          <div class="brand-field-value" id="bp-industry">—</div>
+        </div>
+        <div class="brand-field">
+          <div class="brand-field-label">Location</div>
+          <div class="brand-field-value" id="bp-location">—</div>
+        </div>
+        <div class="brand-field">
+          <div class="brand-field-label">Website</div>
+          <div class="brand-field-value" id="bp-website">—</div>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="brand-section">
+        <div class="brand-section-label">Description</div>
+        <div class="brand-field">
+          <div class="brand-field-label">About the Business</div>
+          <div class="brand-field-value" id="bp-description">—</div>
+        </div>
+        <div class="brand-field">
+          <div class="brand-field-label">Target Audience</div>
+          <div class="brand-field-value" id="bp-audience">—</div>
+        </div>
+      </div>
+
+      <!-- Voice & Goals -->
+      <div class="brand-section">
+        <div class="brand-section-label">Voice &amp; Goals</div>
+        <div class="brand-field">
+          <div class="brand-field-label">Brand Voice</div>
+          <div class="brand-field-value" id="bp-voice">—</div>
+        </div>
+        <div class="brand-field">
+          <div class="brand-field-label">Posting Goals</div>
+          <div class="brand-field-value" id="bp-goals">—</div>
+        </div>
+        <div class="brand-field">
+          <div class="brand-field-label">Off-Limits Topics</div>
+          <div class="brand-field-value" id="bp-offlimits">—</div>
+        </div>
+        <div class="brand-field">
+          <div class="brand-field-label">Extra Context for AI</div>
+          <div class="brand-field-value" id="bp-extra">—</div>
+        </div>
+      </div>
+
+      <!-- Logo -->
+      <div class="brand-section">
+        <div class="brand-section-label">Logo</div>
+        <div id="bp-logo-wrap" style="padding:0 1.25rem 1rem">
+          <div class="brand-field-value" style="color:var(--muted);font-style:italic">No logo uploaded</div>
+        </div>
+      </div>
+
+      <!-- Colors -->
+      <div class="brand-section">
+        <div class="brand-section-label">Brand Colors</div>
+        <div class="brand-colors-row" id="bp-colors">
+          <span style="color:var(--muted);font-size:0.85rem;font-style:italic">No colors set</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Error state -->
+    <div id="brand-error" style="display:none;padding:2rem 1.25rem;text-align:center;color:var(--muted);font-size:0.85rem">
+      Could not load brand profile.
+    </div>
+
+    <div style="padding:1.25rem 1.25rem 2rem">
+      <button class="modal-btn secondary" style="width:100%" onclick="window.location.href='/autopilot/onboarding/onboarding.html'">
+        ✎ Edit Brand Profile
+      </button>
+    </div>
+
+  </div>
+
 </main>
 
 <!-- Bottom Nav -->
@@ -1494,6 +1684,10 @@
   <button class="nav-tab" id="nav-settings" onclick="switchTab('settings')">
     <span class="nav-tab-icon">⚙️</span>
     <span class="nav-tab-label">Settings</span>
+  </button>
+  <button class="nav-tab" id="nav-brand" onclick="switchTab('brand')">
+    <span class="nav-tab-icon">🏴</span>
+    <span class="nav-tab-label">Brand</span>
   </button>
 </nav>
 
@@ -2270,6 +2464,107 @@ function downloadCurrentImage() {
   a.click();
 }
 
+// ── BRAND PROFILE TAB ──────────────────────────────────────────────────────
+let brandProfileLoaded = false;
+
+async function loadBrandProfile() {
+  if (brandProfileLoaded) return; // only fetch once per session
+  if (!client) return;
+
+  document.getElementById('brand-loading').style.display = 'block';
+  document.getElementById('brand-content').style.display = 'none';
+  document.getElementById('brand-error').style.display = 'none';
+
+  try {
+    const [profileData, assetData] = await Promise.all([
+      sbFetch(`brand_profiles?client_id=eq.${client.id}&select=*&limit=1`),
+      sbFetch(`brand_assets?client_id=eq.${client.id}&asset_type=eq.logo_primary&is_active=eq.true&limit=1`),
+    ]);
+
+    const profile = Array.isArray(profileData) ? profileData[0] : null;
+    const logo    = Array.isArray(assetData)   ? assetData[0]   : null;
+
+    document.getElementById('brand-loading').style.display = 'none';
+
+    if (!profile) {
+      document.getElementById('brand-error').style.display = 'block';
+      document.getElementById('brand-error').textContent = 'No brand profile found. Complete onboarding to set one up.';
+      return;
+    }
+
+    renderBrandProfile(profile, logo);
+    brandProfileLoaded = true;
+
+  } catch(e) {
+    document.getElementById('brand-loading').style.display = 'none';
+    document.getElementById('brand-error').style.display = 'block';
+  }
+}
+
+function renderBrandProfile(profile, logo) {
+  const set = (id, val, fallback = '—') => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (val && String(val).trim()) {
+      el.textContent = val;
+      el.classList.remove('empty');
+    } else {
+      el.textContent = fallback;
+      el.classList.add('empty');
+    }
+  };
+
+  set('bp-business-name', profile.business_name);
+  set('bp-industry',      profile.industry);
+  set('bp-location',      profile.location);
+  set('bp-website',       profile.website);
+  set('bp-description',   profile.business_description);
+  set('bp-audience',      profile.target_audience);
+  set('bp-voice',         profile.brand_voice);
+  set('bp-offlimits',     profile.off_limits);
+  set('bp-extra',         profile.extra_context);
+
+  // Posting goals — render as chips if array
+  const goalsEl = document.getElementById('bp-goals');
+  const goals = profile.posting_goals;
+  if (Array.isArray(goals) && goals.length) {
+    goalsEl.innerHTML = `<div class="brand-goals-chips">${
+      goals.map(g => `<span class="brand-goal-chip">${escHtml(g)}</span>`).join('')
+    }</div>`;
+  } else if (goals && String(goals).trim()) {
+    goalsEl.textContent = goals;
+    goalsEl.classList.remove('empty');
+  } else {
+    goalsEl.textContent = '—';
+    goalsEl.classList.add('empty');
+  }
+
+  // Logo
+  const logoWrap = document.getElementById('bp-logo-wrap');
+  if (logo?.public_url) {
+    logoWrap.innerHTML = `<img class="brand-logo-img" src="${logo.public_url}" alt="Brand logo">`;
+  } else {
+    logoWrap.innerHTML = `<div class="brand-field-value empty">No logo uploaded</div>`;
+  }
+
+  // Colors
+  const colorsEl = document.getElementById('bp-colors');
+  const palette = profile.color_palette;
+  const colorEntries = palette && typeof palette === 'object' ? Object.entries(palette) : [];
+  if (colorEntries.length) {
+    colorsEl.innerHTML = colorEntries.map(([name, hex]) => `
+      <div class="brand-color-swatch">
+        <div class="brand-color-dot" style="background:${escHtml(hex)}"></div>
+        <span class="brand-color-hex">${escHtml(hex)}</span>
+      </div>
+    `).join('');
+  } else {
+    colorsEl.innerHTML = `<span style="color:var(--muted);font-size:0.85rem;font-style:italic">No colors set</span>`;
+  }
+
+  document.getElementById('brand-content').style.display = 'block';
+}
+
 // ── SCHEDULE SETTINGS ──────────────────────────────────────────────────────
 function renderScheduleSettings() {
   const container = document.getElementById('schedule-display');
@@ -2390,6 +2685,7 @@ function switchTab(tab) {
   document.getElementById(`tab-${tab}`).classList.add('active');
   document.getElementById(`nav-${tab}`).classList.add('active');
   if (tab === 'library') loadImageLibrary();
+  if (tab === 'brand') loadBrandProfile();
 }
 
 // ── MODALS ─────────────────────────────────────────────────────────────────
