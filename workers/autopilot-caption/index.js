@@ -108,36 +108,44 @@ async function handleRegenerate(request, env) {
 // ─── Stage 2: Image Prompt Generation ────────────────────────────────────────
 
 async function buildImagePromptViaClaude(caption, profile, postType, env, imageFeedback = [], notes = '') {
-  const colorHints = profile.color_palette && Object.values(profile.color_palette).length
-    ? `Brand colors: ${Object.values(profile.color_palette).join(', ')}.`
+  const colorEntries = profile.color_palette && Object.keys(profile.color_palette).length
+    ? Object.entries(profile.color_palette).map(([k, v]) => `${k}: ${v}`).join(', ')
+    : null;
+
+  const feedbackSection = imageFeedback?.length
+    ? `\nPREVIOUS IMAGE REJECTION — the client rejected the last image for these specific reasons. Every point is a hard rule for this generation:\n${imageFeedback.map(f => `- ${f}`).join('\n')}`
     : '';
 
-  const feedbackHint = imageFeedback?.length
-    ? `\nPrevious image was rejected for: ${imageFeedback.join(', ')}. Avoid these issues.`
+  const notesSection = notes
+    ? `\nCLIENT DIRECTION — incorporate all of the following into the image concept. These are directives, not suggestions:\n${notes}`
     : '';
 
-  const notesHint = notes ? `\nAdditional direction: ${notes}` : '';
+  const systemPrompt = `You are an expert AI image prompt engineer specializing in social media visuals for local businesses. Your job is to write a single, detailed image generation prompt that will produce a high-quality Facebook post image.
 
-  const systemPrompt = `You are an AI image prompt engineer. Your job is to write a single, detailed image generation prompt for a Facebook post image.
+Your prompt must follow these rules:
+- One paragraph, maximum 150 words
+- Describe a specific, concrete visual scene or composition — not vague concepts
+- Specify exactly how the business logo should appear in the image (e.g. embossed on packaging, displayed on a storefront sign, printed on an apron, shown as a watermark in the corner)
+- If brand colors are provided, describe how they should appear dominantly in the scene — not as decoration but as the actual color palette of the environment, objects, and lighting
+- The mood, lighting, and energy of the image must match the caption's tone precisely
+- Square 1:1 composition optimized for Facebook
+- Photorealistic or high-quality illustration style unless the brand voice suggests otherwise
+- No text, words, letters, or numbers anywhere in the image — the caption handles all text
+- No generic stock photo feel — the image should look specific to this business
 
-The prompt must:
-- Be one paragraph, no longer than 150 words
-- Describe a specific visual scene or composition that complements the caption
-- Specify how the business logo should be incorporated (e.g. on a product, storefront, banner, overlay)
-- Reference the brand colors if provided
-- Match the mood and tone of the caption
-- Be suitable for a 1:1 square social media image
-- Be high quality and visually compelling
-- NOT include any text overlays or words in the image (Facebook renders caption separately)
+Output only the image prompt. No preamble, no explanation, no label.`;
 
-Output only the image prompt. No preamble, no explanation.`;
-
-  const userMessage = `BUSINESS: ${profile.business_name} — ${profile.industry} in ${profile.location}
+  const userMessage = `BUSINESS: ${profile.business_name}
+INDUSTRY: ${profile.industry}
+LOCATION: ${profile.location}
 BRAND VOICE: ${profile.brand_voice || 'professional and approachable'}
-${colorHints}
+${colorEntries ? `BRAND COLORS — use these as the dominant palette of the image, not as accents:\n${colorEntries}` : ''}
+
 POST TYPE: ${postType}
-CAPTION: "${caption}"
-${feedbackHint}${notesHint}
+
+CAPTION — the image must complement and elevate this specific caption. Study the tone, subject matter, and energy before deciding on the visual:
+"${caption}"
+${feedbackSection}${notesSection}
 
 Write the image generation prompt now.`;
 
@@ -155,33 +163,72 @@ Write the image generation prompt now.`;
 
 function buildCaptionPrompt(profile, type, manualPrompt) {
   const typeInstructions = {
-    general: `Write a natural, on-brand social media post that showcases the business personality and value. No hard sell.`,
-    event:   `Write a post announcing or reminding followers about an upcoming event, special, or happening at the business.`,
-    cta:     `Write a direct, energetic call-to-action post that encourages customers to visit, call, or buy. Make it feel exciting, not pushy.`,
-    joke:    `Write a post that includes a clever joke or pun specifically related to the business, industry, or products. Keep it light and shareable.`,
+    general: `Write a natural, on-brand post that showcases the business personality and value. No hard sell — let the voice do the work. The goal is to feel like a real person wrote this, not a marketing department.`,
+    event:   `Write a post announcing or building anticipation for an upcoming event, special, or happening at the business. Create genuine excitement — give people a reason to show up or pay attention.`,
+    cta:     `Write a direct, energetic call-to-action post that motivates customers to visit, call, or buy right now. The urgency should feel real and exciting, never desperate or pushy. End with a clear next step.`,
+    joke:    `Write a post built around a clever joke or pun that is specifically tied to this business, its industry, or its products/services. The humor should feel natural and shareable — not forced. The joke is the post, not decoration on top of it.`,
   };
 
   const typeInstruction = typeInstructions[type] || typeInstructions.general;
 
-  return `You are a social media copywriter for a local business. Write ONE Facebook post caption.
+  const goalsStr = Array.isArray(profile.posting_goals)
+    ? profile.posting_goals.join(', ')
+    : (profile.posting_goals || '');
 
-BUSINESS PROFILE:
-- Name: ${profile.business_name}
-- Industry: ${profile.industry}
-- Location: ${profile.location}
-- Description: ${profile.business_description}
-- Target audience: ${profile.target_audience}
-- Brand voice: ${profile.brand_voice}
-- Posting goals: ${Array.isArray(profile.posting_goals) ? profile.posting_goals.join(', ') : profile.posting_goals}
-- Off-limits: ${profile.off_limits || 'None'}
-- Extra context: ${profile.extra_context || 'None'}
-${profile.example_posts ? `- Example posts they've written (match this voice closely):\n${profile.example_posts}` : ''}
+  const colorStr = profile.color_palette && Object.keys(profile.color_palette).length
+    ? Object.entries(profile.color_palette).map(([k, v]) => `${k}: ${v}`).join(', ')
+    : null;
 
-POST TYPE: ${type.toUpperCase()}
-INSTRUCTION: ${typeInstruction}
-${manualPrompt ? `\nCLIENT NOTES: ${manualPrompt}` : ''}
+  // Build example posts section with per-type instructional framing
+  let exampleSection = '';
+  if (profile.example_posts && profile.example_posts.trim()) {
+    exampleSection = `
+EXAMPLE POSTS BY TYPE — use these to calibrate voice, rhythm, and style. Do not repeat them verbatim. Study the sentence structure, tone, and personality and apply that same feel to the new post:
+${profile.example_posts}`;
+  }
 
-Write only the caption text. No explanations, no hashtag blocks, no "Here is your caption:" preamble. 2-4 sentences. Natural, human tone. May include 1-3 relevant emojis if appropriate for the brand voice.`;
+  return `You are a social media copywriter working for a local business. Your job is to write ONE Facebook post caption that sounds exactly like this specific business — not a generic small business, not a template, this one.
+
+━━ WHO THIS BUSINESS IS ━━
+Business name: ${profile.business_name}
+Industry: ${profile.industry}
+Location: ${profile.location}
+What they do: ${profile.business_description}
+${colorStr ? `Brand colors: ${colorStr} — reference these for visual consistency if relevant` : ''}
+Website: ${profile.website || 'Not provided'}
+
+━━ THEIR AUDIENCE ━━
+Write as if speaking directly to this specific group of people — use their vocabulary, speak to their concerns, and give them a reason to care:
+${profile.target_audience}
+
+━━ BRAND VOICE ━━
+Apply this voice consistently — not just in word choice but in sentence rhythm, punctuation style, energy level, and how ideas are sequenced. This is the personality of every post:
+${profile.brand_voice}
+
+━━ WHAT POSTS SHOULD ACCOMPLISH ━━
+Every post must serve at least one of these goals. Do not write a post that doesn't connect to any of them:
+${goalsStr}
+
+━━ HARD RULES — NEVER VIOLATE THESE ━━
+Regardless of post type, client notes, or any other instruction — never include any of the following:
+${profile.off_limits || 'None specified'}
+
+━━ EXTRA CONTEXT ━━
+This is background knowledge that should inform the writing without necessarily appearing in every post. Use it to make the content feel specific and real:
+${profile.extra_context || 'None provided'}
+${exampleSection}
+
+━━ THIS POST ━━
+Post type: ${type.toUpperCase()}
+What this post needs to do: ${typeInstruction}
+${manualPrompt ? `\nCLIENT DIRECTION FOR THIS POST — incorporate all of the following naturally. These are directives, not suggestions. Do not ignore any part of this:\n${manualPrompt}` : ''}
+
+━━ OUTPUT RULES ━━
+- Write only the caption text — no preamble, no explanation, no "Here is your caption:"
+- 2–4 sentences
+- No hashtag blocks
+- Natural, human tone — reads like a real person wrote it
+- May include 1–3 relevant emojis only if they fit the brand voice naturally`;
 }
 
 function buildFeedbackNote(captionFeedback, notes) {
@@ -195,7 +242,7 @@ function buildMessages(recentApproved, recentRejected, feedbackNote = '') {
   let userContent = 'Write the Facebook post caption now.';
 
   if (recentApproved.length) {
-    userContent += `\n\nRECENTLY APPROVED CAPTIONS (avoid repetition):\n${recentApproved.map(p => `- "${p.caption}"`).join('\n')}`;
+    userContent += `\n\nRECENTLY APPROVED CAPTIONS — the client liked these. Do not repeat them, but use them to understand what resonates:\n${recentApproved.map(p => `- "${p.caption}"`).join('\n')}`;
   }
 
   if (recentRejected.length) {
@@ -203,10 +250,12 @@ function buildMessages(recentApproved, recentRejected, feedbackNote = '') {
       .filter(p => p.caption_feedback?.length || p.rejection_notes)
       .map(p => `- Rejected for: ${[...(p.caption_feedback || []), p.rejection_notes].filter(Boolean).join(', ')}`)
       .join('\n');
-    if (rejectedSummary) userContent += `\n\nRECENT REJECTION PATTERNS (avoid these):\n${rejectedSummary}`;
+    if (rejectedSummary) userContent += `\n\nRECENT REJECTION PATTERNS — the client explicitly did not like these things. Treat them as hard rules for this generation:\n${rejectedSummary}`;
   }
 
-  if (feedbackNote) userContent += `\n\nFEEDBACK FOR THIS REGENERATION: ${feedbackNote}`;
+  if (feedbackNote) {
+    userContent += `\n\nCLIENT FEEDBACK ON THE PREVIOUS ATTEMPT — the client reviewed the last generation and specifically requested these changes. Treat every point as a directive:\n${feedbackNote}`;
+  }
 
   return [{ role: 'user', content: userContent }];
 }
