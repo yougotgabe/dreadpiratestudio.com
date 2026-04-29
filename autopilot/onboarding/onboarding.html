@@ -768,28 +768,37 @@
         <div class="field-row">
           <div class="field-group">
             <label class="field-label">Industry <span class="req">✦</span></label>
-            <select id="industry">
-              <option value="">Select your industry&hellip;</option>
-              <option value="restaurant_cafe">Restaurant / Cafe</option>
-              <option value="retail">Retail Shop</option>
-              <option value="health_beauty">Health & Beauty</option>
-              <option value="fitness">Fitness / Gym</option>
-              <option value="home_services">Home Services</option>
-              <option value="auto">Auto & Repair</option>
-              <option value="healthcare">Healthcare / Medical</option>
-              <option value="real_estate">Real Estate</option>
-              <option value="professional_services">Professional Services</option>
-              <option value="nonprofit">Nonprofit</option>
-              <option value="event_venue">Event Venue</option>
-              <option value="agriculture">Agriculture</option>
-              <option value="other">Other</option>
+            <select id="industry-select" onchange="handleIndustrySelect(this)">
+              <option value="">Select your industry…</option>
+              <option value="Restaurant / Cafe">Restaurant / Cafe</option>
+              <option value="Retail Shop">Retail Shop</option>
+              <option value="Health & Beauty">Health & Beauty</option>
+              <option value="Fitness / Gym">Fitness / Gym</option>
+              <option value="Home Services">Home Services</option>
+              <option value="Auto & Repair">Auto & Repair</option>
+              <option value="Healthcare / Medical">Healthcare / Medical</option>
+              <option value="Real Estate">Real Estate</option>
+              <option value="Professional Services">Professional Services</option>
+              <option value="Creative Services & Marketing">Creative Services & Marketing</option>
+              <option value="Nonprofit">Nonprofit</option>
+              <option value="Event Venue">Event Venue</option>
+              <option value="Agriculture">Agriculture</option>
+              <option value="other">Other — I'll type it in</option>
             </select>
-            <span class="field-error" id="err_industry">Please select an industry.</span>
+            <input
+              type="text"
+              id="industry"
+              placeholder="e.g. Wood-fired Pizza Shop, Tattoo Studio, Dog Grooming…"
+              style="margin-top:0.5rem"
+              oninput="document.getElementById('err_industry').style.display='none'"
+            />
+            <span class="field-error" id="err_industry">Please enter your industry.</span>
           </div>
 
           <div class="field-group">
-            <label class="field-label">City / Location</label>
+            <label class="field-label">City / Location <span class="req">✦</span></label>
             <input type="text" id="location" placeholder="e.g. Willmar, MN" autocomplete="address-level2" />
+            <span class="field-error" id="err_location">Please enter your city or location.</span>
           </div>
         </div>
 
@@ -819,32 +828,46 @@
 
         <div class="field-group">
           <label class="field-label">Brand Voice <span class="req">✦</span></label>
-          <span class="field-hint">How should your posts sound? Pick the closest fit.</span>
-          <select id="brand_voice">
-            <option value="">Choose a voice&hellip;</option>
-            <option value="warm_community">Warm & Community-Focused — friendly, local, neighborly</option>
-            <option value="professional_trusted">Professional & Trusted — polished, confident, expert</option>
-            <option value="bold_energetic">Bold & Energetic — punchy, exciting, action-driven</option>
-            <option value="casual_fun">Casual & Fun — relaxed, playful, conversational</option>
-            <option value="witty_clever">Witty & Clever — smart humor, sharp copy</option>
-            <option value="rustic_authentic">Rustic & Authentic — honest, down-to-earth, real</option>
+          <span class="field-hint">How should your posts sound? Pick the closest fit — then tweak it to make it yours.</span>
+          <select id="brand_voice-select" onchange="handleVoiceSelect(this)">
+            <option value="">Choose a voice…</option>
+            <option value="Warm & Community-Focused — friendly, local, neighborly">Warm & Community-Focused</option>
+            <option value="Professional & Trusted — polished, confident, expert">Professional & Trusted</option>
+            <option value="Bold & Energetic — punchy, exciting, action-driven">Bold & Energetic</option>
+            <option value="Casual & Fun — relaxed, playful, conversational">Casual & Fun</option>
+            <option value="Witty & Clever — smart humor, sharp copy">Witty & Clever</option>
+            <option value="Rustic & Authentic — honest, down-to-earth, real">Rustic & Authentic</option>
+            <option value="other">Other — I'll describe it</option>
           </select>
-          <span class="field-error" id="err_brand_voice">Please choose a brand voice.</span>
+          <input
+            type="text"
+            id="brand_voice"
+            placeholder="e.g. Warm but a little sarcastic — think Schitt's Creek energy"
+            style="margin-top:0.5rem"
+            oninput="document.getElementById('err_brand_voice').style.display='none'"
+          />
+          <span class="field-error" id="err_brand_voice">Please describe your brand voice.</span>
         </div>
 
         <div class="field-group">
           <label class="field-label">Posting Goals</label>
           <span class="field-hint">What do you want your posts to accomplish? Select all that apply.</span>
           <div class="check-grid" id="goalsGrid">
-            <label class="check-item"><input type="checkbox" value="foot_traffic"> Drive foot traffic & visits</label>
-            <label class="check-item"><input type="checkbox" value="specials"> Promote specials & deals</label>
-            <label class="check-item"><input type="checkbox" value="community"> Build community connection</label>
-            <label class="check-item"><input type="checkbox" value="behind_scenes"> Share behind-the-scenes</label>
-            <label class="check-item"><input type="checkbox" value="events"> Announce events</label>
-            <label class="check-item"><input type="checkbox" value="seasonal"> Seasonal & holiday content</label>
-            <label class="check-item"><input type="checkbox" value="products"> Highlight products / menu items</label>
-            <label class="check-item"><input type="checkbox" value="testimonials"> Share customer stories</label>
+            <label class="check-item"><input type="checkbox" value="Drive foot traffic & visits"> Drive foot traffic & visits</label>
+            <label class="check-item"><input type="checkbox" value="Promote specials & deals"> Promote specials & deals</label>
+            <label class="check-item"><input type="checkbox" value="Build community connection"> Build community connection</label>
+            <label class="check-item"><input type="checkbox" value="Share behind-the-scenes"> Share behind-the-scenes</label>
+            <label class="check-item"><input type="checkbox" value="Announce events"> Announce events</label>
+            <label class="check-item"><input type="checkbox" value="Seasonal & holiday content"> Seasonal & holiday content</label>
+            <label class="check-item"><input type="checkbox" value="Highlight products & menu items"> Highlight products & menu items</label>
+            <label class="check-item"><input type="checkbox" value="Share customer stories"> Share customer stories</label>
           </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Example posts <span style="font-family:'Crimson Text'; font-style:italic; font-size:0.9rem; text-transform:none; letter-spacing:0; color:var(--muted); font-weight:400;">(optional but highly recommended)</span></label>
+          <span class="field-hint">Paste 1–2 posts you've written that felt right — this is the single best way to help the AI sound like you.</span>
+          <textarea id="example_posts" rows="3" placeholder="e.g. &#34;Happy Friday Willmar! Come on down for our fish fry — it sells out every week for a reason 🐟&#34;"></textarea>
         </div>
 
         <div class="field-group">
@@ -855,7 +878,7 @@
 
         <div class="field-group">
           <label class="field-label">Anything else the AI should know?</label>
-          <span class="field-hint">Optional. Promotions, seasonal notes, values, taglines, inside jokes — anything that makes your business feel like yours.</span>
+          <span class="field-hint">Promotions, seasonal notes, values, taglines, inside jokes, your posting style — anything that makes your business feel like yours.</span>
           <textarea id="extra_context" rows="3" placeholder='Our regulars call us "the best-kept secret in Willmar." We do a Friday fish fry that sells out every week. Cash only — always has been.'></textarea>
         </div>
 
@@ -900,18 +923,18 @@
           <div class="color-pickers">
             <div class="color-picker-wrap">
               <label>Primary</label>
-              <input type="color" id="color1" value="#c9a84c" />
-              <div class="color-hex" id="hex1">#c9a84c</div>
+              <input type="color" id="color1" value="#2b6cb0" />
+              <div class="color-hex" id="hex1">#2b6cb0</div>
             </div>
             <div class="color-picker-wrap">
               <label>Secondary</label>
-              <input type="color" id="color2" value="#080808" />
-              <div class="color-hex" id="hex2">#080808</div>
+              <input type="color" id="color2" value="#1a202c" />
+              <div class="color-hex" id="hex2">#1a202c</div>
             </div>
             <div class="color-picker-wrap">
               <label>Accent</label>
-              <input type="color" id="color3" value="#e8e0d0" />
-              <div class="color-hex" id="hex3">#e8e0d0</div>
+              <input type="color" id="color3" value="#ffffff" />
+              <div class="color-hex" id="hex3">#ffffff</div>
             </div>
           </div>
         </div>
@@ -956,13 +979,16 @@
             </ul>
           </div>
 
-          <a href="https://autopilot-oauth.dreadpiratestudio.workers.dev/autopilot/oauth/start" class="btn btn-gold" style="display:inline-block;">
+          <a id="fb-connect-btn" href="#" class="btn btn-gold" style="display:inline-block;">
             ⚓ &nbsp;Connect My Facebook Page
           </a>
 
           <p style="margin-top:1.25rem; font-size:0.9rem; font-style:italic; color:var(--muted);">
             You can also do this later from your dashboard if you're not ready right now.
           </p>
+          <a id="skip-fb-link" href="#" style="display:block;margin-top:0.5rem;font-size:0.85rem;color:var(--muted);text-decoration:underline;text-underline-offset:3px;">
+            Skip for now — go to dashboard
+          </a>
         </div>
 
         <div class="form-nav" style="justify-content:flex-start;">
@@ -977,10 +1003,10 @@
         <h2>You're All Set.</h2>
         <div class="section-rule" style="margin:0 auto;"></div>
         <p>Your brand profile is saved. Now connect your Facebook Page and your first post will be in the queue within 24 hours.</p>
-        <a href="https://autopilot-oauth.dreadpiratestudio.workers.dev/autopilot/oauth/start" class="btn btn-gold">
+        <a id="success-fb-btn" href="#" class="btn btn-gold">
           Connect My Facebook Page
         </a>
-        <a href="https://dreadpiratestudio.com/autopilot" style="color:var(--muted); font-style:italic; font-size:0.9rem; text-decoration:underline; text-underline-offset:3px;">
+        <a id="success-later-link" href="#" style="color:var(--muted); font-style:italic; font-size:0.9rem; text-decoration:underline; text-underline-offset:3px;">
           I'll do this later
         </a>
       </div>
@@ -1057,6 +1083,7 @@ let logoFile = null;
     loading.classList.add('hidden');
     mainContent.style.display = 'flex';
     updateProgress();
+    wireOAuthLinks();
 
   } catch (err) {
     loading.classList.add('hidden');
@@ -1112,19 +1139,53 @@ function updateProgress() {
   document.getElementById('progressBar').style.width = pct + '%';
 }
 
+function handleVoiceSelect(select) {
+  const input = document.getElementById('brand_voice');
+  if (select.value === 'other' || select.value === '') {
+    input.value = '';
+    input.focus();
+  } else {
+    input.value = select.value;
+  }
+  document.getElementById('err_brand_voice').style.display = 'none';
+}
+
+function wireOAuthLinks() {
+  const oauthBase = 'https://autopilot-oauth.dreadpiratestudio.workers.dev/autopilot/oauth/start';
+  const dashBase  = `/autopilot/dashboard/dashboard.html?token=${clientToken}`;
+  const oauthUrl  = `${oauthBase}?token=${clientToken}`;
+
+  document.getElementById('fb-connect-btn').href    = oauthUrl;
+  document.getElementById('skip-fb-link').href      = dashBase;
+  document.getElementById('success-fb-btn').href    = oauthUrl;
+  document.getElementById('success-later-link').href = dashBase;
+}
+
+function handleIndustrySelect(select) {
+  const input = document.getElementById('industry');
+  if (select.value === 'other' || select.value === '') {
+    input.value = '';
+    input.focus();
+  } else {
+    input.value = select.value;
+  }
+  document.getElementById('err_industry').style.display = 'none';
+}
+
 // ── Validation ────────────────────────────────────────────────────────────────
 function validateStep(step) {
   let valid = true;
 
   if (step === 0) {
     valid = requireField('business_name', 'err_business_name') && valid;
-    valid = requireSelect('industry', 'err_industry') && valid;
+    valid = requireField('industry', 'err_industry') && valid;
+    valid = requireField('location', 'err_location') && valid;
     valid = requireField('business_description', 'err_business_description') && valid;
     valid = requireField('target_audience', 'err_target_audience') && valid;
   }
 
   if (step === 1) {
-    valid = requireSelect('brand_voice', 'err_brand_voice') && valid;
+    valid = requireField('brand_voice', 'err_brand_voice') && valid;
   }
 
   if (step === 2) {
@@ -1271,6 +1332,7 @@ async function submitForm() {
       posting_goals: goals,
       off_limits: document.getElementById('off_limits').value.trim(),
       extra_context: document.getElementById('extra_context').value.trim(),
+      example_posts: document.getElementById('example_posts').value.trim(),
       logo_url: logoUrl,
       color_palette: {
         primary: document.getElementById('color1').value,
