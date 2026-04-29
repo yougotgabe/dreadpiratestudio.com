@@ -175,6 +175,7 @@ BUSINESS PROFILE:
 - Posting goals: ${Array.isArray(profile.posting_goals) ? profile.posting_goals.join(', ') : profile.posting_goals}
 - Off-limits: ${profile.off_limits || 'None'}
 - Extra context: ${profile.extra_context || 'None'}
+${profile.example_posts ? `- Example posts they've written (match this voice closely):\n${profile.example_posts}` : ''}
 
 POST TYPE: ${type.toUpperCase()}
 INSTRUCTION: ${typeInstruction}

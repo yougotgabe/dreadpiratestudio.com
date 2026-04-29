@@ -172,6 +172,7 @@ async function handleSaveProfile(request, env) {
     posting_goals:        data.posting_goals || [],
     off_limits:           data.off_limits || '',
     extra_context:        data.extra_context || '',
+    example_posts:        data.example_posts || '',
     color_palette:        data.color_palette || {},
     website:              data.website || '',
     updated_at:           new Date().toISOString(),
