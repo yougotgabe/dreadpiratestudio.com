@@ -347,6 +347,42 @@
       color: var(--white);
     }
 
+    /* ── EXAMPLE POSTS GRID ── */
+    .example-posts-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 0.75rem;
+    }
+    .example-post-field {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+    }
+    .example-post-type-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Cinzel', serif;
+      font-size: 0.52rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 0.35rem;
+    }
+    .example-type-pip { font-size: 0.55rem; }
+    .example-type-pip.general { color: var(--gold); }
+    .example-type-pip.event   { color: #7ec8e3; }
+    .example-type-pip.cta     { color: #e3a07e; }
+    .example-type-pip.joke    { color: #a0e37e; }
+    .example-post-field textarea {
+      background: var(--surface);
+      border-color: var(--border2);
+      margin-top: 0;
+    }
+    .example-post-field textarea:focus { border-color: var(--gold); }
+
     /* ── COLOR SWATCHES ── */
     .color-pickers {
       display: flex;
@@ -865,9 +901,46 @@
         </div>
 
         <div class="field-group">
-          <label class="field-label">Example posts <span style="font-family:'Crimson Text'; font-style:italic; font-size:0.9rem; text-transform:none; letter-spacing:0; color:var(--muted); font-weight:400;">(optional but highly recommended)</span></label>
-          <span class="field-hint">Paste 1–2 posts you've written that felt right — this is the single best way to help the AI sound like you.</span>
-          <textarea id="example_posts" rows="3" placeholder="e.g. &#34;Happy Friday Willmar! Come on down for our fish fry — it sells out every week for a reason 🐟&#34;"></textarea>
+          <label class="field-label">Example posts by type <span style="font-family:'Crimson Text'; font-style:italic; font-size:0.9rem; text-transform:none; letter-spacing:0; color:var(--muted); font-weight:400;">(optional but highly recommended)</span></label>
+          <span class="field-hint">Paste a real post you've written for each type — or leave any blank. This is the single best way to help the AI sound exactly like you.</span>
+
+          <div class="example-posts-grid">
+            <div class="example-post-field">
+              <div class="example-post-type-label">
+                <span class="example-type-pip general">✦</span>
+                General / Brand Voice
+              </div>
+              <span class="field-hint" style="margin-bottom:0.4rem">A typical post — your personality, no agenda.</span>
+              <textarea id="example_general" rows="2" placeholder='e.g. "Your Facebook page is not a billboard. It&apos;s a conversation. Let&apos;s help you start having it."'></textarea>
+            </div>
+
+            <div class="example-post-field">
+              <div class="example-post-type-label">
+                <span class="example-type-pip event">✦</span>
+                Event / Announcement
+              </div>
+              <span class="field-hint" style="margin-bottom:0.4rem">Something coming up you want people to know about.</span>
+              <textarea id="example_event" rows="2" placeholder='e.g. "Friday fish fry is back this week — come hungry, we always sell out. 🐟"'></textarea>
+            </div>
+
+            <div class="example-post-field">
+              <div class="example-post-type-label">
+                <span class="example-type-pip cta">✦</span>
+                Call to Action
+              </div>
+              <span class="field-hint" style="margin-bottom:0.4rem">A post that asks people to do something.</span>
+              <textarea id="example_cta" rows="2" placeholder='e.g. "Stop guessing what to post. Book a free call and let&apos;s fix that. Link in bio."'></textarea>
+            </div>
+
+            <div class="example-post-field">
+              <div class="example-post-type-label">
+                <span class="example-type-pip joke">✦</span>
+                Joke / Pun
+              </div>
+              <span class="field-hint" style="margin-bottom:0.4rem">Something light — a pun, a joke, a playful take.</span>
+              <textarea id="example_joke" rows="2" placeholder='e.g. "Why did the web designer go broke? Too many tabs open. 😅"'></textarea>
+            </div>
+          </div>
         </div>
 
         <div class="field-group">
@@ -1172,6 +1245,24 @@ function handleIndustrySelect(select) {
   document.getElementById('err_industry').style.display = 'none';
 }
 
+function buildExamplePostsPayload() {
+  const types = [
+    { id: 'example_general', label: 'GENERAL' },
+    { id: 'example_event',   label: 'EVENT' },
+    { id: 'example_cta',     label: 'CTA' },
+    { id: 'example_joke',    label: 'JOKE' },
+  ];
+
+  const parts = types
+    .map(t => {
+      const val = document.getElementById(t.id)?.value.trim();
+      return val ? `[${t.label}] ${val}` : null;
+    })
+    .filter(Boolean);
+
+  return parts.join('\n');
+}
+
 // ── Validation ────────────────────────────────────────────────────────────────
 function validateStep(step) {
   let valid = true;
@@ -1332,7 +1423,7 @@ async function submitForm() {
       posting_goals: goals,
       off_limits: document.getElementById('off_limits').value.trim(),
       extra_context: document.getElementById('extra_context').value.trim(),
-      example_posts: document.getElementById('example_posts').value.trim(),
+      example_posts: buildExamplePostsPayload(),
       logo_url: logoUrl,
       color_palette: {
         primary: document.getElementById('color1').value,
