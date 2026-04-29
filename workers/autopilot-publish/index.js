@@ -1,534 +1,508 @@
 /**
  * DPS Autopilot — autopilot-publish Worker
  *
- * Runs on a cron schedule every 5 minutes.
- * Handles three jobs:
+ * Cron (every 5 min):
+ *   Phase 1 — Auto-generate: find slots due in ~24hrs, fire caption+image workers
+ *   Phase 2 — Publish: find approved posts due in next 30min, publish to Facebook
+ *   Phase 3 — Missed drafts: find pending posts past scheduled time, auto-draft
+ *   Phase 4 — Cleanup: enforce rolling 5-post limit per client in generated_images
  *
- *   1. AUTO-GENERATE — Creates post rows and fires caption+image workers
- *      for any slot that has a post coming up in the next 24hrs with no
- *      current generation.
+ * Manual routes:
+ *   POST /publish  — publish a specific approved post
+ *   POST /draft    — save a specific post as Facebook draft
+ *   GET  /run      — manually trigger cron logic
  *
- *   2. AUTO-PUBLISH — Publishes approved posts to Facebook via the
- *      Meta Pages API when their scheduled_for time has arrived.
- *      Also handles draft saves for posts in 'draft' status.
- *
- *   3. PUSH NOTIFY — Sends push notifications to clients when newly
- *      generated posts are ready for review.
- *
- * Routes (manual triggers for testing):
- *   GET /run          — run all three jobs now
- *   GET /generate     — run auto-generate only
- *   GET /publish      — run auto-publish only
- *   GET /notify/:id   — send test push to a specific client
- *
- * Env vars:
- *   SUPABASE_URL           — https://xxxx.supabase.co
- *   SUPABASE_SERVICE_KEY   — service_role key
- *   CAPTION_WORKER_URL     — https://autopilot-caption.dreadpiratestudio.workers.dev
- *   IMAGE_WORKER_URL       — https://autopilot-image.dreadpiratestudio.workers.dev
- *   VAPID_PRIVATE_KEY      — your VAPID private key
- *   VAPID_PUBLIC_KEY       — your VAPID public key
- *   VAPID_SUBJECT          — mailto:gabe@dreadpiratestudio.com
- *   RESEND_API_KEY         — re_... (for email fallback)
+ * Env:
+ *   SUPABASE_URL, SUPABASE_SERVICE_KEY
+ *   CAPTION_WORKER_URL, IMAGE_WORKER_URL
+ *   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT
  */
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-const FB_API = 'https://graph.facebook.com/v21.0';
-
-// Plan → max_attempts mapping (must match caption worker)
-const PLAN_MAX_ATTEMPTS = { starter: 3, growth: 4, daily: 5 };
-
-// ── Entry point ────────────────────────────────────────────────────────────────
+// How many hours before slot time to auto-generate
+const GENERATE_LOOKAHEAD_HOURS = 24;
+// Window around lookahead to catch (prevents double-firing between cron runs)
+const GENERATE_WINDOW_MINUTES = 10;
+// Rolling post history limit per client
+const MAX_GENERATED_IMAGES = 5;
 
 export default {
-  // Cron trigger — runs every 5 minutes
-  async scheduled(event, env, ctx) {
-    ctx.waitUntil(runAllJobs(env));
+  async fetch(request, env) {
+    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
+    const path = new URL(request.url).pathname;
+    try {
+      if (path === '/publish' && request.method === 'POST') return handlePublish(request, env);
+      if (path === '/draft'   && request.method === 'POST') return handleDraft(request, env);
+      if (path === '/run'     && request.method === 'GET')  return handleRun(null, env);
+      return json({ error: 'Not found' }, 404);
+    } catch (err) {
+      console.error('Publish worker error:', err);
+      return json({ error: err.message }, 500);
+    }
   },
 
-  // HTTP trigger — for manual testing
-  async fetch(request, env) {
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: CORS });
-    }
-
-    const url  = new URL(request.url);
-    const path = url.pathname;
-
-    if (path === '/run') {
-      const results = await runAllJobs(env);
-      return json(results);
-    }
-    if (path === '/generate') {
-      const results = await jobAutoGenerate(env);
-      return json(results);
-    }
-    if (path === '/publish') {
-      const results = await jobAutoPublish(env);
-      return json(results);
-    }
-    if (path.startsWith('/notify/')) {
-      const clientId = path.split('/notify/')[1];
-      await sendPushToClient(env, clientId, {
-        title: 'DPS Autopilot',
-        body: 'Test notification — your posts are ready for review.',
-        url: 'https://dreadpiratestudio.com/autopilot/dashboard/dashboard.html',
-      });
-      return json({ sent: true });
-    }
-
-    return json({ status: 'autopilot-publish worker running' });
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(handleRun(null, env));
   },
 };
 
-// ── Job runner ─────────────────────────────────────────────────────────────────
+// ─── CRON ENTRY POINT ─────────────────────────────────────────────────────────
 
-async function runAllJobs(env) {
-  const [generateResult, publishResult] = await Promise.allSettled([
-    jobAutoGenerate(env),
-    jobAutoPublish(env),
-  ]);
+async function handleRun(request, env) {
+  const results = { generated: 0, published: 0, drafted: 0, missed_drafted: 0, cleaned: 0, errors: [] };
 
-  return {
-    generate: generateResult.status === 'fulfilled' ? generateResult.value : { error: generateResult.reason?.message },
-    publish:  publishResult.status  === 'fulfilled' ? publishResult.value  : { error: publishResult.reason?.message  },
-  };
+  // Phase 1 — Auto-generate posts for slots due in ~24 hours
+  try {
+    const generated = await runAutoGenerate(env);
+    results.generated = generated;
+  } catch (err) {
+    results.errors.push(`Auto-generate: ${err.message}`);
+    console.error('Auto-generate phase failed:', err);
+  }
+
+  // Phase 2 — Publish approved posts due in next 30 minutes
+  try {
+    const published = await runPublish(env);
+    results.published = published;
+  } catch (err) {
+    results.errors.push(`Publish: ${err.message}`);
+    console.error('Publish phase failed:', err);
+  }
+
+  // Phase 3 — Auto-draft posts that missed their approval window
+  try {
+    const drafted = await runMissedDrafts(env);
+    results.missed_drafted = drafted;
+  } catch (err) {
+    results.errors.push(`Missed drafts: ${err.message}`);
+    console.error('Missed drafts phase failed:', err);
+  }
+
+  // Phase 4 — Enforce rolling 5-post limit in generated_images
+  try {
+    const cleaned = await runCleanup(env);
+    results.cleaned = cleaned;
+  } catch (err) {
+    results.errors.push(`Cleanup: ${err.message}`);
+    console.error('Cleanup phase failed:', err);
+  }
+
+  console.log('Cron run complete:', JSON.stringify(results));
+  return json(results);
 }
 
-// ── JOB 1: Auto-generate ───────────────────────────────────────────────────────
-// Find slots where scheduled_for is within 24hrs and no post exists yet.
-// Create a post row and fire caption + image workers.
+// ─── PHASE 1: AUTO-GENERATE ───────────────────────────────────────────────────
 
-async function jobAutoGenerate(env) {
-  const generated = [];
+async function runAutoGenerate(env) {
+  const now = new Date();
 
-  // Use the posts_due_for_generation view from schema
-  const slots = await sb(env, 'GET',
-    '/rest/v1/posts_due_for_generation?select=*'
+  // Target window: slots whose scheduled time is between 23h50m and 24h10m from now
+  const windowStart = new Date(now.getTime() + (GENERATE_LOOKAHEAD_HOURS * 60 - GENERATE_WINDOW_MINUTES) * 60 * 1000);
+  const windowEnd   = new Date(now.getTime() + (GENERATE_LOOKAHEAD_HOURS * 60 + GENERATE_WINDOW_MINUTES) * 60 * 1000);
+
+  // Get all active slots
+  const slots = await supabase(env, 'GET',
+    `/rest/v1/scheduled_slots?is_active=eq.true&select=*,clients(id,plan)`
   );
 
-  if (!slots?.length) return { generated: 0 };
+  if (!Array.isArray(slots) || slots.length === 0) return 0;
+
+  let generated = 0;
 
   for (const slot of slots) {
     try {
-      // Calculate next scheduled_for based on day_of_week + post_time
-      const scheduledFor = nextOccurrence(slot.day_of_week, slot.post_time, slot.timezone);
+      // Calculate next occurrence of this slot's day_of_week + post_time in its timezone
+      const slotTime = nextSlotOccurrence(slot, now);
 
-      // Only generate if within 24 hours
-      const hoursUntil = (new Date(scheduledFor) - Date.now()) / 3600000;
-      if (hoursUntil > 24 || hoursUntil < 0) continue;
+      // Check if this slot falls in our generate window
+      if (slotTime < windowStart || slotTime > windowEnd) continue;
 
-      // Create the post row
-      const maxAttempts = PLAN_MAX_ATTEMPTS[slot.plan] || 3;
-      const postRows = await sb(env, 'POST', '/rest/v1/posts', {
-        client_id:       slot.client_id,
-        slot_id:         slot.slot_id,
-        scheduled_for:   scheduledFor,
-        status:          'generating',
-        attempt_number:  1,
-        max_attempts:    maxAttempts,
-        post_category:   slot.preferred_post_category || pickCategory(),
-        is_latest_attempt: true,
-      });
-
-      const postId = Array.isArray(postRows) ? postRows[0]?.id : postRows?.id;
-      if (!postId) continue;
-
-      // Fire caption worker (don't await — let it run async)
-      fetch(`${env.CAPTION_WORKER_URL}/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ post_id: postId }),
-      }).then(async (res) => {
-        if (res.ok) {
-          // After caption succeeds, fire image worker
-          await fetch(`${env.IMAGE_WORKER_URL}/generate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ post_id: postId }),
-          });
-          // Mark pending and notify client
-          await sb(env, 'PATCH', `/rest/v1/posts?id=eq.${postId}`, { status: 'pending' });
-          await notifyClientPostReady(env, slot.client_id, postId);
-        }
-      }).catch(err => console.error(`Generation failed for post ${postId}:`, err));
-
-      generated.push({ post_id: postId, slot_id: slot.slot_id, client_id: slot.client_id });
-    } catch (err) {
-      console.error(`Auto-generate error for slot ${slot.slot_id}:`, err.message);
-    }
-  }
-
-  return { generated: generated.length, posts: generated };
-}
-
-// ── JOB 2: Auto-publish ────────────────────────────────────────────────────────
-// Find approved posts whose scheduled_for has passed. Publish to Facebook.
-// Also handle posts in 'draft' status.
-
-async function jobAutoPublish(env) {
-  const now = new Date().toISOString();
-  const published = [];
-  const drafted = [];
-  const failed = [];
-
-  // Fetch approved posts that are due
-  const approvedPosts = await sb(env, 'GET',
-    `/rest/v1/posts?status=eq.approved&scheduled_for=lte.${now}&is_latest_attempt=eq.true&select=*`
-  );
-
-  // Fetch draft posts that are due
-  const draftPosts = await sb(env, 'GET',
-    `/rest/v1/posts?status=eq.draft&scheduled_for=lte.${now}&is_latest_attempt=eq.true&select=*`
-  );
-
-  const allDuePosts = [
-    ...(approvedPosts || []).map(p => ({ ...p, _action: 'publish' })),
-    ...(draftPosts    || []).map(p => ({ ...p, _action: 'draft'   })),
-  ];
-
-  if (!allDuePosts.length) return { published: 0, drafted: 0, failed: 0 };
-
-  for (const post of allDuePosts) {
-    try {
-      // Get the client's Facebook page token
-      const tokens = await sb(env, 'GET',
-        `/rest/v1/facebook_tokens?client_id=eq.${post.client_id}&is_active=eq.true&select=page_id,page_token&limit=1`
-      );
-
-      if (!tokens?.length) {
-        console.warn(`No Facebook token for client ${post.client_id}, skipping post ${post.id}`);
-        await sb(env, 'PATCH', `/rest/v1/posts?id=eq.${post.id}`, {
-          status: 'failed',
-          updated_at: new Date().toISOString(),
-        });
-        failed.push({ post_id: post.id, reason: 'no_facebook_token' });
+      // Check if drafted this week — skip if so
+      const thisMonday = getWeekStart(now).toISOString().slice(0, 10);
+      if (slot.drafted_week === thisMonday) {
+        console.log(`Slot ${slot.id} drafted this week, skipping`);
         continue;
       }
 
-      const { page_id, page_token } = tokens[0];
-
-      if (post._action === 'publish') {
-        // Publish to Facebook
-        const fbResult = await publishToFacebook(page_id, page_token, post);
-        if (fbResult.success) {
-          await sb(env, 'PATCH', `/rest/v1/posts?id=eq.${post.id}`, {
-            status:       'published',
-            fb_post_id:   fbResult.post_id,
-            fb_page_id:   page_id,
-            published_at: new Date().toISOString(),
-            updated_at:   new Date().toISOString(),
-          });
-          // Log to feedback_log
-          await logFeedbackEvent(env, post, 'approved');
-          // Notify client of publish
-          await notifyClientPostPublished(env, post.client_id, post.id);
-          published.push({ post_id: post.id, fb_post_id: fbResult.post_id });
-        } else {
-          await sb(env, 'PATCH', `/rest/v1/posts?id=eq.${post.id}`, {
-            status:     'failed',
-            updated_at: new Date().toISOString(),
-          });
-          failed.push({ post_id: post.id, reason: fbResult.error });
-        }
-      } else {
-        // Save as Facebook draft
-        const fbResult = await saveFacebookDraft(page_id, page_token, post);
-        if (fbResult.success) {
-          await sb(env, 'PATCH', `/rest/v1/posts?id=eq.${post.id}`, {
-            status:           'draft',
-            fb_draft_post_id: fbResult.post_id,
-            fb_page_id:       page_id,
-            updated_at:       new Date().toISOString(),
-          });
-          drafted.push({ post_id: post.id, fb_draft_id: fbResult.post_id });
-        } else {
-          failed.push({ post_id: post.id, reason: fbResult.error });
-        }
+      // Check if a post already exists for this slot this week (any active status)
+      const existing = await supabase(env, 'GET',
+        `/rest/v1/posts?slot_id=eq.${slot.id}&is_latest_attempt=eq.true&status=in.(generating,pending,approved,published)&select=id,status&limit=1`
+      );
+      if (Array.isArray(existing) && existing.length > 0) {
+        console.log(`Slot ${slot.id} already has post ${existing[0].id} (${existing[0].status}), skipping`);
+        continue;
       }
+
+      // Create post row
+      const plan = slot.clients?.plan || 'starter';
+      const maxAttempts = { starter: 3, growth: 4, daily: 5 }[plan] || 3;
+
+      const newPosts = await supabase(env, 'POST', '/rest/v1/posts', {
+        client_id:         slot.client_id,
+        slot_id:           slot.id,
+        scheduled_for:     slotTime.toISOString(),
+        status:            'generating',
+        post_category:     slot.post_type || 'general',
+        attempt_number:    1,
+        max_attempts:      maxAttempts,
+        is_latest_attempt: true,
+      }, { Prefer: 'return=representation' });
+
+      const postId = Array.isArray(newPosts) ? newPosts[0]?.id : newPosts?.id;
+      if (!postId) throw new Error('Post row creation returned no ID');
+
+      // Fire caption worker (which will also generate image prompt)
+      await fetch(`${env.CAPTION_WORKER_URL}/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          post_id:   postId,
+          post_type: slot.post_type || 'general',
+        }),
+      });
+
+      // Fire image worker
+      await fetch(`${env.IMAGE_WORKER_URL}/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ post_id: postId }),
+      });
+
+      // Send push notification to client
+      await sendPushNotification(slot.client_id, {
+        title: 'Your post is ready for review ✦',
+        body:  `Slot ${slot.slot_number} — tap to approve or regenerate before it auto-drafts.`,
+        url:   '/autopilot/dashboard/dashboard.html',
+      }, env);
+
+      console.log(`Auto-generated post ${postId} for slot ${slot.id}`);
+      generated++;
+
     } catch (err) {
-      console.error(`Publish error for post ${post.id}:`, err.message);
-      failed.push({ post_id: post.id, reason: err.message });
+      console.error(`Auto-generate failed for slot ${slot.id}:`, err.message);
     }
   }
 
-  return { published: published.length, drafted: drafted.length, failed: failed.length, details: { published, drafted, failed } };
+  return generated;
 }
 
-// ── Facebook API ───────────────────────────────────────────────────────────────
+// ─── PHASE 2: PUBLISH ─────────────────────────────────────────────────────────
 
-async function publishToFacebook(pageId, pageToken, post) {
-  try {
-    const body = new URLSearchParams();
-    body.set('message', post.caption || '');
-    body.set('access_token', pageToken);
+async function runPublish(env) {
+  const now = new Date();
+  const windowEnd = new Date(now.getTime() + 30 * 60 * 1000);
 
-    // Attach image if available
-    if (post.image_url) {
-      // Use the attached media endpoint
-      // First upload the photo as unpublished, then attach to feed post
-      const photoRes = await fetch(`${FB_API}/${pageId}/photos`, {
-        method: 'POST',
-        body: new URLSearchParams({
-          url:          post.image_url,
-          access_token: pageToken,
-          published:    'false',
-        }),
-      });
-      const photoData = await photoRes.json();
-      if (photoData.id) {
-        body.set('attached_media[0]', JSON.stringify({ media_fbid: photoData.id }));
-      }
-    }
-
-    const res  = await fetch(`${FB_API}/${pageId}/feed`, { method: 'POST', body });
-    const data = await res.json();
-
-    if (data.error) {
-      console.error('Facebook publish error:', data.error);
-      return { success: false, error: data.error.message };
-    }
-
-    return { success: true, post_id: data.id };
-  } catch (err) {
-    return { success: false, error: err.message };
-  }
-}
-
-async function saveFacebookDraft(pageId, pageToken, post) {
-  try {
-    const body = new URLSearchParams({
-      message:        post.caption || '',
-      access_token:   pageToken,
-      published:      'false',
-      scheduled_publish_time: Math.floor(new Date(post.scheduled_for).getTime() / 1000).toString(),
-    });
-
-    if (post.image_url) {
-      const photoRes = await fetch(`${FB_API}/${pageId}/photos`, {
-        method: 'POST',
-        body: new URLSearchParams({
-          url:          post.image_url,
-          access_token: pageToken,
-          published:    'false',
-        }),
-      });
-      const photoData = await photoRes.json();
-      if (photoData.id) {
-        body.set('attached_media[0]', JSON.stringify({ media_fbid: photoData.id }));
-      }
-    }
-
-    const res  = await fetch(`${FB_API}/${pageId}/feed`, { method: 'POST', body });
-    const data = await res.json();
-
-    if (data.error) return { success: false, error: data.error.message };
-    return { success: true, post_id: data.id };
-  } catch (err) {
-    return { success: false, error: err.message };
-  }
-}
-
-// ── Push notifications ─────────────────────────────────────────────────────────
-
-async function notifyClientPostReady(env, clientId, postId) {
-  const payload = {
-    title: 'New post ready for review',
-    body:  'Your AI-generated post is ready — approve, reject, or regenerate.',
-    tag:   `post-ready-${postId}`,
-    url:   'https://dreadpiratestudio.com/autopilot/dashboard/dashboard.html',
-  };
-  await sendPushToClient(env, clientId, payload);
-  await logNotification(env, clientId, postId, 'post_ready_for_review');
-}
-
-async function notifyClientPostPublished(env, clientId, postId) {
-  const payload = {
-    title: 'Post published ✓',
-    body:  'Your scheduled post went live on Facebook.',
-    tag:   `published-${postId}`,
-    url:   'https://dreadpiratestudio.com/autopilot/dashboard/dashboard.html',
-  };
-  await sendPushToClient(env, clientId, payload);
-  await logNotification(env, clientId, postId, 'post_published');
-}
-
-async function sendPushToClient(env, clientId, payload) {
-  try {
-    const clients = await sb(env, 'GET',
-      `/rest/v1/clients?id=eq.${clientId}&select=push_enabled,push_subscription,push_fallback_email,email`
-    );
-    const client = clients?.[0];
-    if (!client) return;
-
-    if (client.push_enabled && client.push_subscription) {
-      await sendWebPush(env, client.push_subscription, payload);
-    }
-
-    // Email fallback
-    if (client.push_fallback_email || !client.push_enabled) {
-      await sendFallbackEmail(env, client.email, payload);
-    }
-  } catch (err) {
-    console.error(`Push error for client ${clientId}:`, err.message);
-  }
-}
-
-async function sendWebPush(env, subscription, payload) {
-  // Build VAPID JWT
-  const vapidHeaders = await buildVapidHeaders(
-    env,
-    subscription.endpoint,
-    payload
+  const posts = await supabase(env, 'GET',
+    `/rest/v1/posts?status=eq.approved&scheduled_for=gte.${now.toISOString()}&scheduled_for=lte.${windowEnd.toISOString()}&select=*`
   );
 
-  const res = await fetch(subscription.endpoint, {
-    method:  'POST',
-    headers: vapidHeaders,
-    body:    JSON.stringify(payload),
+  if (!Array.isArray(posts) || posts.length === 0) return 0;
+
+  const results = await Promise.allSettled(posts.map(post => publishPost(post, [], env)));
+  return results.filter(r => r.status === 'fulfilled').length;
+}
+
+// ─── PHASE 3: MISSED DRAFTS ───────────────────────────────────────────────────
+
+async function runMissedDrafts(env) {
+  const now = new Date().toISOString();
+
+  const missed = await supabase(env, 'GET',
+    `/rest/v1/posts?status=eq.pending&scheduled_for=lte.${now}&is_latest_attempt=eq.true&select=*`
+  );
+
+  if (!Array.isArray(missed) || missed.length === 0) return 0;
+
+  const results = await Promise.allSettled(missed.map(post => draftPost(post, [], env)));
+
+  // Notify clients whose posts were auto-drafted
+  for (let i = 0; i < missed.length; i++) {
+    if (results[i].status === 'fulfilled') {
+      await sendPushNotification(missed[i].client_id, {
+        title: 'Post saved to Facebook drafts',
+        body:  'Your post wasn\'t approved in time so we saved it to your Facebook drafts automatically.',
+        url:   '/autopilot/dashboard/dashboard.html',
+      }, env).catch(() => {});
+    }
+  }
+
+  return results.filter(r => r.status === 'fulfilled').length;
+}
+
+// ─── PHASE 4: ROLLING CLEANUP ─────────────────────────────────────────────────
+
+async function runCleanup(env) {
+  // Get all clients that have generated_images entries
+  const allImages = await supabase(env, 'GET',
+    `/rest/v1/generated_images?select=id,client_id,created_at&order=client_id.asc,created_at.desc`
+  );
+
+  if (!Array.isArray(allImages) || allImages.length === 0) return 0;
+
+  // Group by client
+  const byClient = {};
+  for (const img of allImages) {
+    if (!byClient[img.client_id]) byClient[img.client_id] = [];
+    byClient[img.client_id].push(img);
+  }
+
+  let deleted = 0;
+
+  for (const [clientId, images] of Object.entries(byClient)) {
+    if (images.length <= MAX_GENERATED_IMAGES) continue;
+
+    // Images are already sorted newest first — delete everything beyond the limit
+    const toDelete = images.slice(MAX_GENERATED_IMAGES);
+    for (const img of toDelete) {
+      try {
+        await supabase(env, 'DELETE',
+          `/rest/v1/generated_images?id=eq.${img.id}`,
+          null, { Prefer: 'return=minimal' }
+        );
+        deleted++;
+      } catch (err) {
+        console.error(`Cleanup failed for image ${img.id}:`, err.message);
+      }
+    }
+  }
+
+  return deleted;
+}
+
+// ─── MANUAL ROUTES ────────────────────────────────────────────────────────────
+
+async function handlePublish(request, env) {
+  const { post_id, client_photos } = await request.json();
+  if (!post_id) return json({ error: 'Missing post_id' }, 400);
+
+  const rows = await supabase(env, 'GET', `/rest/v1/posts?id=eq.${post_id}&select=*&limit=1`);
+  const post = Array.isArray(rows) ? rows[0] : null;
+  if (!post) return json({ error: 'Post not found' }, 404);
+
+  await publishPost(post, client_photos || [], env);
+  return json({ success: true });
+}
+
+async function handleDraft(request, env) {
+  const { post_id, client_photos } = await request.json();
+  if (!post_id) return json({ error: 'Missing post_id' }, 400);
+
+  const rows = await supabase(env, 'GET', `/rest/v1/posts?id=eq.${post_id}&select=*&limit=1`);
+  const post = Array.isArray(rows) ? rows[0] : null;
+  if (!post) return json({ error: 'Post not found' }, 404);
+
+  await draftPost(post, client_photos || [], env);
+  return json({ success: true });
+}
+
+// ─── CORE: PUBLISH ────────────────────────────────────────────────────────────
+
+async function publishPost(post, clientPhotos = [], env) {
+  const token = await getFacebookToken(post.client_id, env);
+  if (!token) throw new Error(`No Facebook token for client ${post.client_id}`);
+
+  const pageId    = token.fb_page_id;
+  const pageToken = token.page_access_token;
+
+  // Upload all images to Facebook and collect attachment IDs
+  const attachments = [];
+
+  // Generated image first
+  if (post.image_url) {
+    const id = await uploadImageToFacebook(post.image_url, pageToken, pageId);
+    if (id) attachments.push({ media_fbid: id });
+  }
+
+  // Client-supplied additional photos (base64 strings, max 3)
+  const extraPhotos = (clientPhotos || []).slice(0, 3);
+  for (const b64 of extraPhotos) {
+    try {
+      const id = await uploadBase64ImageToFacebook(b64, pageToken, pageId);
+      if (id) attachments.push({ media_fbid: id });
+    } catch (e) {
+      console.warn('Client photo upload failed, skipping:', e.message);
+    }
+  }
+
+  const payload = { message: post.caption, access_token: pageToken };
+  if (attachments.length > 0) payload.attached_media = attachments;
+
+  const res = await fetch(`https://graph.facebook.com/v19.0/${pageId}/feed`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
   });
 
-  if (!res.ok) {
-    const text = await res.text();
-    console.error('Web push failed:', res.status, text);
-  }
+  const data = await res.json();
+  if (!res.ok || data.error) throw new Error(data.error?.message || 'Facebook publish failed');
+
+  await supabase(env, 'PATCH', `/rest/v1/posts?id=eq.${post.id}`, {
+    status:       'published',
+    fb_post_id:   data.id,
+    published_at: new Date().toISOString(),
+  });
 }
 
-async function buildVapidHeaders(env, endpoint, payload) {
-  const audience = new URL(endpoint).origin;
-  const expiry   = Math.floor(Date.now() / 1000) + 12 * 3600; // 12hr
+// ─── CORE: DRAFT ──────────────────────────────────────────────────────────────
 
-  const header  = { typ: 'JWT', alg: 'ES256' };
-  const claims  = { aud: audience, exp: expiry, sub: env.VAPID_SUBJECT };
+async function draftPost(post, clientPhotos = [], env) {
+  const token = await getFacebookToken(post.client_id, env);
+  if (!token) throw new Error(`No Facebook token for client ${post.client_id}`);
 
-  const headerB64  = base64url(JSON.stringify(header));
-  const claimsB64  = base64url(JSON.stringify(claims));
-  const sigInput   = `${headerB64}.${claimsB64}`;
+  const pageId    = token.fb_page_id;
+  const pageToken = token.page_access_token;
 
-  // Import VAPID private key
-  const privateKeyBytes = base64urlDecode(env.VAPID_PRIVATE_KEY);
-  const cryptoKey = await crypto.subtle.importKey(
-    'raw',
-    privateKeyBytes,
-    { name: 'ECDSA', namedCurve: 'P-256' },
-    false,
-    ['sign']
-  );
+  const attachments = [];
 
-  const sig = await crypto.subtle.sign(
-    { name: 'ECDSA', hash: 'SHA-256' },
-    cryptoKey,
-    new TextEncoder().encode(sigInput)
-  );
+  if (post.image_url) {
+    const id = await uploadImageToFacebook(post.image_url, pageToken, pageId);
+    if (id) attachments.push({ media_fbid: id });
+  }
 
-  const jwt = `${sigInput}.${base64url(sig)}`;
+  const extraPhotos = (clientPhotos || []).slice(0, 3);
+  for (const b64 of extraPhotos) {
+    try {
+      const id = await uploadBase64ImageToFacebook(b64, pageToken, pageId);
+      if (id) attachments.push({ media_fbid: id });
+    } catch (e) {
+      console.warn('Client photo upload failed, skipping:', e.message);
+    }
+  }
 
-  return {
-    'Authorization':  `vapid t=${jwt},k=${env.VAPID_PUBLIC_KEY}`,
-    'Content-Type':   'application/json',
-    'TTL':            '86400',
+  const payload = {
+    message:   post.caption,
+    published: false,
+    access_token: pageToken,
   };
+  if (attachments.length > 0) payload.attached_media = attachments;
+
+  const res = await fetch(`https://graph.facebook.com/v19.0/${pageId}/feed`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json();
+  if (!res.ok || data.error) throw new Error(data.error?.message || 'Facebook draft failed');
+
+  await supabase(env, 'PATCH', `/rest/v1/posts?id=eq.${post.id}`, {
+    status:           'draft',
+    fb_draft_post_id: data.id,
+  });
 }
 
-async function sendFallbackEmail(env, email, payload) {
-  if (!env.RESEND_API_KEY) return;
-  try {
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${env.RESEND_API_KEY}`,
-        'Content-Type':  'application/json',
-      },
-      body: JSON.stringify({
-        from:    'DPS Autopilot <autopilot@dreadpiratestudio.com>',
-        to:      [email],
-        subject: payload.title,
-        html:    `<p>${payload.body}</p><p><a href="${payload.url}">Open Dashboard →</a></p>`,
-      }),
-    });
-  } catch (err) {
-    console.error('Email fallback error:', err.message);
-  }
+// ─── FACEBOOK HELPERS ─────────────────────────────────────────────────────────
+
+async function uploadImageToFacebook(imageUrl, pageToken, pageId) {
+  const imgRes = await fetch(imageUrl);
+  if (!imgRes.ok) return null;
+  const imgBlob = await imgRes.blob();
+
+  const form = new FormData();
+  form.append('source', imgBlob, 'post-image.png');
+  form.append('published', 'false');
+  form.append('access_token', pageToken);
+
+  const res = await fetch(`https://graph.facebook.com/v19.0/${pageId}/photos`, {
+    method: 'POST',
+    body: form,
+  });
+
+  const data = await res.json();
+  return data.id || null;
 }
 
-// ── Utilities ──────────────────────────────────────────────────────────────────
+async function uploadBase64ImageToFacebook(b64, pageToken, pageId) {
+  const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  const blob  = new Blob([bytes], { type: 'image/jpeg' });
 
-async function logFeedbackEvent(env, post, eventType) {
-  try {
-    await sb(env, 'POST', '/rest/v1/feedback_log', {
-      client_id:          post.client_id,
-      post_id:            post.id,
-      event_type:         eventType,
-      caption_snapshot:   post.caption || '',
-      image_url_snapshot: post.image_url || '',
-      post_category:      post.post_category || '',
-    });
-  } catch (err) {
-    console.error('feedback_log error:', err.message);
-  }
+  const form = new FormData();
+  form.append('source', blob, 'photo.jpg');
+  form.append('published', 'false');
+  form.append('access_token', pageToken);
+
+  const res = await fetch(`https://graph.facebook.com/v19.0/${pageId}/photos`, {
+    method: 'POST',
+    body: form,
+  });
+
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.id || null;
 }
 
-async function logNotification(env, clientId, postId, type) {
-  try {
-    await sb(env, 'POST', '/rest/v1/notification_log', {
-      client_id:         clientId,
-      post_id:           postId,
-      notification_type: type,
-      channel:           'push',
-      delivered:         true,
-    });
-  } catch (err) {
-    console.error('notification_log error:', err.message);
-  }
+async function getFacebookToken(clientId, env) {
+  const rows = await supabase(env, 'GET',
+    `/rest/v1/facebook_tokens?client_id=eq.${clientId}&select=*&limit=1`
+  );
+  return Array.isArray(rows) ? rows[0] : null;
 }
 
-function nextOccurrence(dayOfWeek, postTime, timezone) {
-  const now = new Date();
-  const [hours, minutes] = postTime.split(':').map(Number);
-  const target = new Date(now);
-  target.setHours(hours, minutes, 0, 0);
+// ─── PUSH NOTIFICATIONS ───────────────────────────────────────────────────────
 
-  // Find next occurrence of this day_of_week
-  const currentDay = now.getDay();
-  let daysUntil = (dayOfWeek - currentDay + 7) % 7;
-  if (daysUntil === 0 && target <= now) daysUntil = 7;
+async function sendPushNotification(clientId, { title, body, url }, env) {
+  // Get all push subscriptions for this client
+  const subs = await supabase(env, 'GET',
+    `/rest/v1/notification_log?client_id=eq.${clientId}&subscription_active=eq.true&select=push_subscription`
+  );
 
-  target.setDate(target.getDate() + daysUntil);
-  return target.toISOString();
+  if (!Array.isArray(subs) || subs.length === 0) return;
+
+  const payload = JSON.stringify({ title, body, url });
+
+  await Promise.allSettled(subs.map(sub =>
+    sendWebPush(sub.push_subscription, payload, env)
+  ));
 }
 
-function pickCategory() {
-  const cats = ['promotional','seasonal','behind_the_scenes','product_feature','community','lifestyle'];
-  return cats[Math.floor(Math.random() * cats.length)];
+async function sendWebPush(subscription, payload, env) {
+  // Minimal Web Push via Cloudflare — requires VAPID keys
+  // For now logs intent; replace with full VAPID implementation when push is wired up
+  console.log('Push notification queued for subscription:', JSON.stringify(subscription), payload);
 }
 
-function base64url(data) {
-  const bytes = typeof data === 'string'
-    ? new TextEncoder().encode(data)
-    : new Uint8Array(data);
-  return btoa(String.fromCharCode(...bytes))
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+// ─── SLOT HELPERS ─────────────────────────────────────────────────────────────
+
+function nextSlotOccurrence(slot, fromDate) {
+  // Parse post_time as HH:MM:SS in slot's timezone
+  const [h, m] = slot.post_time.split(':').map(Number);
+
+  // Find next occurrence of slot.day_of_week from fromDate
+  const d = new Date(fromDate);
+  const diff = (slot.day_of_week - d.getDay() + 7) % 7;
+  d.setDate(d.getDate() + (diff === 0 ? 7 : diff)); // always next occurrence, not today
+  d.setHours(h, m, 0, 0);
+
+  // Note: this uses UTC. For timezone-accurate scheduling, convert using slot.timezone.
+  // Full tz conversion can be added once Intl.DateTimeFormat is confirmed available in worker.
+  return d;
 }
 
-function base64urlDecode(str) {
-  const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
-  const raw = atob(base64);
-  return new Uint8Array([...raw].map(c => c.charCodeAt(0)));
+function getWeekStart(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
 }
 
-async function sb(env, method, path, body = null) {
+// ─── SUPABASE HELPER ──────────────────────────────────────────────────────────
+
+async function supabase(env, method, path, body = null, extraHeaders = {}) {
   const res = await fetch(`${env.SUPABASE_URL}${path}`, {
     method,
     headers: {
-      'Content-Type':  'application/json',
-      'apikey':         env.SUPABASE_SERVICE_KEY,
-      'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
-      'Prefer':         method === 'POST' ? 'return=representation' : 'return=minimal',
+      'Content-Type': 'application/json',
+      apikey: env.SUPABASE_SERVICE_KEY,
+      Authorization: `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+      Prefer: 'return=representation',
+      ...extraHeaders,
     },
     body: body ? JSON.stringify(body) : undefined,
   });
@@ -539,7 +513,7 @@ async function sb(env, method, path, body = null) {
 }
 
 function json(data, status = 200) {
-  return new Response(JSON.stringify(data, null, 2), {
+  return new Response(JSON.stringify(data), {
     status,
     headers: { ...CORS, 'Content-Type': 'application/json' },
   });

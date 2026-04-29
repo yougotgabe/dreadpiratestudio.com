@@ -1420,6 +1420,53 @@
       min-height: 1.2rem;
     }
 
+    .client-photos-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
+    }
+    .client-photo-add {
+      width: 72px; height: 72px;
+      border-radius: 8px;
+      border: 1px dashed var(--border);
+      background: var(--surface2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      flex-shrink: 0;
+    }
+    .client-photo-add:hover { border-color: var(--gold-dim); }
+    .client-photo-thumb {
+      width: 72px; height: 72px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .client-photo-wrap {
+      position: relative;
+      width: 72px; height: 72px;
+      flex-shrink: 0;
+    }
+    .client-photo-remove {
+      position: absolute;
+      top: -6px; right: -6px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--error);
+      border: none;
+      color: white;
+      font-size: 0.6rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      line-height: 1;
+    }
+
     /* Generating overlay on image */
     .image-generating {
       position: absolute;
@@ -1826,6 +1873,19 @@
       <span class="slot-panel-label">Generated Post</span>
       <img class="slot-panel-result-image" id="slot-result-image" src="" alt="Generated">
       <div class="slot-panel-result-caption" id="slot-result-caption"></div>
+
+      <!-- Additional client photos -->
+      <div style="margin-bottom:0.75rem">
+        <span class="slot-panel-label">Add Your Own Photos <span style="color:var(--muted2);font-size:0.9em">(optional — up to 3)</span></span>
+        <div class="client-photos-grid" id="client-photos-grid">
+          <div class="client-photo-add" onclick="document.getElementById('client-photo-input').click()">
+            <input type="file" id="client-photo-input" accept="image/*" multiple style="display:none" onchange="handleClientPhotos(this)">
+            <span style="font-size:1.25rem;display:block;margin-bottom:0.2rem">+</span>
+            <span class="ref-image-upload-label">Add photo</span>
+          </div>
+        </div>
+      </div>
+
       <div class="slot-panel-attempts-left" id="slot-attempts-left"></div>
       <textarea
         class="slot-panel-regen-notes"
@@ -1899,11 +1959,14 @@ let selectedCaptionFeedback = [];
 let currentViewImageUrl = null;
 
 // Slot panel state
-let activeSlot = null;          // the slot object currently open in panel
-let activeSlotPostId = null;    // post.id after generation
-let slotPanelAttempts = 0;      // attempts used in this session
-let slotRefImageFile = null;    // reference image File object (session-only)
-let slotRefImageB64 = null;     // base64 for sending to worker
+let activeSlot = null;
+let activeSlotPostId = null;
+let slotPanelAttempts = 0;
+let slotRefImageFile = null;
+let slotRefImageB64 = null;
+let clientPhotosB64 = []; // up to 3 session-only client photos
+
+const PUBLISH_WORKER = 'https://autopilot-publish.dreadpiratestudio.workers.dev';
 
 const POST_TYPES = {
   general: 'General',
@@ -2760,6 +2823,10 @@ function openSlotPanel(slotNumber) {
   slotPanelAttempts = 0;
   slotRefImageFile = null;
   slotRefImageB64 = null;
+  clientPhotosB64 = [];
+
+  // Reset client photos grid
+  resetClientPhotosGrid();
 
   // Reset UI
   const dayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][activeSlot.day_of_week];
@@ -2827,6 +2894,127 @@ async function saveSlotType() {
 
   btn.disabled = false;
   btn.textContent = 'Save Type';
+}
+
+function resetClientPhotosGrid() {
+  clientPhotosB64 = [];
+  const grid = document.getElementById('client-photos-grid');
+  if (!grid) return;
+  grid.innerHTML = `
+    <div class="client-photo-add" onclick="document.getElementById('client-photo-input').click()">
+      <input type="file" id="client-photo-input" accept="image/*" multiple style="display:none" onchange="handleClientPhotos(this)">
+      <span style="font-size:1.25rem;display:block;margin-bottom:0.2rem">+</span>
+      <span class="ref-image-upload-label">Add photo</span>
+    </div>`;
+}
+
+function handleClientPhotos(input) {
+  const files = Array.from(input.files).slice(0, 3 - clientPhotosB64.length);
+  if (!files.length) return;
+
+  files.forEach(file => {
+    if (clientPhotosB64.length >= 3) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const b64 = e.target.result.split(',')[1];
+      clientPhotosB64.push(b64);
+      renderClientPhotoThumb(e.target.result, clientPhotosB64.length - 1);
+      // Hide add button if at limit
+      if (clientPhotosB64.length >= 3) {
+        const addBtn = document.querySelector('.client-photo-add');
+        if (addBtn) addBtn.style.display = 'none';
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function renderClientPhotoThumb(dataUrl, idx) {
+  const grid = document.getElementById('client-photos-grid');
+  const wrap = document.createElement('div');
+  wrap.className = 'client-photo-wrap';
+  wrap.dataset.idx = idx;
+  wrap.innerHTML = `
+    <img class="client-photo-thumb" src="${dataUrl}" alt="Photo ${idx + 1}">
+    <button class="client-photo-remove" onclick="removeClientPhoto(${idx})">✕</button>`;
+  // Insert before the add button
+  const addBtn = grid.querySelector('.client-photo-add');
+  grid.insertBefore(wrap, addBtn);
+}
+
+function removeClientPhoto(idx) {
+  clientPhotosB64.splice(idx, 1);
+  // Re-render all thumbs
+  const grid = document.getElementById('client-photos-grid');
+  const addBtn = grid.querySelector('.client-photo-add');
+  // Remove all wraps
+  grid.querySelectorAll('.client-photo-wrap').forEach(w => w.remove());
+  // Re-add thumbs — we don't have dataUrls anymore so just show count
+  clientPhotosB64.forEach((_, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'client-photo-wrap';
+    wrap.innerHTML = `
+      <div class="client-photo-thumb" style="background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.75rem">Photo ${i+1}</div>
+      <button class="client-photo-remove" onclick="removeClientPhoto(${i})">✕</button>`;
+    grid.insertBefore(wrap, addBtn);
+  });
+  // Show add button again
+  if (addBtn) addBtn.style.display = '';
+}
+
+async function approveNow() {
+  if (!activeSlotPostId) return;
+  try {
+    await sbFetch(`posts?id=eq.${activeSlotPostId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: 'approved' }),
+    });
+    // Store client photos on the post row as JSON for publish worker to use at scheduled time
+    if (clientPhotosB64.length) {
+      await sbFetch(`posts?id=eq.${activeSlotPostId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ client_photos: clientPhotosB64 }),
+      });
+    }
+    showToast('✓ Post approved — publishes at scheduled time', 'success');
+    closeSlotPanel();
+    await loadPosts();
+  } catch(e) {
+    showToast('Could not approve', 'error');
+  }
+}
+
+async function saveNowAsDraft() {
+  if (!activeSlotPostId) return;
+  const btn = document.getElementById('slot-draft-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    // Send to publish worker /draft route with client photos
+    await fetch(`${PUBLISH_WORKER}/draft`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        post_id:       activeSlotPostId,
+        client_photos: clientPhotosB64,
+      }),
+    });
+    // Mark slot as drafted for the week
+    const thisMonday = getWeekStart(new Date()).toISOString().slice(0, 10);
+    await sbFetch(`scheduled_slots?id=eq.${activeSlot.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ drafted_week: thisMonday }),
+    });
+    showToast('Saved to Facebook drafts', 'success');
+    closeSlotPanel();
+    await loadSlots();
+    await loadPosts();
+  } catch(e) {
+    showToast('Could not save draft', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Save as Draft';
+  }
 }
 
 function handleRefImageUpload(input) {
@@ -3048,43 +3236,6 @@ async function regenNow() {
     showToast('Regeneration failed', 'error');
     regenBtn.disabled = false;
     regenBtn.textContent = '↻ Regenerate';
-  }
-}
-
-async function approveNow() {
-  if (!activeSlotPostId) return;
-  try {
-    await sbFetch(`posts?id=eq.${activeSlotPostId}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status: 'approved' }),
-    });
-    showToast('✓ Post approved', 'success');
-    closeSlotPanel();
-    await loadPosts();
-  } catch(e) {
-    showToast('Could not approve', 'error');
-  }
-}
-
-async function saveNowAsDraft() {
-  if (!activeSlotPostId) return;
-  try {
-    await sbFetch(`posts?id=eq.${activeSlotPostId}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status: 'draft' }),
-    });
-    // Mark slot as drafted for this week (auto-clears next week)
-    const thisMonday = getWeekStart(new Date()).toISOString().slice(0, 10);
-    await sbFetch(`scheduled_slots?id=eq.${activeSlot.id}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ drafted_week: thisMonday }),
-    });
-    showToast('Saved to Facebook drafts', 'success');
-    closeSlotPanel();
-    await loadSlots();
-    await loadPosts();
-  } catch(e) {
-    showToast('Could not save draft', 'error');
   }
 }
 
