@@ -1966,7 +1966,7 @@ const SUPABASE_URL = 'https://efylfnnshmaauhiwqaxj.supabase.co';
 const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // replace with anon key
 const CAPTION_WORKER = 'https://autopilot-caption.dreadpiratestudio.workers.dev';
 const IMAGE_WORKER   = 'https://autopilot-image.dreadpiratestudio.workers.dev';
-const VAPID_PUBLIC_KEY = 'YOUR_VAPID_PUBLIC_KEY'; // replace after generating
+const VAPID_PUBLIC_KEY = 'BEUKw3ABuC4Im6Ra8RALn-StCXR0SDiGERmywjFEOBtFA0zsH9G8jf7VSL9uj8SEDi0AjQveqWOb6fH6Bhro3m4';
 
 // ── STATE ──────────────────────────────────────────────────────────────────
 let client = null;
@@ -2736,14 +2736,7 @@ function dismissPushBanner() {
 
 async function togglePushNotifications() {
   if (client?.push_enabled) {
-    // Disable
-    await sbFetch(`clients?id=eq.${client.id}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ push_enabled: false }),
-    });
-    client.push_enabled = false;
-    updatePushUI();
-    showToast('Notifications disabled');
+    await disablePushNotifications();
   } else {
     await requestPushPermission();
   }
@@ -2767,20 +2760,62 @@ async function requestPushPermission() {
       applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
     });
 
-    await sbFetch(`clients?id=eq.${client.id}`, {
-      method: 'PATCH',
+    const subJson = sub.toJSON();
+
+    // Save to push_subscriptions table
+    await sbFetch('push_subscriptions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates,return=minimal',
+      },
       body: JSON.stringify({
-        push_enabled: true,
-        push_subscription: sub.toJSON(),
+        client_id:  client.id,
+        endpoint:   subJson.endpoint,
+        p256dh:     subJson.keys.p256dh,
+        auth:       subJson.keys.auth,
+        user_agent: navigator.userAgent.slice(0, 200),
+        is_active:  true,
       }),
     });
+
+    // Mark push enabled on client row
+    await sbFetch(`clients?id=eq.${client.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ push_enabled: true }),
+    });
+
     client.push_enabled = true;
-    client.push_subscription = sub.toJSON();
     updatePushUI();
     dismissPushBanner();
     showToast('🔔 Notifications enabled', 'success');
   } catch(e) {
+    console.error('Push subscribe error:', e);
     showToast('Could not enable push', 'error');
+  }
+}
+
+async function disablePushNotifications() {
+  try {
+    // Mark all subscriptions for this client inactive
+    await sbFetch(`push_subscriptions?client_id=eq.${client.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ is_active: false }),
+    });
+    await sbFetch(`clients?id=eq.${client.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ push_enabled: false }),
+    });
+    // Unsubscribe browser
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) await sub.unsubscribe();
+
+    client.push_enabled = false;
+    updatePushUI();
+    showToast('Notifications disabled');
+  } catch(e) {
+    showToast('Could not disable notifications', 'error');
   }
 }
 
@@ -3481,9 +3516,19 @@ async function init() {
     await loadClient();
     await Promise.all([loadSlots(), loadPosts()]);
     checkScheduleSetup();
-    // Register service worker for PWA
+    // Register service worker for PWA + push
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/autopilot-sw.js', { scope: '/' }).catch(() => {});
+      navigator.serviceWorker.register('/autopilot-sw.js', { scope: '/' })
+        .catch(e => console.warn('SW registration failed:', e));
+
+      // Handle expired push subscription
+      navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data?.type === 'PUSH_SUBSCRIPTION_EXPIRED') {
+          client.push_enabled = false;
+          updatePushUI();
+          showToast('Notification subscription expired — please re-enable', 'error');
+        }
+      });
     }
   } catch(e) {
     console.error('Init error:', e);

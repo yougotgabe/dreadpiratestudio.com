@@ -1,67 +1,85 @@
-// DPS Autopilot — Service Worker
-const CACHE_NAME = 'autopilot-v1';
-const STATIC_ASSETS = [
-  '/autopilot/dashboard/dashboard.html',
-];
+/**
+ * DPS Autopilot — Service Worker
+ * Handles push notifications and offline caching
+ */
 
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
-  );
+const CACHE_NAME = 'autopilot-v1';
+
+// ── Install ───────────────────────────────────────────────────────────────────
+self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
-  );
-  self.clients.claim();
+// ── Activate ──────────────────────────────────────────────────────────────────
+self.addEventListener('activate', event => {
+  event.waitUntil(clients.claim());
 });
 
-self.addEventListener('fetch', e => {
-  // Network first for API calls, cache fallback for static assets
-  if (e.request.url.includes('/rest/v1/') || e.request.url.includes('workers.dev')) {
-    return; // Let API calls go through normally
+// ── Push ──────────────────────────────────────────────────────────────────────
+self.addEventListener('push', event => {
+  if (!event.data) return;
+
+  let payload;
+  try {
+    payload = event.data.json();
+  } catch {
+    payload = {
+      title: 'DPS Autopilot',
+      body: event.data.text(),
+      url: '/autopilot/dashboard/dashboard.html',
+    };
   }
-  e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request))
-  );
-});
 
-// Push notification handler
-self.addEventListener('push', e => {
-  const data = e.data?.json() || {};
-  const title = data.title || 'DPS Autopilot';
   const options = {
-    body: data.body || 'A post is ready for your review.',
-    icon: '/icon-192.png',
-    badge: '/icon-72.png',
-    tag: data.tag || 'autopilot-review',
+    body:    payload.body || 'You have a new notification.',
+    icon:    '/icon-192.png',
+    badge:   '/icon-72.png',
+    tag:     payload.tag || 'autopilot-notification',
     renotify: true,
-    data: { url: data.url || '/dashboard.html' },
+    data: {
+      url: payload.url || '/autopilot/dashboard/dashboard.html',
+    },
     actions: [
-      { action: 'review', title: 'Review Now' },
-      { action: 'dismiss', title: 'Later' },
+      { action: 'open',    title: 'Review Post' },
+      { action: 'dismiss', title: 'Dismiss' },
     ],
   };
-  e.waitUntil(self.registration.showNotification(title, options));
+
+  event.waitUntil(
+    self.registration.showNotification(payload.title || 'DPS Autopilot ✦', options)
+  );
 });
 
-// Notification click handler
-self.addEventListener('notificationclick', e => {
-  e.notification.close();
-  if (e.action === 'dismiss') return;
-  const url = e.notification.data?.url || '/dashboard.html';
-  e.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-      for (const client of clientList) {
-        if (client.url.includes('dashboard') && 'focus' in client) {
+// ── Notification click ────────────────────────────────────────────────────────
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+
+  if (event.action === 'dismiss') return;
+
+  const url = event.notification.data?.url || '/autopilot/dashboard/dashboard.html';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+      // Focus existing tab if open
+      for (const client of windowClients) {
+        if (client.url.includes('/autopilot/') && 'focus' in client) {
           return client.focus();
         }
       }
+      // Otherwise open new tab
       if (clients.openWindow) return clients.openWindow(url);
+    })
+  );
+});
+
+// ── Push subscription change ──────────────────────────────────────────────────
+self.addEventListener('pushsubscriptionchange', event => {
+  // Subscription expired — notify the page to re-subscribe
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then(windowClients => {
+      windowClients.forEach(client => {
+        client.postMessage({ type: 'PUSH_SUBSCRIPTION_EXPIRED' });
+      });
     })
   );
 });
