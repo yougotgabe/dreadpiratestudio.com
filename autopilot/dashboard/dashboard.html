@@ -4727,11 +4727,24 @@ function openSlotPanel(slotNumber) {
   });
   document.getElementById('fb-event-section').style.display = activeType === 'event' ? 'block' : 'none';
 
-  // Hide result, show pre-actions
-  document.getElementById('slot-panel-result').classList.remove('visible');
-  document.getElementById('slot-panel-pre-actions').style.display = 'flex';
-  document.getElementById('slot-generate-btn').disabled = false;
-  document.getElementById('slot-generate-btn').textContent = '✦ Generate Now';
+  // Hide result, show pre-actions — but check if there's already a post for this slot
+  const existingPost = posts.find(p =>
+    p.slot_id === activeSlot.id &&
+    p.is_latest_attempt &&
+    (p.status === 'pending' || p.status === 'generating' || p.status === 'approved')
+  );
+
+  if (existingPost && existingPost.status !== 'generating') {
+    activeSlotPostId = existingPost.id;
+    slotPanelAttempts = existingPost.attempt_number || 1;
+    const maxAttempts = { starter: 3, growth: 4, daily: 5 }[client?.plan] || 3;
+    showSlotPanelResult(existingPost, maxAttempts);
+  } else {
+    document.getElementById('slot-panel-result').classList.remove('visible');
+    document.getElementById('slot-panel-pre-actions').style.display = 'flex';
+    document.getElementById('slot-generate-btn').disabled = false;
+    document.getElementById('slot-generate-btn').textContent = '✦ Generate Now';
+  }
 
   document.getElementById('slot-panel').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -5048,9 +5061,13 @@ async function pollForSlotResult(postId, maxAttempts) {
 function showSlotPanelResult(post, maxAttempts) {
   document.getElementById('slot-panel-pre-actions').style.display = 'none';
 
+  // Sync slotPanelAttempts to actual post attempt_number
+  slotPanelAttempts = post.attempt_number || slotPanelAttempts;
+
   if (post.image_url) {
     const img = document.getElementById('slot-result-image');
-    img.src = post.image_url;
+    // Cache bust to force image reload on regen
+    img.src = post.image_url + '?t=' + Date.now();
     img.style.display = 'block';
     document.getElementById('slot-result-no-image').style.display = 'none';
   } else {
