@@ -1781,8 +1781,61 @@
     }
     .cal-override-body { padding: 0.75rem 1rem 1rem; }
 
+    /* ── EXAMPLE POST TABS ── */
+    .cpt-example-tab {
+      font-family: 'Cinzel', serif;
+      font-size: 0.42rem;
+      letter-spacing: 0.1em;
+      width: 22px; height: 22px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      padding: 0;
+    }
+    .cpt-example-tab.selected { border-color: var(--gold-dim); color: var(--gold); background: rgba(201,168,76,0.08); }
+
+    /* ── COLOR SWATCH PICKER ── */
+    .color-swatch-row { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.4rem; }
+    .color-swatch-item {
+      display: flex; align-items: center; gap: 0.3rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.3rem 0.45rem;
+      flex: 1; min-width: 0; transition: border-color 0.2s;
+    }
+    .color-swatch-item.excluded { opacity: 0.4; }
+    .color-swatch-dot {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.15); flex-shrink: 0;
+      position: relative; cursor: pointer;
+    }
+    .color-swatch-dot input[type=color] {
+      position: absolute; inset: 0; opacity: 0;
+      width: 100%; height: 100%; cursor: pointer; border: none; padding: 0;
+    }
+    .color-swatch-label {
+      font-family: 'Cinzel', serif; font-size: 0.36rem; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); flex: 1;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .color-swatch-hex {
+      font-size: 0.65rem; font-family: monospace; width: 54px;
+      background: none; border: none; border-bottom: 1px solid var(--border2);
+      color: var(--muted); text-align: center; padding: 0;
+    }
+    .color-swatch-hex:focus { outline: none; border-color: var(--gold-dim); color: var(--white); }
+    .color-swatch-toggle {
+      width: 14px; height: 14px; border-radius: 3px;
+      border: 1px solid var(--border); background: none; cursor: pointer;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 9px; color: var(--gold); transition: background 0.15s, border-color 0.15s;
+    }
+    .color-swatch-toggle.on { background: rgba(201,168,76,0.2); border-color: var(--gold-dim); }
+
   </style>
-<body>
+</head>
 
 <!-- Topbar -->
 <header class="topbar">
@@ -2202,6 +2255,25 @@
       <button class="lib-post-action-btn" style="margin-top:0.5rem" id="manage-custom-types-btn" onclick="openCustomTypesPanel()">+ Manage Custom Types</button>
     </div>
 
+    <!-- Facebook Event picker (shown when Event type is selected) -->
+    <div class="slot-panel-section" id="fb-event-section" style="display:none">
+      <span class="slot-panel-label">Link Facebook Event <span style="color:var(--muted2);font-size:0.9em">(optional)</span></span>
+      <div id="fb-event-picker" style="margin-top:0.4rem">
+        <button class="lib-post-action-btn" style="width:100%;justify-content:center" onclick="loadFbEvents()">
+          📅 Browse Upcoming Events
+        </button>
+      </div>
+      <div id="fb-event-selected" style="display:none;margin-top:0.5rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.6rem 0.75rem">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem">
+          <div>
+            <div style="font-size:0.85rem;color:var(--white);font-weight:500" id="fb-event-name"></div>
+            <div style="font-size:0.75rem;color:var(--muted);margin-top:0.15rem" id="fb-event-meta"></div>
+          </div>
+          <button class="lib-post-action-btn" onclick="clearFbEvent()" style="flex-shrink:0">✕ Remove</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Manual prompt -->
     <div class="slot-panel-section">
       <span class="slot-panel-label">Custom Prompt <span style="color:var(--muted2);font-size:0.9em">(optional)</span></span>
@@ -2233,10 +2305,10 @@
           <input type="checkbox" id="slot-include-logo" checked style="accent-color:var(--gold)">
           Include logo in image
         </label>
-        <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.82rem;color:var(--muted)">
-          <input type="checkbox" id="slot-include-colors" checked style="accent-color:var(--gold)">
-          Use brand colors
-        </label>
+        <div>
+          <span class="slot-panel-label" style="font-size:0.72rem">Brand Colors</span>
+          <div class="color-swatch-row" id="pregen-color-swatches"></div>
+        </div>
       </div>
     </div>
 
@@ -2309,12 +2381,10 @@
         </label>
       </div>
 
-      <!-- Brand colors toggle -->
-      <div style="margin-bottom:0.75rem;display:flex;align-items:center;gap:0.6rem">
-        <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.82rem;color:var(--muted)">
-          <input type="checkbox" id="slot-include-colors" checked style="accent-color:var(--gold)">
-          Use brand colors
-        </label>
+      <!-- Brand colors per-generation -->
+      <div style="margin-bottom:0.75rem">
+        <span class="slot-panel-label" style="font-size:0.72rem">Brand Colors</span>
+        <div class="color-swatch-row" id="regen-color-swatches"></div>
       </div>
 
       <!-- Post type change for regen -->
@@ -2433,6 +2503,20 @@
   </div>
 </div>
 
+<!-- Facebook Events Picker Modal -->
+<div class="modal-overlay" id="fb-events-modal">
+  <div class="modal-sheet" style="max-height:80vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Upcoming Facebook Events</div>
+    <div id="fb-events-list" style="padding:0 1.25rem 1rem">
+      <div style="text-align:center;color:var(--muted);padding:2rem;font-size:0.85rem">Loading…</div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn secondary" onclick="closeModal('fb-events-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- Subscription Gate Panel -->
 <div class="modal-overlay" id="sub-gate-modal">
   <div class="modal-sheet">
@@ -2480,10 +2564,19 @@
           <textarea class="slot-panel-textarea" id="cpt-params" rows="3" placeholder="How should the AI write this type of post? Be specific about tone, structure, length…"></textarea>
         </div>
         <div style="margin-bottom:0.75rem">
-          <span class="slot-panel-label">Example Posts
-            <span class="field-info" tabindex="0">i<span class="field-tooltip"><strong>Example Posts</strong>Paste 1–3 real examples of posts in this style. The AI will study the voice, rhythm, and structure. These are the single most powerful thing you can provide.</span></span>
-          </span>
-          <textarea class="slot-panel-textarea" id="cpt-examples" rows="3" placeholder="Paste 1–3 example posts in this style…"></textarea>
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.35rem">
+            <span class="slot-panel-label">Example Posts
+              <span class="field-info" tabindex="0">i<span class="field-tooltip"><strong>Example Posts</strong>Paste real examples of posts in this style. The AI will study the voice, rhythm, and structure. These are the single most powerful thing you can provide.</span></span>
+            </span>
+            <div style="display:flex;gap:0.25rem;margin-left:auto">
+              <button class="cpt-example-tab selected" data-tab="1" onclick="switchExampleTab(1,this)">1</button>
+              <button class="cpt-example-tab" data-tab="2" onclick="switchExampleTab(2,this)">2</button>
+              <button class="cpt-example-tab" data-tab="3" onclick="switchExampleTab(3,this)">3</button>
+            </div>
+          </div>
+          <textarea class="slot-panel-textarea cpt-example-field" id="cpt-example-1" rows="3" placeholder="Example post 1…"></textarea>
+          <textarea class="slot-panel-textarea cpt-example-field" id="cpt-example-2" rows="3" placeholder="Example post 2…" style="display:none"></textarea>
+          <textarea class="slot-panel-textarea cpt-example-field" id="cpt-example-3" rows="3" placeholder="Example post 3…" style="display:none"></textarea>
         </div>
         <div style="color:var(--error);font-size:0.82rem;min-height:1rem;margin-bottom:0.25rem" id="cpt-error"></div>
         <button class="schedule-save-btn" id="cpt-save-btn" onclick="saveCustomType()">Add Custom Type</button>
@@ -3686,7 +3779,182 @@ function renderBrandProfile(profile, logo) {
   document.getElementById('brand-content').style.display = 'block';
 }
 
-// ── CUSTOM POST TYPES ──────────────────────────────────────────────────────
+// ── COLOR SWATCH SYSTEM ────────────────────────────────────────────────────
+// Per-generation color state: { primary: { hex, included }, secondary: ..., accent: ... }
+let genColors = {};
+
+function initColorSwatches(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const palette = _cachedBrandProfile?.color_palette || {};
+  const keys = Object.keys(palette);
+
+  if (!keys.length) {
+    container.innerHTML = `<span style="font-size:0.78rem;color:var(--muted);font-style:italic">No brand colors set.</span>`;
+    return;
+  }
+
+  // Init genColors from brand profile (reset each time panel opens)
+  keys.forEach(k => {
+    genColors[k] = { hex: palette[k], included: true };
+  });
+
+  renderColorSwatches(containerId);
+}
+
+function renderColorSwatches(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = Object.entries(genColors).map(([key, val]) => `
+    <div class="color-swatch-item ${val.included ? '' : 'excluded'}" id="swatch-item-${containerId}-${key}">
+      <div class="color-swatch-dot" style="background:${val.hex}" title="Click to change color">
+        <input type="color" value="${val.hex}"
+          onchange="updateSwatchColor('${containerId}','${key}',this.value)"
+          oninput="updateSwatchColor('${containerId}','${key}',this.value)">
+      </div>
+      <span class="color-swatch-label">${key}</span>
+      <input class="color-swatch-hex" type="text" value="${val.hex}" maxlength="7"
+        onchange="updateSwatchHex('${containerId}','${key}',this.value)"
+        onblur="updateSwatchHex('${containerId}','${key}',this.value)">
+      <button class="color-swatch-toggle ${val.included ? 'on' : ''}"
+        onclick="toggleSwatch('${containerId}','${key}')"
+        title="${val.included ? 'Exclude this color' : 'Include this color'}">
+        ${val.included ? '✓' : ''}
+      </button>
+    </div>`).join('');
+}
+
+function updateSwatchColor(containerId, key, hex) {
+  if (!genColors[key]) return;
+  genColors[key].hex = hex;
+  // Update hex input to match
+  const hexInput = document.querySelector(`#swatch-item-${containerId}-${key} .color-swatch-hex`);
+  if (hexInput) hexInput.value = hex;
+  // Update dot background
+  const dot = document.querySelector(`#swatch-item-${containerId}-${key} .color-swatch-dot`);
+  if (dot) dot.style.background = hex;
+}
+
+function updateSwatchHex(containerId, key, rawVal) {
+  let hex = rawVal.trim();
+  if (!hex.startsWith('#')) hex = '#' + hex;
+  if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return; // invalid, ignore
+  genColors[key].hex = hex;
+  // Update color picker
+  const picker = document.querySelector(`#swatch-item-${containerId}-${key} input[type=color]`);
+  if (picker) picker.value = hex;
+  const dot = document.querySelector(`#swatch-item-${containerId}-${key} .color-swatch-dot`);
+  if (dot) dot.style.background = hex;
+}
+
+function toggleSwatch(containerId, key) {
+  if (!genColors[key]) return;
+  genColors[key].included = !genColors[key].included;
+  renderColorSwatches(containerId);
+  // Sync the other container too so both panels stay in sync
+  const other = containerId === 'pregen-color-swatches' ? 'regen-color-swatches' : 'pregen-color-swatches';
+  renderColorSwatches(other);
+}
+
+function getActiveColorPalette() {
+  // Returns only the included colors as { key: hex } or null if none
+  const active = {};
+  Object.entries(genColors).forEach(([k, v]) => {
+    if (v.included) active[k] = v.hex;
+  });
+  return Object.keys(active).length ? active : null;
+}
+
+// ── EXAMPLE POST TABS ──────────────────────────────────────────────────────
+function switchExampleTab(num, btn) {
+  document.querySelectorAll('.cpt-example-field').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.cpt-example-tab').forEach(b => b.classList.remove('selected'));
+  document.getElementById(`cpt-example-${num}`).style.display = 'block';
+  btn.classList.add('selected');
+}
+
+// ── FACEBOOK EVENTS ────────────────────────────────────────────────────────
+let selectedFbEvent = null;
+
+function selectPostType(chip) {
+  document.querySelectorAll('#post-type-grid .post-type-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+  // Show/hide FB event section
+  const isEvent = chip.dataset.type === 'event';
+  document.getElementById('fb-event-section').style.display = isEvent ? 'block' : 'none';
+  if (!isEvent) clearFbEvent();
+}
+
+async function loadFbEvents() {
+  const token = getToken();
+  openModal('fb-events-modal');
+  document.getElementById('fb-events-list').innerHTML =
+    `<div style="text-align:center;color:var(--muted);padding:2rem;font-size:0.85rem">Loading events…</div>`;
+
+  try {
+    const res = await fetch(
+      `https://autopilot-onboarding.dreadpiratestudio.workers.dev/events?token=${encodeURIComponent(token)}`
+    );
+    const data = await res.json();
+
+    if (data.error) throw new Error(data.error);
+
+    if (!data.events?.length) {
+      document.getElementById('fb-events-list').innerHTML =
+        `<div style="text-align:center;color:var(--muted);padding:2rem;font-size:0.85rem">No upcoming events found on your Facebook Page.</div>`;
+      return;
+    }
+
+    document.getElementById('fb-events-list').innerHTML = data.events.map(ev => {
+      const start = new Date(ev.start_time);
+      const dateStr = start.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+      return `
+        <div style="border-bottom:1px solid var(--border2);padding:0.75rem 0;cursor:pointer" onclick="pickFbEvent(${JSON.stringify(ev).replace(/"/g,'&quot;')})">
+          <div style="font-size:0.88rem;color:var(--white);margin-bottom:0.2rem">${escHtml(ev.name)}</div>
+          <div style="font-size:0.75rem;color:var(--muted)">${dateStr}${ev.location ? ' · ' + escHtml(ev.location) : ''}</div>
+        </div>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('fb-events-list').innerHTML =
+      `<div style="text-align:center;color:var(--error);padding:2rem;font-size:0.85rem">Could not load events: ${e.message}</div>`;
+  }
+}
+
+function pickFbEvent(ev) {
+  selectedFbEvent = ev;
+  closeModal('fb-events-modal');
+
+  const start = new Date(ev.start_time);
+  const dateStr = start.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', hour:'numeric', minute:'2-digit' });
+
+  document.getElementById('fb-event-name').textContent = ev.name;
+  document.getElementById('fb-event-meta').textContent = dateStr + (ev.location ? ' · ' + ev.location : '');
+  document.getElementById('fb-event-selected').style.display = 'block';
+  document.getElementById('fb-event-picker').style.display = 'none';
+}
+
+function clearFbEvent() {
+  selectedFbEvent = null;
+  document.getElementById('fb-event-selected').style.display = 'none';
+  document.getElementById('fb-event-picker').style.display = 'block';
+}
+
+function buildFbEventContext() {
+  if (!selectedFbEvent) return null;
+  const ev = selectedFbEvent;
+  const start = new Date(ev.start_time);
+  const dateStr = start.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+  const timeStr = start.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+  let ctx = `LINKED FACEBOOK EVENT:\nName: ${ev.name}\nDate: ${dateStr}\nTime: ${timeStr}`;
+  if (ev.location) ctx += `\nLocation: ${ev.location}`;
+  if (ev.description) ctx += `\nDescription: ${ev.description.slice(0, 300)}`;
+  ctx += `\n\nInclude the event name, date, time, and location naturally in the post. Make it feel like an exciting invitation.`;
+  return ctx;
+}
+
+// ── CUSTOM POST TYPES (updated) ────────────────────────────────────────────
 let customPostTypes = []; // loaded on init
 
 async function loadCustomPostTypes() {
@@ -3762,10 +4030,12 @@ function updateCustomTypeFormVisibility() {
 }
 
 async function saveCustomType() {
-  const name    = document.getElementById('cpt-name').value.trim();
-  const desc    = document.getElementById('cpt-desc').value.trim();
-  const params  = document.getElementById('cpt-params').value.trim();
-  const examples= document.getElementById('cpt-examples').value.trim();
+  const name     = document.getElementById('cpt-name').value.trim();
+  const desc     = document.getElementById('cpt-desc').value.trim();
+  const params   = document.getElementById('cpt-params').value.trim();
+  const example1 = document.getElementById('cpt-example-1').value.trim();
+  const example2 = document.getElementById('cpt-example-2').value.trim();
+  const example3 = document.getElementById('cpt-example-3').value.trim();
   const errEl   = document.getElementById('cpt-error');
 
   if (!name) { errEl.textContent = 'Name is required.'; return; }
@@ -3780,11 +4050,13 @@ async function saveCustomType() {
     const result = await sbFetch('custom_post_types', {
       method: 'POST',
       body: JSON.stringify({
-        client_id:   client.id,
+        client_id:    client.id,
         name,
-        description: desc,
-        parameters:  params,
-        examples,
+        description:  desc,
+        parameters:   params,
+        example_post_1: example1,
+        example_post_2: example2,
+        example_post_3: example3,
       }),
     });
     const newType = Array.isArray(result) ? result[0] : result;
@@ -3795,6 +4067,9 @@ async function saveCustomType() {
     document.getElementById('cpt-name').value = '';
     document.getElementById('cpt-desc').value = '';
     document.getElementById('cpt-params').value = '';
+    document.getElementById('cpt-example-1').value = '';
+    document.getElementById('cpt-example-2').value = '';
+    document.getElementById('cpt-example-3').value = '';
     document.getElementById('cpt-examples').value = '';
     showToast('✦ Custom type added', 'success');
   } catch(e) {
@@ -4294,10 +4569,20 @@ function openSlotPanel(slotNumber) {
   document.getElementById('ref-image-thumb').src = '';
   document.getElementById('ref-image-input').value = '';
 
+  // Init color swatches
+  initColorSwatches('pregen-color-swatches');
+  initColorSwatches('regen-color-swatches');
+
+  // Reset FB event
+  clearFbEvent();
+  selectedFbEvent = null;
+
   // Set post type chips
-  document.querySelectorAll('.post-type-chip').forEach(chip => {
-    chip.classList.toggle('selected', chip.dataset.type === (activeSlot.post_type || 'general'));
+  const activeType = activeSlot.post_type || 'general';
+  document.querySelectorAll('#post-type-grid .post-type-chip').forEach(chip => {
+    chip.classList.toggle('selected', chip.dataset.type === activeType);
   });
+  document.getElementById('fb-event-section').style.display = activeType === 'event' ? 'block' : 'none';
 
   // Hide result, show pre-actions
   document.getElementById('slot-panel-result').classList.remove('visible');
@@ -4315,11 +4600,6 @@ function closeSlotPanel() {
   // Clear session ref image
   slotRefImageFile = null;
   slotRefImageB64 = null;
-}
-
-function selectPostType(chip) {
-  document.querySelectorAll('.post-type-chip').forEach(c => c.classList.remove('selected'));
-  chip.classList.add('selected');
 }
 
 function getSelectedPostType() {
@@ -4556,9 +4836,17 @@ async function generateNow() {
       : null;
     const resolvedType = customType ? 'general' : postType; // workers use built-in types; custom handled via manual_prompt
 
-    // Read logo/color toggles (from slot panel pre-gen — default true for first gen)
-    const includeLogo   = document.getElementById('slot-include-logo')?.checked ?? true;
-    const includeColors = document.getElementById('slot-include-colors')?.checked ?? true;
+    // Read logo/color toggles
+    const includeLogo    = document.getElementById('slot-include-logo')?.checked ?? true;
+    const activeColors   = getActiveColorPalette(); // null = no colors, object = selected colors
+
+    // Build manual prompt including FB event context if linked
+    const eventContext   = buildFbEventContext();
+    const fullManualPrompt = [
+      manualPrompt || '',
+      customType ? `POST TYPE NAME: ${customType.name}\nINSTRUCTIONS: ${customType.parameters || ''}\nEXAMPLES: ${customType.examples || ''}` : '',
+      eventContext || '',
+    ].filter(Boolean).join('\n\n') || null;
 
     // Fire caption worker with extra context
     await fetch(`${CAPTION_WORKER}/generate`, {
@@ -4568,11 +4856,8 @@ async function generateNow() {
         post_id:        postId,
         post_type:      resolvedType,
         include_logo:   includeLogo,
-        include_colors: includeColors,
-        manual_prompt: [
-          manualPrompt || '',
-          customType ? `POST TYPE NAME: ${customType.name}\nINSTRUCTIONS: ${customType.parameters || ''}\nEXAMPLES: ${customType.examples || ''}` : '',
-        ].filter(Boolean).join('\n\n') || null,
+        color_palette:  activeColors,
+        manual_prompt:  fullManualPrompt,
       }),
     });
 
@@ -4749,11 +5034,10 @@ async function regenNow() {
   }
 
   const notes        = document.getElementById('slot-regen-notes').value.trim();
-  const scope        = currentRegenScope; // 'both' | 'image' | 'caption'
+  const scope        = currentRegenScope;
   const regenType    = getSelectedRegenType();
   const includeLogo  = document.getElementById('slot-include-logo').checked;
-  const includeColors= document.getElementById('slot-include-colors').checked;
-  const sendPrevImg  = document.getElementById('slot-send-prev-image').checked;
+  const activeColors = getActiveColorPalette();
 
   const regenBtn = document.getElementById('slot-regen-btn');
   regenBtn.disabled = true;
@@ -4821,7 +5105,7 @@ async function regenNow() {
           notes,
           post_type:      regenType,
           include_logo:   includeLogo,
-          include_colors: includeColors,
+          color_palette:  activeColors,
         }),
       });
 
@@ -4890,7 +5174,7 @@ async function regenNow() {
         notes,
         ref_image_b64:  prevImageB64 || slotRefImageB64 || null,
         include_logo:   includeLogo,
-        include_colors: includeColors,
+        color_palette:  activeColors,
       }),
     });
 
