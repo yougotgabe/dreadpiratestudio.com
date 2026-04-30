@@ -47,7 +47,11 @@ async function handleGenerate(request, env) {
   if (!profile) return json({ error: 'Brand profile not found' }, 404);
 
   const type = post_type || post.post_category || 'general';
-  const systemPrompt = buildCaptionPrompt(profile, type, manual_prompt);
+
+  // Fetch product/offering sheet data if configured
+  const sheetContext = await fetchSheetContext(profile, type, env);
+
+  const systemPrompt = buildCaptionPrompt(profile, type, manual_prompt, sheetContext);
 
   const recentApproved = await getRecentApproved(post.client_id, env, 8);
   const recentRejected = await getRecentRejected(post.client_id, env, 10);
@@ -82,7 +86,11 @@ async function handleRegenerate(request, env) {
   if (!profile) return json({ error: 'Brand profile not found' }, 404);
 
   const type = post_type || post.post_category || 'general';
-  const systemPrompt = buildCaptionPrompt(profile, type, null);
+
+  // Fetch product/offering sheet data if configured
+  const sheetContext = await fetchSheetContext(profile, type, env);
+
+  const systemPrompt = buildCaptionPrompt(profile, type, null, sheetContext);
 
   const recentApproved = await getRecentApproved(post.client_id, env, 8);
   const recentRejected = await getRecentRejected(post.client_id, env, 10);
@@ -168,7 +176,7 @@ Write the image generation prompt now.`;
 
 // ─── Caption Prompt Building ───────────────────────────────────────────────────
 
-function buildCaptionPrompt(profile, type, manualPrompt) {
+function buildCaptionPrompt(profile, type, manualPrompt, sheetContext = null) {
   const typeInstructions = {
     general: `Write a natural, on-brand post that showcases the business personality and value. No hard sell — let the voice do the work. The goal is to feel like a real person wrote this, not a marketing department.`,
     event:   `Write a post announcing or building anticipation for an upcoming event, special, or happening at the business. Create genuine excitement — give people a reason to show up or pay attention.`,
@@ -193,6 +201,11 @@ function buildCaptionPrompt(profile, type, manualPrompt) {
 EXAMPLE POSTS BY TYPE — use these to calibrate voice, rhythm, and style. Do not repeat them verbatim. Study the sentence structure, tone, and personality and apply that same feel to the new post:
 ${profile.example_posts}`;
   }
+
+  const sheetSection = sheetContext ? `
+━━ PRODUCTS & OFFERINGS ━━
+The following is real, current data about this business's products, services, or pricing. Use it to make posts specific and accurate — mention real items, real prices, real deals when relevant to the post type:
+${sheetContext}` : '';
 
   return `You are a social media copywriter working for a local business. Your job is to write ONE Facebook post caption that sounds exactly like this specific business — not a generic small business, not a template, this one.
 
@@ -223,7 +236,7 @@ ${profile.off_limits || 'None specified'}
 ━━ EXTRA CONTEXT ━━
 This is background knowledge that should inform the writing without necessarily appearing in every post. Use it to make the content feel specific and real:
 ${profile.extra_context || 'None provided'}
-${exampleSection}
+${exampleSection}${sheetSection}
 
 ━━ THIS POST ━━
 Post type: ${type.toUpperCase()}
@@ -265,6 +278,120 @@ function buildMessages(recentApproved, recentRejected, feedbackNote = '') {
   }
 
   return [{ role: 'user', content: userContent }];
+}
+
+// ─── Sheet Context ────────────────────────────────────────────────────────────
+
+// Sheet types and which post types benefit from product context
+const SHEET_RELEVANT_TYPES = ['general', 'cta', 'event', 'joke'];
+
+const SHEET_CONFIGS = {
+  restaurant: {
+    label: 'Restaurant / Café / Bar',
+    columns: ['Category', 'Item', 'Description', 'Price', 'Notes'],
+    prompt: 'Menu items, specials, and pricing',
+  },
+  retail: {
+    label: 'Retail Shop',
+    columns: ['Category', 'Product', 'Description', 'Price', 'Sale Price'],
+    prompt: 'Products and pricing',
+  },
+  salon: {
+    label: 'Salon / Spa / Barber',
+    columns: ['Service', 'Description', 'Duration', 'Price', 'Add-ons'],
+    prompt: 'Services and pricing',
+  },
+  fitness: {
+    label: 'Fitness / Gym / Studio',
+    columns: ['Offering', 'Description', 'Price', 'Schedule', 'Notes'],
+    prompt: 'Memberships, classes, and pricing',
+  },
+  auto: {
+    label: 'Auto Service',
+    columns: ['Service', 'Description', 'Starting Price', 'Duration', 'Notes'],
+    prompt: 'Services and pricing',
+  },
+  contractor: {
+    label: 'Contractor / Trade',
+    columns: ['Service', 'Description', 'Starting Rate', 'Notes'],
+    prompt: 'Services and rates',
+  },
+  professional: {
+    label: 'Professional Services',
+    columns: ['Service', 'Description', 'Rate / Package', 'Notes'],
+    prompt: 'Services and rates',
+  },
+};
+
+async function fetchSheetContext(profile, postType, env) {
+  if (!profile.sheet_url) return null;
+
+  // Convert Google Sheets share URL to CSV export URL
+  let csvUrl;
+  try {
+    const match = profile.sheet_url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    if (!match) return null;
+    const sheetId = match[1];
+    csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=0`;
+  } catch(e) {
+    console.warn('Could not parse sheet URL:', e.message);
+    return null;
+  }
+
+  try {
+    const res = await fetch(csvUrl, {
+      headers: { 'User-Agent': 'DPS-Autopilot/1.0' },
+      redirect: 'follow',
+    });
+    if (!res.ok) {
+      console.warn('Sheet fetch failed:', res.status);
+      return null;
+    }
+    const csv = await res.text();
+    return parseSheetToContext(csv, profile.sheet_type);
+  } catch(e) {
+    console.warn('Sheet fetch error:', e.message);
+    return null;
+  }
+}
+
+function parseSheetToContext(csv, sheetType) {
+  const lines = csv.split('\n').filter(l => l.trim());
+  if (lines.length < 2) return null;
+
+  // Parse CSV rows (handle quoted fields)
+  const parseRow = line => {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    for (const ch of line) {
+      if (ch === '"') { inQuotes = !inQuotes; continue; }
+      if (ch === ',' && !inQuotes) { result.push(current.trim()); current = ''; continue; }
+      current += ch;
+    }
+    result.push(current.trim());
+    return result;
+  };
+
+  const headers = parseRow(lines[0]);
+  const rows = lines.slice(1).map(parseRow).filter(r => r.some(c => c));
+
+  if (!rows.length) return null;
+
+  // Format as readable context — limit to 30 items to keep tokens reasonable
+  const config = SHEET_CONFIGS[sheetType];
+  const label = config ? config.label : 'Products & Services';
+
+  const formatted = rows.slice(0, 30).map(row => {
+    return headers.map((h, i) => {
+      const val = row[i] || '';
+      return val ? `${h}: ${val}` : null;
+    }).filter(Boolean).join(' | ');
+  }).filter(Boolean).join('\n');
+
+  if (!formatted) return null;
+
+  return `[${label}]\n${formatted}`;
 }
 
 // ─── Claude API ───────────────────────────────────────────────────────────────
