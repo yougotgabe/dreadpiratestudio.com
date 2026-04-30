@@ -2712,7 +2712,7 @@ function reconnectFacebook() {
   window.location.href = `https://autopilot-oauth.dreadpiratestudio.workers.dev/autopilot/oauth/start?token=${token}`;
 }
 
-
+async function openManageSubscription() {
   const token = getToken();
   if (!token) return;
   showToast('Opening Stripe portal…');
