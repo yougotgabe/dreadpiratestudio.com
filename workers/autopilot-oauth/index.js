@@ -47,7 +47,7 @@ export default {
       const params = new URLSearchParams({
         client_id:     env.FB_APP_ID,
         redirect_uri:  env.FB_REDIRECT_URI,
-        scope:         'pages_manage_posts,pages_read_engagement,pages_read_user_content,pages_show_list,public_profile',
+        scope:         'pages_manage_posts,pages_read_engagement,pages_read_user_content,pages_show_list,public_profile,instagram_basic,instagram_business_basic,instagram_business_content_publish',
         response_type: 'code',
         state:         btoa(state),  // base64 encode so it's URL-safe
       });
@@ -107,9 +107,9 @@ export default {
 
       const userToken = tokenData.access_token;
 
-      // Fetch pages this user manages
+      // Fetch pages this user manages — include instagram_business_account
       const pagesRes  = await fetch(
-        `${FACEBOOK_PAGES_URL}?access_token=${userToken}&fields=id,name,access_token,category`
+        `${FACEBOOK_PAGES_URL}?access_token=${userToken}&fields=id,name,access_token,category,instagram_business_account`
       );
       const pagesData = await pagesRes.json();
 
@@ -134,21 +134,39 @@ export default {
         }
       }
 
-      // Upsert each page token into Supabase
-      // Uses page_id as the conflict key so reconnecting updates the token
-      const pages = pagesData.data.map((page) => ({
-        client_id:  clientId,   // null if no token was passed — still saves the page
-        page_id:    page.id,
-        page_name:  page.name,
-        page_token: page.access_token,
-        category:   page.category || '',
-        is_active:  true,
-        updated_at: new Date().toISOString(),
+      // For each page, fetch Instagram username if linked — non-fatal if it fails
+      const pages = await Promise.all(pagesData.data.map(async (page) => {
+        let igUserId   = page.instagram_business_account?.id || null;
+        let igUsername = null;
+
+        if (igUserId) {
+          try {
+            const igRes  = await fetch(
+              `https://graph.facebook.com/v21.0/${igUserId}?fields=username&access_token=${page.access_token}`
+            );
+            const igData = await igRes.json();
+            igUsername = igData.username || null;
+          } catch(e) {
+            console.warn('Could not fetch IG username, skipping:', e.message);
+          }
+        }
+
+        return {
+          client_id:           clientId,
+          page_id:             page.id,
+          page_name:           page.name,
+          page_token:          page.access_token,
+          category:            page.category || '',
+          is_active:           true,
+          updated_at:          new Date().toISOString(),
+          instagram_user_id:   igUserId,
+          instagram_username:  igUsername,
+        };
       }));
 
       try {
         await supabase(env, 'POST',
-          '/rest/v1/facebook_tokens',
+          '/rest/v1/facebook_tokens?on_conflict=page_id',
           pages,
           { Prefer: 'resolution=merge-duplicates,return=minimal' }
         );
@@ -175,8 +193,9 @@ export default {
 
       // Success — send back to dashboard if we know who they are,
       // otherwise back to the autopilot landing page
+      const igConnected = pages.some(p => p.instagram_user_id);
       const successDest = clientToken
-        ? `${SITE_URL}/autopilot/dashboard/dashboard.html?token=${clientToken}&fb_connected=true`
+        ? `${SITE_URL}/autopilot/dashboard/dashboard.html?token=${clientToken}&fb_connected=true${igConnected ? '&ig_connected=true' : ''}`
         : `${SITE_URL}/autopilot/?connected=true&pages=${pages.length}`;
 
       return Response.redirect(successDest, 302);
