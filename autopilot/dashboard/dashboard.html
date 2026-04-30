@@ -2007,7 +2007,10 @@
           <div class="settings-label">Facebook</div>
           <div class="settings-sub" id="fb-connection-status">Checking…</div>
         </div>
-        <button class="lib-post-action-btn" id="fb-reconnect-btn" onclick="reconnectFacebook()" style="flex-shrink:0">Reconnect</button>
+        <div style="display:flex;gap:0.4rem;flex-shrink:0">
+          <button class="lib-post-action-btn" id="fb-reconnect-btn" onclick="reconnectFacebook()">Reconnect</button>
+          <button class="lib-post-action-btn" id="fb-disconnect-btn" onclick="disconnectFacebook()" style="display:none;color:var(--error);border-color:rgba(192,57,43,0.3)">Disconnect</button>
+        </div>
       </div>
       <div class="settings-row">
         <div>
@@ -2832,9 +2835,15 @@ async function loadConnections() {
     if (token?.page_name) {
       fbStatus.textContent = token.page_name;
       fbStatus.style.color = 'var(--success)';
+      document.getElementById('fb-reconnect-btn').textContent = 'Reconnect';
+      document.getElementById('fb-reconnect-btn').onclick = reconnectFacebook;
+      document.getElementById('fb-disconnect-btn').style.display = 'block';
     } else {
       fbStatus.textContent = 'Not connected';
       fbStatus.style.color = 'var(--error)';
+      document.getElementById('fb-reconnect-btn').textContent = 'Connect';
+      document.getElementById('fb-reconnect-btn').onclick = reconnectFacebook;
+      document.getElementById('fb-disconnect-btn').style.display = 'none';
     }
 
     if (token?.instagram_user_id) {
@@ -2844,7 +2853,7 @@ async function loadConnections() {
       igBadge.style.color = 'var(--success)';
       igBadge.style.borderColor = 'rgba(39,174,96,0.3)';
     } else {
-      igStatus.textContent = 'Not connected — link an Instagram Business account to your Facebook Page';
+      igStatus.innerHTML = `Not linked — <a href="https://www.facebook.com/help/502981923235522" target="_blank" style="color:var(--gold);text-decoration:underline">connect an Instagram Business account</a> to your Facebook Page, then reconnect above.`;
       igStatus.style.color = 'var(--muted)';
       igBadge.textContent = 'Not linked';
       igBadge.style.color = 'var(--muted)';
@@ -2858,6 +2867,17 @@ function reconnectFacebook() {
   const token = getToken();
   if (!token) return;
   window.location.href = `https://autopilot-oauth.dreadpiratestudio.workers.dev/autopilot/oauth/start?token=${token}`;
+}
+
+async function disconnectFacebook() {
+  if (!confirm('Disconnect your Facebook Page? Posts will stop publishing until you reconnect.')) return;
+  try {
+    await sbFetch(`facebook_tokens?client_id=eq.${client.id}`, { method: 'DELETE' });
+    showToast('Facebook disconnected', 'success');
+    loadConnections();
+  } catch(e) {
+    showToast('Could not disconnect', 'error');
+  }
 }
 
 async function openManageSubscription() {
