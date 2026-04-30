@@ -1944,6 +1944,26 @@
     </div>
 
     <div class="section-header">
+      <span class="section-title">Connections</span>
+    </div>
+    <div class="settings-group" id="connections-group">
+      <div class="settings-row">
+        <div>
+          <div class="settings-label">Facebook</div>
+          <div class="settings-sub" id="fb-connection-status">Checking…</div>
+        </div>
+        <button class="lib-post-action-btn" id="fb-reconnect-btn" onclick="reconnectFacebook()" style="flex-shrink:0">Reconnect</button>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-label">Instagram</div>
+          <div class="settings-sub" id="ig-connection-status">Checking…</div>
+        </div>
+        <span id="ig-status-badge" style="flex-shrink:0;font-family:'Cinzel',serif;font-size:0.38rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.3em 0.7em;border-radius:6px;border:1px solid var(--border2);color:var(--muted)">—</span>
+      </div>
+    </div>
+
+    <div class="section-header">
       <span class="section-title">Schedule</span>
     </div>
     <div class="settings-group" id="schedule-display">
@@ -2649,7 +2669,50 @@ async function loadClient() {
   updatePushUI();
 }
 
-async function openManageSubscription() {
+async function loadConnections() {
+  if (!client) return;
+  try {
+    const rows = await sbFetch(
+      `facebook_tokens?client_id=eq.${client.id}&select=page_id,page_name,instagram_user_id,instagram_username&limit=1`
+    );
+    const token = Array.isArray(rows) ? rows[0] : null;
+
+    const fbStatus = document.getElementById('fb-connection-status');
+    const igStatus = document.getElementById('ig-connection-status');
+    const igBadge  = document.getElementById('ig-status-badge');
+
+    if (token?.page_name) {
+      fbStatus.textContent = token.page_name;
+      fbStatus.style.color = 'var(--success)';
+    } else {
+      fbStatus.textContent = 'Not connected';
+      fbStatus.style.color = 'var(--error)';
+    }
+
+    if (token?.instagram_user_id) {
+      igStatus.textContent = token.instagram_username ? `@${token.instagram_username}` : 'Connected';
+      igStatus.style.color = 'var(--success)';
+      igBadge.textContent = 'Connected';
+      igBadge.style.color = 'var(--success)';
+      igBadge.style.borderColor = 'rgba(39,174,96,0.3)';
+    } else {
+      igStatus.textContent = 'Not connected — link an Instagram Business account to your Facebook Page';
+      igStatus.style.color = 'var(--muted)';
+      igBadge.textContent = 'Not linked';
+      igBadge.style.color = 'var(--muted)';
+    }
+  } catch(e) {
+    console.warn('Could not load connections:', e);
+  }
+}
+
+function reconnectFacebook() {
+  const token = getToken();
+  if (!token) return;
+  window.location.href = `https://autopilot-oauth.dreadpiratestudio.workers.dev/autopilot/oauth/start?token=${token}`;
+}
+
+
   const token = getToken();
   if (!token) return;
   showToast('Opening Stripe portal…');
@@ -5003,15 +5066,26 @@ async function init() {
   const urlToken = urlParams.get('token');
   if (urlToken) {
     localStorage.setItem('autopilot_token', urlToken);
-    // Clean token from URL without reload
     const cleanUrl = window.location.pathname;
     window.history.replaceState({}, '', cleanUrl);
   }
 
+  // Show connection success toasts when returning from OAuth
+  const fbConnected = urlParams.get('fb_connected');
+  const igConnected = urlParams.get('ig_connected');
+  const extended    = urlParams.get('extended');
+  if (fbConnected || igConnected || extended) {
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
   try {
     await loadClient();
-    await Promise.all([loadSlots(), loadPosts(), loadBrandProfile(), loadCustomPostTypes()]);
+    await Promise.all([loadSlots(), loadPosts(), loadBrandProfile(), loadCustomPostTypes(), loadConnections()]);
     checkScheduleSetup();
+
+    // Show post-OAuth toasts
+    if (fbConnected) showToast(igConnected ? '✦ Facebook + Instagram connected' : '✦ Facebook connected', 'success');
+    else if (extended) showToast('✦ Subscription extended one month', 'success');
     // Register service worker for PWA + push
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/autopilot-sw.js', { scope: '/' })
