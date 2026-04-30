@@ -47,7 +47,7 @@ export default {
       const params = new URLSearchParams({
         client_id:     env.FB_APP_ID,
         redirect_uri:  env.FB_REDIRECT_URI,
-        scope:         'pages_manage_posts,pages_read_engagement,pages_read_user_content,pages_show_list,public_profile,instagram_basic,instagram_business_basic,instagram_business_content_publish',
+        scope:         'pages_manage_posts,pages_read_engagement,pages_read_user_content,pages_show_list,public_profile,instagram_basic,instagram_content_publish',
         response_type: 'code',
         state:         btoa(state),  // base64 encode so it's URL-safe
       });
