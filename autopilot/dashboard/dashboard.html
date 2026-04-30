@@ -1602,6 +1602,76 @@
     }
     .lib-logo-name { font-size: 0.82rem; color: var(--muted); }
 
+    /* ── FIELD TOOLTIPS ── */
+    .field-info {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 1px solid var(--muted2);
+      color: var(--muted2);
+      font-size: 9px;
+      font-family: sans-serif;
+      cursor: pointer;
+      margin-left: 0.35rem;
+      vertical-align: middle;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .field-info:hover { border-color: var(--gold-dim); color: var(--gold); }
+    .field-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.78rem;
+      color: var(--white);
+      line-height: 1.5;
+      width: 220px;
+      z-index: 100;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      text-align: left;
+      font-family: 'Marcellus', serif;
+    }
+    .field-tooltip strong {
+      display: block;
+      color: var(--gold-dim);
+      font-family: 'Cinzel', serif;
+      font-size: 0.38rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+    .field-info:hover .field-tooltip,
+    .field-info:focus .field-tooltip { display: block; }
+
+  </style>
+    .regen-scope-btn {
+      font-family: 'Cinzel', serif;
+      font-size: 0.42rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      padding: 0.5em 1em;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      flex: 1;
+    }
+    .regen-scope-btn.selected {
+      border-color: var(--gold-dim);
+      color: var(--gold);
+      background: rgba(201,168,76,0.08);
+    }
+
   </style>
 </head>
 <body>
@@ -1991,9 +2061,23 @@
 
     <!-- Result area (post-generation) -->
     <div class="slot-panel-result" id="slot-panel-result">
-      <span class="slot-panel-label">Generated Post</span>
-      <img class="slot-panel-result-image" id="slot-result-image" src="" alt="Generated">
-      <div class="slot-panel-result-caption" id="slot-result-caption"></div>
+
+      <!-- Generated image -->
+      <div style="position:relative;margin-bottom:0.75rem">
+        <img class="slot-panel-result-image" id="slot-result-image" src="" alt="Generated" style="display:none">
+        <div id="slot-result-no-image" style="display:none;padding:1rem;text-align:center;color:var(--muted);font-size:0.85rem;font-style:italic">No image generated.</div>
+      </div>
+
+      <!-- Editable caption -->
+      <div style="margin-bottom:0.75rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem">
+          <span class="slot-panel-label">Caption</span>
+          <button class="lib-post-action-btn" id="slot-caption-edit-btn" onclick="toggleCaptionEdit()">✎ Edit</button>
+        </div>
+        <div class="slot-panel-result-caption" id="slot-result-caption"></div>
+        <textarea class="slot-panel-textarea" id="slot-caption-editor" rows="4" style="display:none;margin-top:0.4rem" placeholder="Edit caption…"></textarea>
+        <button class="schedule-save-btn" id="slot-caption-save-btn" style="display:none;margin-top:0.4rem;font-size:0.75rem;padding:0.5em 1em" onclick="saveCaptionEdit()">Save Caption</button>
+      </div>
 
       <!-- Additional client photos -->
       <div style="margin-bottom:0.75rem">
@@ -2008,12 +2092,68 @@
       </div>
 
       <div class="slot-panel-attempts-left" id="slot-attempts-left"></div>
+
+      <!-- What to regenerate -->
+      <div style="margin-bottom:0.5rem">
+        <span class="slot-panel-label">What to Regenerate</span>
+        <div style="display:flex;gap:0.5rem;margin-top:0.4rem;flex-wrap:wrap">
+          <button class="regen-scope-btn selected" id="scope-both" data-scope="both" onclick="selectRegenScope(this)">Both</button>
+          <button class="regen-scope-btn" id="scope-image" data-scope="image" onclick="selectRegenScope(this)">Image Only</button>
+          <button class="regen-scope-btn" id="scope-caption" data-scope="caption" onclick="selectRegenScope(this)">Caption Only</button>
+        </div>
+      </div>
+
+      <!-- Send prev image as reference (shown for image regen) -->
+      <div id="slot-prev-image-ref-row" style="margin-bottom:0.5rem;display:flex;align-items:center;gap:0.6rem">
+        <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.82rem;color:var(--muted)">
+          <input type="checkbox" id="slot-send-prev-image" checked style="accent-color:var(--gold)">
+          Send previous image as reference
+        </label>
+      </div>
+
+      <!-- Logo toggle -->
+      <div style="margin-bottom:0.5rem;display:flex;align-items:center;gap:0.6rem">
+        <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.82rem;color:var(--muted)">
+          <input type="checkbox" id="slot-include-logo" checked style="accent-color:var(--gold)">
+          Include logo in image
+        </label>
+      </div>
+
+      <!-- Brand colors toggle -->
+      <div style="margin-bottom:0.75rem;display:flex;align-items:center;gap:0.6rem">
+        <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.82rem;color:var(--muted)">
+          <input type="checkbox" id="slot-include-colors" checked style="accent-color:var(--gold)">
+          Use brand colors
+        </label>
+      </div>
+
+      <!-- Post type change for regen -->
+      <div style="margin-bottom:0.5rem">
+        <span class="slot-panel-label">Change Post Type <span style="color:var(--muted2);font-size:0.9em">(optional)</span></span>
+        <div class="post-type-grid" id="regen-type-grid" style="margin-top:0.4rem">
+          <div class="post-type-chip selected" data-type="general" onclick="selectRegenType(this)">
+            <span class="post-type-chip-name">General</span>
+          </div>
+          <div class="post-type-chip" data-type="event" onclick="selectRegenType(this)">
+            <span class="post-type-chip-name">Event</span>
+          </div>
+          <div class="post-type-chip" data-type="cta" onclick="selectRegenType(this)">
+            <span class="post-type-chip-name">Call to Action</span>
+          </div>
+          <div class="post-type-chip" data-type="joke" onclick="selectRegenType(this)">
+            <span class="post-type-chip-name">Joke / Pun</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Regen notes -->
       <textarea
         class="slot-panel-regen-notes"
         id="slot-regen-notes"
         placeholder="What should change? e.g. warmer colors, mention our weekend special…"
         rows="2"
       ></textarea>
+
       <div class="slot-panel-actions" style="padding:0 0 0.5rem">
         <button class="slot-panel-btn danger" id="slot-regen-btn" onclick="regenNow()">↻ Regenerate</button>
         <button class="slot-panel-btn secondary" id="slot-draft-btn" onclick="saveNowAsDraft()">Save as Draft</button>
@@ -2058,6 +2198,51 @@
   </div>
 </div>
 
+<!-- Post Edit Panel (for approved/pending posts) -->
+<div class="slot-panel-overlay" id="post-edit-panel">
+  <div class="slot-panel-sheet">
+    <div class="modal-handle" style="margin:0.75rem auto 0"></div>
+    <div class="slot-panel-header">
+      <span class="slot-panel-title" id="post-edit-panel-title">Edit Post</span>
+      <button class="slot-panel-close" onclick="closePostEditPanel()">✕</button>
+    </div>
+
+    <div style="padding:0 1.25rem 0.5rem">
+
+      <!-- Image preview -->
+      <div id="pep-image-wrap" style="margin-bottom:0.75rem;display:none">
+        <img id="pep-image" src="" alt="" style="width:100%;border-radius:10px;border:1px solid var(--border)">
+      </div>
+
+      <!-- Caption edit -->
+      <div style="margin-bottom:0.75rem">
+        <span class="slot-panel-label">Caption</span>
+        <textarea class="slot-panel-textarea" id="pep-caption" rows="5" placeholder="Caption…"></textarea>
+      </div>
+
+      <!-- Upload photos -->
+      <div style="margin-bottom:0.75rem">
+        <span class="slot-panel-label">Add Your Own Photos <span style="color:var(--muted2);font-size:0.9em">(optional — up to 3)</span></span>
+        <div class="client-photos-grid" id="pep-photos-grid">
+          <div class="client-photo-add" onclick="document.getElementById('pep-photo-input').click()">
+            <input type="file" id="pep-photo-input" accept="image/*" multiple style="display:none" onchange="handlePepPhotos(this)">
+            <span style="font-size:1.25rem;display:block;margin-bottom:0.2rem">+</span>
+            <span class="ref-image-upload-label">Add photo</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="color:var(--error);font-size:0.82rem;min-height:1rem;margin-bottom:0.25rem" id="pep-error"></div>
+
+      <div style="display:flex;gap:0.5rem;padding-bottom:1.5rem">
+        <button class="slot-panel-btn secondary" style="flex:1" onclick="closePostEditPanel()">Cancel</button>
+        <button class="slot-panel-btn success" style="flex:1" id="pep-save-btn" onclick="savePostEdit()">Save Changes</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <!-- Brand Edit Panel -->
 <div class="slot-panel-overlay" id="brand-edit-panel">
   <div class="slot-panel-sheet">
@@ -2070,47 +2255,65 @@
     <div style="padding:0 1.25rem 1rem">
 
       <div style="margin-top:1rem">
-        <span class="slot-panel-label">Business Name</span>
+        <span class="slot-panel-label">Business Name
+          <span class="field-info" tabindex="0">i<span class="field-tooltip"><strong>Business Name</strong>Your official business name as you want it to appear. The AI uses this in captions and to understand context. Keep it exactly as customers know you.</span></span>
+        </span>
         <input class="schedule-time-input" style="width:100%;max-width:none" type="text" id="bep-business-name" placeholder="Your business name">
       </div>
 
       <div style="margin-top:1rem">
-        <span class="slot-panel-label">Industry</span>
+        <span class="slot-panel-label">Industry
+          <span class="field-info" tabindex="0">i<span class="field-tooltip"><strong>Industry</strong>Your business category. Examples: Restaurant, Retail Boutique, Hair Salon, Auto Repair, Fitness Studio. Be specific — "Coffee Shop" beats "Food Service."</span></span>
+        </span>
         <input class="schedule-time-input" style="width:100%;max-width:none" type="text" id="bep-industry" placeholder="e.g. Restaurant, Retail, Fitness…">
       </div>
 
       <div style="margin-top:1rem">
-        <span class="slot-panel-label">Location</span>
+        <span class="slot-panel-label">Location
+          <span class="field-info" tabindex="0">i<span class="field-tooltip"><strong>Location</strong>Your city and state. The AI uses this to write posts that feel local and relevant. Example: "Willmar, MN" or "Austin, TX."</span></span>
+        </span>
         <input class="schedule-time-input" style="width:100%;max-width:none" type="text" id="bep-location" placeholder="City, State">
       </div>
 
       <div style="margin-top:1rem">
-        <span class="slot-panel-label">Website</span>
+        <span class="slot-panel-label">Website
+          <span class="field-info" tabindex="0">i<span class="field-tooltip"><strong>Website</strong>Optional but helpful for CTAs. When the AI writes "visit us online," it can reference your actual URL.</span></span>
+        </span>
         <input class="schedule-time-input" style="width:100%;max-width:none" type="url" id="bep-website" placeholder="https://…">
       </div>
 
       <div style="margin-top:1rem">
-        <span class="slot-panel-label">About the Business</span>
+        <span class="slot-panel-label">About the Business
+          <span class="field-info" tabindex="0">i<span class="field-tooltip"><strong>About the Business</strong>Describe what you do, what makes you different, and anything customers should know. The richer this is, the more specific and authentic your posts will be. Aim for 2–4 sentences.</span></span>
+        </span>
         <textarea class="slot-panel-textarea" id="bep-description" rows="3" placeholder="What does your business do? What makes it special?"></textarea>
       </div>
 
       <div style="margin-top:1rem">
-        <span class="slot-panel-label">Target Audience</span>
+        <span class="slot-panel-label">Target Audience
+          <span class="field-info" tabindex="0">i<span class="field-tooltip"><strong>Target Audience</strong>Who are you trying to reach? Be specific: "young professionals who want quick healthy lunches" beats "everyone." The AI will write as if speaking directly to this group.</span></span>
+        </span>
         <textarea class="slot-panel-textarea" id="bep-audience" rows="2" placeholder="Who are your customers?"></textarea>
       </div>
 
       <div style="margin-top:1rem">
-        <span class="slot-panel-label">Brand Voice</span>
+        <span class="slot-panel-label">Brand Voice
+          <span class="field-info" tabindex="0">i<span class="field-tooltip"><strong>Brand Voice</strong>How should your posts sound? Examples: "Warm and conversational, like texting a friend." "Confident and bold — we don't apologize for being the best." "Witty with a nautical edge." This shapes every word the AI writes.</span></span>
+        </span>
         <input class="schedule-time-input" style="width:100%;max-width:none" type="text" id="bep-voice" placeholder="e.g. Friendly, Professional, Playful…">
       </div>
 
       <div style="margin-top:1rem">
-        <span class="slot-panel-label">Off-Limits Topics</span>
+        <span class="slot-panel-label">Off-Limits Topics
+          <span class="field-info" tabindex="0">i<span class="field-tooltip"><strong>Off-Limits Topics</strong>Hard rules the AI will never break. Examples: "No political content." "Never mention competitor names." "Don't use the word 'cheap.'" Be specific about anything that could embarrass or misrepresent you.</span></span>
+        </span>
         <textarea class="slot-panel-textarea" id="bep-offlimits" rows="2" placeholder="Anything the AI should never mention or post about…"></textarea>
       </div>
 
       <div style="margin-top:1rem">
-        <span class="slot-panel-label">Extra Context for AI</span>
+        <span class="slot-panel-label">Extra Context for AI
+          <span class="field-info" tabindex="0">i<span class="field-tooltip"><strong>Extra Context</strong>Background info that makes posts feel more real and specific. Examples: "We're known for our 45-minute lunch guarantee." "Our owner has been a chef for 20 years." "We sponsor the local youth hockey team." The AI won't use this every post, but it adds authenticity.</span></span>
+        </span>
         <textarea class="slot-panel-textarea" id="bep-extra" rows="2" placeholder="Anything else that helps the AI write better posts…"></textarea>
       </div>
 
@@ -2616,6 +2819,11 @@ function buildPostCard(post) {
           <span class="btn-icon">✦</span>Gen…
         </button>`
       }
+      ${(post.status === 'approved' || post.status === 'pending') && post.caption ? `
+        <button class="post-action-btn" style="border-color:var(--gold-dim);color:var(--gold)" onclick="openPostEditPanel('${post.id}')">
+          <span class="btn-icon">✎</span>Edit
+        </button>` : ''
+      }
     </div>
   `;
 
@@ -2944,6 +3152,118 @@ function renderBrandProfile(profile, logo) {
 
   document.getElementById('brand-content').style.display = 'block';
 }
+
+// ── POST EDIT PANEL (approved/pending posts) ───────────────────────────────
+let activeEditPostId = null;
+let pepClientPhotos = [];
+
+function openPostEditPanel(postId) {
+  const post = posts.find(p => p.id === postId);
+  if (!post) return;
+
+  activeEditPostId = postId;
+  pepClientPhotos = [];
+
+  document.getElementById('post-edit-panel-title').textContent =
+    `Edit Post — ${new Date(post.scheduled_for).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}`;
+
+  // Image
+  const imgWrap = document.getElementById('pep-image-wrap');
+  const img = document.getElementById('pep-image');
+  if (post.image_url) {
+    img.src = post.image_url;
+    imgWrap.style.display = 'block';
+  } else {
+    imgWrap.style.display = 'none';
+  }
+
+  // Caption
+  document.getElementById('pep-caption').value = post.caption || '';
+
+  // Reset photos grid
+  const grid = document.getElementById('pep-photos-grid');
+  grid.innerHTML = `
+    <div class="client-photo-add" onclick="document.getElementById('pep-photo-input').click()">
+      <input type="file" id="pep-photo-input" accept="image/*" multiple style="display:none" onchange="handlePepPhotos(this)">
+      <span style="font-size:1.25rem;display:block;margin-bottom:0.2rem">+</span>
+      <span class="ref-image-upload-label">Add photo</span>
+    </div>`;
+
+  document.getElementById('pep-error').textContent = '';
+  const btn = document.getElementById('pep-save-btn');
+  btn.disabled = false;
+  btn.textContent = 'Save Changes';
+
+  document.getElementById('post-edit-panel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePostEditPanel() {
+  document.getElementById('post-edit-panel').classList.remove('open');
+  document.body.style.overflow = '';
+  activeEditPostId = null;
+  pepClientPhotos = [];
+}
+
+function handlePepPhotos(input) {
+  const files = Array.from(input.files);
+  const remaining = 3 - pepClientPhotos.length;
+  const toAdd = files.slice(0, remaining);
+
+  toAdd.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      pepClientPhotos.push({ b64: e.target.result.split(',')[1], name: file.name, type: file.type });
+      const grid = document.getElementById('pep-photos-grid');
+      const thumb = document.createElement('div');
+      thumb.className = 'client-photo-thumb';
+      thumb.style.cssText = 'position:relative;width:64px;height:64px;flex-shrink:0';
+      thumb.innerHTML = `
+        <img src="${e.target.result}" style="width:64px;height:64px;border-radius:8px;object-fit:cover;border:1px solid var(--border)">
+        <button onclick="this.parentNode.remove();pepClientPhotos.splice(${pepClientPhotos.length-1},1)"
+          style="position:absolute;top:-4px;right:-4px;background:var(--error);color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;line-height:1">✕</button>`;
+      grid.insertBefore(thumb, grid.lastElementChild);
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+async function savePostEdit() {
+  if (!activeEditPostId) return;
+  const caption = document.getElementById('pep-caption').value.trim();
+  const errEl = document.getElementById('pep-error');
+  if (!caption) { errEl.textContent = 'Caption cannot be empty.'; return; }
+
+  const btn = document.getElementById('pep-save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  errEl.textContent = '';
+
+  try {
+    await sbFetch(`posts?id=eq.${activeEditPostId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ caption }),
+    });
+
+    // Update local posts array
+    const p = posts.find(x => x.id === activeEditPostId);
+    if (p) p.caption = caption;
+
+    showToast('✦ Post updated', 'success');
+    closePostEditPanel();
+    await loadPosts();
+  } catch(e) {
+    errEl.textContent = 'Could not save. Please try again.';
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+  }
+}
+
+// Close on overlay click
+document.getElementById('post-edit-panel').addEventListener('click', e => {
+  if (e.target === document.getElementById('post-edit-panel')) closePostEditPanel();
+});
 
 // ── BRAND EDIT PANEL ───────────────────────────────────────────────────────
 let _cachedBrandProfile = null;
@@ -3574,13 +3894,24 @@ function showSlotPanelResult(post, maxAttempts) {
   document.getElementById('slot-panel-pre-actions').style.display = 'none';
 
   if (post.image_url) {
-    document.getElementById('slot-result-image').src = post.image_url;
-    document.getElementById('slot-result-image').style.display = 'block';
+    const img = document.getElementById('slot-result-image');
+    img.src = post.image_url;
+    img.style.display = 'block';
+    document.getElementById('slot-result-no-image').style.display = 'none';
   } else {
     document.getElementById('slot-result-image').style.display = 'none';
+    document.getElementById('slot-result-no-image').style.display = 'block';
   }
 
-  document.getElementById('slot-result-caption').textContent = post.caption || '(No caption generated)';
+  // Caption display + editor pre-fill
+  const caption = post.caption || '';
+  document.getElementById('slot-result-caption').textContent = caption || '(No caption generated)';
+  document.getElementById('slot-caption-editor').value = caption;
+
+  // Reset caption edit state
+  document.getElementById('slot-caption-editor').style.display = 'none';
+  document.getElementById('slot-caption-save-btn').style.display = 'none';
+  document.getElementById('slot-caption-edit-btn').textContent = '✎ Edit';
 
   const attemptsLeft = maxAttempts - slotPanelAttempts;
   document.getElementById('slot-attempts-left').textContent =
@@ -3588,10 +3919,96 @@ function showSlotPanelResult(post, maxAttempts) {
 
   const regenBtn = document.getElementById('slot-regen-btn');
   regenBtn.disabled = attemptsLeft <= 0;
+  regenBtn.textContent = '↻ Regenerate';
+
+  // Set regen type grid to match current post type
+  document.querySelectorAll('#regen-type-grid .post-type-chip').forEach(c => {
+    c.classList.toggle('selected', c.dataset.type === (post.post_category || 'general'));
+  });
+
+  // Default scope to both
+  selectRegenScopeById('both');
 
   document.getElementById('slot-panel-result').classList.add('visible');
   showToast('✦ Post generated', 'success');
-  loadPosts(); // refresh main list in background
+  loadPosts();
+}
+
+// ── CAPTION INLINE EDIT ────────────────────────────────────────────────────
+function toggleCaptionEdit() {
+  const editor = document.getElementById('slot-caption-editor');
+  const saveBtn = document.getElementById('slot-caption-save-btn');
+  const editBtn = document.getElementById('slot-caption-edit-btn');
+  const display = document.getElementById('slot-result-caption');
+  const isEditing = editor.style.display !== 'none';
+
+  if (isEditing) {
+    editor.style.display = 'none';
+    saveBtn.style.display = 'none';
+    display.style.display = '';
+    editBtn.textContent = '✎ Edit';
+  } else {
+    editor.value = display.textContent === '(No caption generated)' ? '' : display.textContent;
+    editor.style.display = 'block';
+    saveBtn.style.display = 'block';
+    display.style.display = 'none';
+    editBtn.textContent = 'Cancel';
+  }
+}
+
+async function saveCaptionEdit() {
+  if (!activeSlotPostId) return;
+  const newCaption = document.getElementById('slot-caption-editor').value.trim();
+  if (!newCaption) { showToast('Caption cannot be empty', 'error'); return; }
+
+  const saveBtn = document.getElementById('slot-caption-save-btn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving…';
+
+  try {
+    await sbFetch(`posts?id=eq.${activeSlotPostId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ caption: newCaption }),
+    });
+    document.getElementById('slot-result-caption').textContent = newCaption;
+    document.getElementById('slot-caption-editor').style.display = 'none';
+    saveBtn.style.display = 'none';
+    document.getElementById('slot-result-caption').style.display = '';
+    document.getElementById('slot-caption-edit-btn').textContent = '✎ Edit';
+    showToast('Caption saved', 'success');
+  } catch(e) {
+    showToast('Could not save caption', 'error');
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save Caption';
+  }
+}
+
+// ── REGEN SCOPE SELECTION ──────────────────────────────────────────────────
+let currentRegenScope = 'both';
+
+function selectRegenScope(btn) {
+  selectRegenScopeById(btn.dataset.scope);
+}
+
+function selectRegenScopeById(scope) {
+  currentRegenScope = scope;
+  document.querySelectorAll('.regen-scope-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.scope === scope);
+  });
+  // Show/hide prev image ref row only when image is being regenerated
+  const showPrevRef = scope === 'both' || scope === 'image';
+  document.getElementById('slot-prev-image-ref-row').style.display = showPrevRef ? 'flex' : 'none';
+}
+
+function selectRegenType(chip) {
+  document.querySelectorAll('#regen-type-grid .post-type-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+}
+
+function getSelectedRegenType() {
+  const chip = document.querySelector('#regen-type-grid .post-type-chip.selected');
+  return chip ? chip.dataset.type : 'general';
 }
 
 async function regenNow() {
@@ -3602,13 +4019,87 @@ async function regenNow() {
     return;
   }
 
-  const notes = document.getElementById('slot-regen-notes').value.trim();
+  const notes        = document.getElementById('slot-regen-notes').value.trim();
+  const scope        = currentRegenScope; // 'both' | 'image' | 'caption'
+  const regenType    = getSelectedRegenType();
+  const includeLogo  = document.getElementById('slot-include-logo').checked;
+  const includeColors= document.getElementById('slot-include-colors').checked;
+  const sendPrevImg  = document.getElementById('slot-send-prev-image').checked;
+
   const regenBtn = document.getElementById('slot-regen-btn');
   regenBtn.disabled = true;
   regenBtn.textContent = '↻ Regenerating…';
 
   try {
-    // Mark current post as rejected
+    // Get current post data (for image_url to use as reference)
+    const existing = await sbFetch(`posts?id=eq.${activeSlotPostId}&select=*`);
+    const prev = Array.isArray(existing) ? existing[0] : existing;
+
+    // If only regenerating image — keep caption, don't create new post row, just re-run image worker
+    if (scope === 'image') {
+      slotPanelAttempts++;
+
+      // Fetch prev image as base64 if requested
+      let prevImageB64 = null;
+      if (sendPrevImg && prev.image_url) {
+        try {
+          const r = await fetch(prev.image_url);
+          const blob = await r.blob();
+          prevImageB64 = await new Promise((res, rej) => {
+            const reader = new FileReader();
+            reader.onload = e => res(e.target.result.split(',')[1]);
+            reader.onerror = rej;
+            reader.readAsDataURL(blob);
+          });
+        } catch(e) { console.warn('Could not fetch prev image for reference', e); }
+      }
+
+      await sbFetch(`posts?id=eq.${activeSlotPostId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'generating', attempt_number: slotPanelAttempts }),
+      });
+
+      await fetch(`${IMAGE_WORKER}/regenerate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          post_id:         activeSlotPostId,
+          notes,
+          ref_image_b64:   prevImageB64 || slotRefImageB64 || null,
+          include_logo:    includeLogo,
+          include_colors:  includeColors,
+        }),
+      });
+
+      await pollForSlotResult(activeSlotPostId, prev.max_attempts);
+      return;
+    }
+
+    // Caption only — re-run caption worker, keep existing image
+    if (scope === 'caption') {
+      slotPanelAttempts++;
+
+      await sbFetch(`posts?id=eq.${activeSlotPostId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'generating', attempt_number: slotPanelAttempts, post_category: regenType }),
+      });
+
+      await fetch(`${CAPTION_WORKER}/regenerate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          post_id:   activeSlotPostId,
+          notes,
+          post_type: regenType,
+        }),
+      });
+
+      // Don't regen image — just re-fetch post and show
+      await pollForSlotResult(activeSlotPostId, prev.max_attempts);
+      return;
+    }
+
+    // Both — full regen, new post row
     await sbFetch(`posts?id=eq.${activeSlotPostId}`, {
       method: 'PATCH',
       body: JSON.stringify({ status: 'rejected', rejection_notes: notes }),
@@ -3616,11 +4107,6 @@ async function regenNow() {
 
     slotPanelAttempts++;
 
-    // Create new attempt row
-    const existing = await sbFetch(`posts?id=eq.${activeSlotPostId}&select=*`);
-    const prev = Array.isArray(existing) ? existing[0] : existing;
-
-    // Mark previous as not latest
     await sbFetch(`posts?slot_id=eq.${activeSlot.id}&is_latest_attempt=eq.true`, {
       method: 'PATCH',
       body: JSON.stringify({ is_latest_attempt: false }),
@@ -3633,7 +4119,7 @@ async function regenNow() {
         slot_id:           activeSlot.id,
         scheduled_for:     prev.scheduled_for,
         status:            'generating',
-        post_category:     prev.post_category,
+        post_category:     regenType,
         attempt_number:    slotPanelAttempts,
         max_attempts:      prev.max_attempts,
         is_latest_attempt: true,
@@ -3644,25 +4130,43 @@ async function regenNow() {
     const newPostId = Array.isArray(newPost) ? newPost[0].id : newPost.id;
     activeSlotPostId = newPostId;
 
-    // Fire workers again with regen context
+    // Fetch prev image as base64 reference if requested
+    let prevImageB64 = null;
+    if (sendPrevImg && prev.image_url) {
+      try {
+        const r = await fetch(prev.image_url);
+        const blob = await r.blob();
+        prevImageB64 = await new Promise((res, rej) => {
+          const reader = new FileReader();
+          reader.onload = e => res(e.target.result.split(',')[1]);
+          reader.onerror = rej;
+          reader.readAsDataURL(blob);
+        });
+      } catch(e) { console.warn('Could not fetch prev image', e); }
+    }
+
     await fetch(`${CAPTION_WORKER}/regenerate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ post_id: newPostId, notes }),
+      body: JSON.stringify({ post_id: newPostId, notes, post_type: regenType }),
     });
+
     await fetch(`${IMAGE_WORKER}/regenerate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        post_id:       newPostId,
+        post_id:        newPostId,
         notes,
-        ref_image_b64: slotRefImageB64 || null,
+        ref_image_b64:  prevImageB64 || slotRefImageB64 || null,
+        include_logo:   includeLogo,
+        include_colors: includeColors,
       }),
     });
 
     await pollForSlotResult(newPostId, prev.max_attempts);
 
   } catch(e) {
+    console.error(e);
     showToast('Regeneration failed', 'error');
     regenBtn.disabled = false;
     regenBtn.textContent = '↻ Regenerate';
