@@ -2252,9 +2252,21 @@
           <span class="post-type-chip-name">Joke / Pun</span>
           <span class="post-type-chip-desc">A business-specific joke or pun to boost engagement</span>
         </div>
+        <div class="post-type-chip" data-type="product_spotlight" id="post-type-chip-spotlight" onclick="selectPostType(this)" style="display:none">
+          <span class="post-type-chip-name">✦ Product Spotlight</span>
+          <span class="post-type-chip-desc">Put one specific product or service in the spotlight</span>
+        </div>
         <!-- Custom types injected here by JS -->
       </div>
       <button class="lib-post-action-btn" style="margin-top:0.5rem" id="manage-custom-types-btn" onclick="openCustomTypesPanel()">+ Manage Custom Types</button>
+    </div>
+
+    <!-- Featured product field (shown when sheet is configured) -->
+    <div class="slot-panel-section" id="featured-product-section" style="display:none">
+      <span class="slot-panel-label">Feature a Specific Product <span style="color:var(--muted2);font-size:0.9em">(optional)</span>
+        <span class="field-info" tabindex="0">i<span class="field-tooltip"><strong>Feature a Product</strong>Type the name of a specific item from your offerings sheet. The AI will build the entire post around that one thing. Leave blank to let the AI choose.</span></span>
+      </span>
+      <input class="schedule-time-input" style="width:100%;max-width:none;margin-top:0.35rem" type="text" id="slot-featured-product" placeholder="e.g. Walleye Sandwich, Oil Change Special, 10-Class Pack…">
     </div>
 
     <!-- Facebook Event picker (shown when Event type is selected) -->
@@ -2404,6 +2416,9 @@
           </div>
           <div class="post-type-chip" data-type="joke" onclick="selectRegenType(this)">
             <span class="post-type-chip-name">Joke / Pun</span>
+          </div>
+          <div class="post-type-chip" data-type="product_spotlight" id="regen-type-chip-spotlight" onclick="selectRegenType(this)" style="display:none">
+            <span class="post-type-chip-name">✦ Product Spotlight</span>
           </div>
         </div>
       </div>
@@ -4658,6 +4673,18 @@ function openSlotPanel(slotNumber) {
   document.getElementById('ref-image-thumb').src = '';
   document.getElementById('ref-image-input').value = '';
 
+  // Show Product Spotlight chip and featured product field only if sheet is configured
+  const hasSheet = !!(_cachedBrandProfile?.sheet_url);
+  const spotlightChip = document.getElementById('post-type-chip-spotlight');
+  const regenSpotlightChip = document.getElementById('regen-type-chip-spotlight');
+  const featuredSection = document.getElementById('featured-product-section');
+  if (spotlightChip) spotlightChip.style.display = hasSheet ? '' : 'none';
+  if (regenSpotlightChip) regenSpotlightChip.style.display = hasSheet ? '' : 'none';
+  if (featuredSection) featuredSection.style.display = hasSheet ? 'block' : 'none';
+  if (document.getElementById('slot-featured-product')) {
+    document.getElementById('slot-featured-product').value = '';
+  }
+
   // Init color swatches
   initColorSwatches('pregen-color-swatches');
   initColorSwatches('regen-color-swatches');
@@ -4923,30 +4950,28 @@ async function generateNow() {
     const customType = postType.startsWith('custom_')
       ? customPostTypes.find(ct => `custom_${ct.id}` === postType)
       : null;
-    const resolvedType = customType ? 'general' : postType; // workers use built-in types; custom handled via manual_prompt
-
-    // Read logo/color toggles
+    const resolvedType = customType ? 'general' : postType;
     const includeLogo    = document.getElementById('slot-include-logo')?.checked ?? true;
-    const activeColors   = getActiveColorPalette(); // null = no colors, object = selected colors
-
-    // Build manual prompt including FB event context if linked
+    const activeColors   = getActiveColorPalette();
     const eventContext   = buildFbEventContext();
+    const featuredProduct = document.getElementById('slot-featured-product')?.value.trim() || null;
+
     const fullManualPrompt = [
       manualPrompt || '',
       customType ? `POST TYPE NAME: ${customType.name}\nINSTRUCTIONS: ${customType.parameters || ''}\nEXAMPLES: ${customType.examples || ''}` : '',
       eventContext || '',
     ].filter(Boolean).join('\n\n') || null;
 
-    // Fire caption worker with extra context
     await fetch(`${CAPTION_WORKER}/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        post_id:        postId,
-        post_type:      resolvedType,
-        include_logo:   includeLogo,
-        color_palette:  activeColors,
-        manual_prompt:  fullManualPrompt,
+        post_id:          postId,
+        post_type:        resolvedType,
+        include_logo:     includeLogo,
+        color_palette:    activeColors,
+        manual_prompt:    fullManualPrompt,
+        featured_product: featuredProduct,
       }),
     });
 
@@ -5190,11 +5215,12 @@ async function regenNow() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          post_id:        activeSlotPostId,
+          post_id:          activeSlotPostId,
           notes,
-          post_type:      regenType,
-          include_logo:   includeLogo,
-          color_palette:  activeColors,
+          post_type:        regenType,
+          include_logo:     includeLogo,
+          color_palette:    activeColors,
+          featured_product: document.getElementById('slot-featured-product')?.value.trim() || null,
         }),
       });
 
@@ -5252,7 +5278,7 @@ async function regenNow() {
     await fetch(`${CAPTION_WORKER}/regenerate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ post_id: newPostId, notes, post_type: regenType, include_logo: includeLogo, include_colors: includeColors }),
+      body: JSON.stringify({ post_id: newPostId, notes, post_type: regenType, include_logo: includeLogo, color_palette: activeColors, featured_product: document.getElementById("slot-featured-product")?.value.trim() || null }),
     });
 
     await fetch(`${IMAGE_WORKER}/regenerate`, {

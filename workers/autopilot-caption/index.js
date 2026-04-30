@@ -37,7 +37,7 @@ export default {
 // ─── Generate ─────────────────────────────────────────────────────────────────
 
 async function handleGenerate(request, env) {
-  const { post_id, post_type, manual_prompt, include_logo = true, color_palette = null } = await request.json();
+  const { post_id, post_type, manual_prompt, include_logo = true, color_palette = null, featured_product = null } = await request.json();
   if (!post_id) return json({ error: 'Missing post_id' }, 400);
 
   const post = await getPost(post_id, env);
@@ -48,10 +48,8 @@ async function handleGenerate(request, env) {
 
   const type = post_type || post.post_category || 'general';
 
-  // Fetch product/offering sheet data if configured
   const sheetContext = await fetchSheetContext(profile, type, env);
-
-  const systemPrompt = buildCaptionPrompt(profile, type, manual_prompt, sheetContext);
+  const systemPrompt = buildCaptionPrompt(profile, type, manual_prompt, sheetContext, featured_product);
 
   const recentApproved = await getRecentApproved(post.client_id, env, 8);
   const recentRejected = await getRecentRejected(post.client_id, env, 10);
@@ -76,7 +74,7 @@ async function handleGenerate(request, env) {
 // ─── Regenerate ───────────────────────────────────────────────────────────────
 
 async function handleRegenerate(request, env) {
-  const { post_id, image_feedback, caption_feedback, notes, post_type, include_logo = true, color_palette = null } = await request.json();
+  const { post_id, image_feedback, caption_feedback, notes, post_type, include_logo = true, color_palette = null, featured_product = null } = await request.json();
   if (!post_id) return json({ error: 'Missing post_id' }, 400);
 
   const post = await getPost(post_id, env);
@@ -87,10 +85,8 @@ async function handleRegenerate(request, env) {
 
   const type = post_type || post.post_category || 'general';
 
-  // Fetch product/offering sheet data if configured
   const sheetContext = await fetchSheetContext(profile, type, env);
-
-  const systemPrompt = buildCaptionPrompt(profile, type, null, sheetContext);
+  const systemPrompt = buildCaptionPrompt(profile, type, null, sheetContext, featured_product);
 
   const recentApproved = await getRecentApproved(post.client_id, env, 8);
   const recentRejected = await getRecentRejected(post.client_id, env, 10);
@@ -176,12 +172,13 @@ Write the image generation prompt now.`;
 
 // ─── Caption Prompt Building ───────────────────────────────────────────────────
 
-function buildCaptionPrompt(profile, type, manualPrompt, sheetContext = null) {
+function buildCaptionPrompt(profile, type, manualPrompt, sheetContext = null, featuredProduct = null) {
   const typeInstructions = {
-    general: `Write a natural, on-brand post that showcases the business personality and value. No hard sell — let the voice do the work. The goal is to feel like a real person wrote this, not a marketing department.`,
-    event:   `Write a post announcing or building anticipation for an upcoming event, special, or happening at the business. Create genuine excitement — give people a reason to show up or pay attention.`,
-    cta:     `Write a direct, energetic call-to-action post that motivates customers to visit, call, or buy right now. The urgency should feel real and exciting, never desperate or pushy. End with a clear next step.`,
-    joke:    `Write a post built around a clever joke or pun that is specifically tied to this business, its industry, or its products/services. The humor should feel natural and shareable — not forced. The joke is the post, not decoration on top of it.`,
+    general:           `Write a natural, on-brand post that showcases the business personality and value. No hard sell — let the voice do the work. The goal is to feel like a real person wrote this, not a marketing department.${sheetContext ? ' If a product or service from the offerings list feels natural to reference, do so — but only if it flows with the voice.' : ''}`,
+    event:             `Write a post announcing or building anticipation for an upcoming event, special, or happening at the business. Create genuine excitement — give people a reason to show up or pay attention.`,
+    cta:               `Write a direct, energetic call-to-action post that motivates customers to visit, call, or buy right now. The urgency should feel real and exciting, never desperate or pushy.${sheetContext ? ' Pick ONE specific product, service, or deal from the offerings list and make it the focus of the CTA. Name it specifically, mention the price if it reinforces urgency. End with a clear next step.' : ' End with a clear next step.'}`,
+    joke:              `Write a post built around a clever joke or pun that is specifically tied to this business, its industry, or its products/services.${sheetContext ? ' Use a real product or service name from the offerings list as the punchline setup or subject of the joke.' : ''} The humor should feel natural and shareable — not forced.`,
+    product_spotlight: `Write a post that puts ONE specific product or service in the spotlight. This post lives or dies by how well it makes one thing sound irresistible. Name it. Describe what makes it special. Mention the price naturally if it fits. The entire post is about this one thing — do not dilute it with other offerings or generic brand messaging.`,
   };
 
   const typeInstruction = typeInstructions[type] || typeInstructions.general;
@@ -194,7 +191,7 @@ function buildCaptionPrompt(profile, type, manualPrompt, sheetContext = null) {
     ? Object.entries(profile.color_palette).map(([k, v]) => `${k}: ${v}`).join(', ')
     : null;
 
-  // Build example posts section with per-type instructional framing
+  // Build example posts section
   let exampleSection = '';
   if (profile.example_posts && profile.example_posts.trim()) {
     exampleSection = `
@@ -202,10 +199,8 @@ EXAMPLE POSTS BY TYPE — use these to calibrate voice, rhythm, and style. Do no
 ${profile.example_posts}`;
   }
 
-  const sheetSection = sheetContext ? `
-━━ PRODUCTS & OFFERINGS ━━
-The following is real, current data about this business's products, services, or pricing. Use it to make posts specific and accurate — mention real items, real prices, real deals when relevant to the post type:
-${sheetContext}` : '';
+  // Build sheet section with type-aware instructions
+  const sheetSection = sheetContext ? buildSheetSection(type, sheetContext, featuredProduct) : '';
 
   return `You are a social media copywriter working for a local business. Your job is to write ONE Facebook post caption that sounds exactly like this specific business — not a generic small business, not a template, this one.
 
@@ -249,6 +244,53 @@ ${manualPrompt ? `\nCLIENT DIRECTION FOR THIS POST — incorporate all of the fo
 - No hashtag blocks
 - Natural, human tone — reads like a real person wrote it
 - May include 1–3 relevant emojis only if they fit the brand voice naturally`;
+}
+
+function buildSheetSection(type, sheetContext, featuredProduct = null) {
+  // Event posts don't benefit from product data
+  if (type === 'event') return '';
+
+  const instructions = {
+    product_spotlight: featuredProduct
+      ? `━━ FEATURED PRODUCT / SERVICE ━━
+The client has specifically chosen this item to spotlight. The entire post must be about THIS ONE item. Name it. Describe what makes it worth caring about. Mention the price naturally if it fits the voice. Do not reference other products.
+
+FEATURED ITEM:
+${featuredProduct}
+
+FULL OFFERINGS LIST (for context only — do not feature other items):
+${sheetContext}`
+      : `━━ PRODUCTS & OFFERINGS — PICK ONE TO SPOTLIGHT ━━
+Select ONE item from this list that would make the most compelling post right now — something that sounds interesting, unique, or seasonal. The entire post must be built around that single item. Name it specifically. Describe what makes it worth trying or buying. Mention the price naturally if it supports the post. Do not reference multiple items.
+
+${sheetContext}`,
+
+    cta: featuredProduct
+      ? `━━ FEATURED ITEM FOR THIS CTA ━━
+The client wants to drive action around this specific item. Build the CTA around it — name it, create urgency, end with a next step.
+
+FEATURED ITEM:
+${featuredProduct}
+
+FULL OFFERINGS (for supporting context):
+${sheetContext}`
+      : `━━ PRODUCTS & OFFERINGS — PICK ONE FOR YOUR CTA ━━
+Choose ONE item from this list to make the focus of your call-to-action. Pick something that would motivate people to act — a good deal, a popular item, or something seasonal. Name it specifically and build urgency around it.
+
+${sheetContext}`,
+
+    joke: `━━ PRODUCTS & OFFERINGS — USE FOR JOKE MATERIAL ━━
+These are real products and services at this business. Use a specific item name, price, or category as the subject or punchline of your joke. The funnier and more specific to the actual business the better.
+${featuredProduct ? `\nThe client suggests using this item: ${featuredProduct}\n` : ''}
+${sheetContext}`,
+
+    general: `━━ PRODUCTS & OFFERINGS — OPTIONAL REFERENCE ━━
+If it feels natural and unforced, you may reference a specific product, service, or price point from this list to make the post feel more real and specific. Do not force it — only use it if it strengthens the post.
+${featuredProduct ? `\nThe client suggests referencing: ${featuredProduct}\n` : ''}
+${sheetContext}`,
+  };
+
+  return '\n\n' + (instructions[type] || instructions.general);
 }
 
 function buildFeedbackNote(captionFeedback, notes) {
