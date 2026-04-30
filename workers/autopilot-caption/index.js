@@ -136,6 +136,7 @@ async function buildImagePromptViaClaude(caption, profile, postType, env, imageF
 Your prompt must follow these rules:
 - One paragraph, maximum 150 words
 - Describe a specific, concrete visual scene or composition — not vague concepts
+- VARY THE SCENE TYPE each time — do not default to "person at desk" or "creative workspace." Consider: outdoor locations, product close-ups, lifestyle moments, abstract brand compositions, environmental shots, action scenes, flat lays, aerial views, storefront exteriors, seasonal settings, community gatherings, behind-the-scenes moments, or any other creative concept that fits the brand and caption
 ${logoInstruction}
 ${colorInstruction}
 - The mood, lighting, and energy of the image must match the caption's tone precisely
