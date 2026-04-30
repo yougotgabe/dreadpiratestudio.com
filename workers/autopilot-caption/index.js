@@ -243,7 +243,8 @@ ${manualPrompt ? `\nCLIENT DIRECTION FOR THIS POST — incorporate all of the fo
 - 2–4 sentences
 - No hashtag blocks
 - Natural, human tone — reads like a real person wrote it
-- May include 1–3 relevant emojis only if they fit the brand voice naturally`;
+- May include 1–3 relevant emojis only if they fit the brand voice naturally
+${profile.website ? `- End the post with the business website URL on its own line: ${profile.website}` : ''}`;
 }
 
 function buildSheetSection(type, sheetContext, featuredProduct = null) {
