@@ -2262,6 +2262,9 @@
         <!-- Custom types injected here by JS -->
       </div>
       <button class="lib-post-action-btn" style="margin-top:0.5rem" id="manage-custom-types-btn" onclick="openCustomTypesPanel()">+ Manage Custom Types</button>
+      <div id="sheet-connected-indicator" style="display:none;margin-top:0.5rem;font-size:0.75rem;color:var(--success)">
+        ✦ Products &amp; offerings sheet connected — AI will reference your real products
+      </div>
     </div>
 
     <!-- Featured product field (shown when sheet is configured) -->
@@ -4096,7 +4099,9 @@ function openCustomTypesPanel() {
   document.getElementById('cpt-name').value = '';
   document.getElementById('cpt-desc').value = '';
   document.getElementById('cpt-params').value = '';
-  document.getElementById('cpt-examples').value = '';
+  document.getElementById('cpt-example-1').value = '';
+  document.getElementById('cpt-example-2').value = '';
+  document.getElementById('cpt-example-3').value = '';
   document.getElementById('cpt-error').textContent = '';
   document.getElementById('cpt-save-btn').disabled = false;
   document.getElementById('cpt-save-btn').textContent = 'Add Custom Type';
@@ -4698,9 +4703,11 @@ function openSlotPanel(slotNumber) {
   const spotlightChip = document.getElementById('post-type-chip-spotlight');
   const regenSpotlightChip = document.getElementById('regen-type-chip-spotlight');
   const featuredSection = document.getElementById('featured-product-section');
+  const sheetIndicator = document.getElementById('sheet-connected-indicator');
   if (spotlightChip) spotlightChip.style.display = hasSheet ? '' : 'none';
   if (regenSpotlightChip) regenSpotlightChip.style.display = hasSheet ? '' : 'none';
   if (featuredSection) featuredSection.style.display = hasSheet ? 'block' : 'none';
+  if (sheetIndicator) sheetIndicator.style.display = hasSheet ? 'block' : 'none';
   if (document.getElementById('slot-featured-product')) {
     document.getElementById('slot-featured-product').value = '';
   }
