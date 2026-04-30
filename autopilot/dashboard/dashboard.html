@@ -2227,6 +2227,19 @@
     </div>
 
     <!-- Generate Now actions (pre-generation) -->
+    <div class="slot-panel-section" style="padding-bottom:0">
+      <div style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.75rem">
+        <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.82rem;color:var(--muted)">
+          <input type="checkbox" id="slot-include-logo" checked style="accent-color:var(--gold)">
+          Include logo in image
+        </label>
+        <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.82rem;color:var(--muted)">
+          <input type="checkbox" id="slot-include-colors" checked style="accent-color:var(--gold)">
+          Use brand colors
+        </label>
+      </div>
+    </div>
+
     <div id="slot-panel-pre-actions" class="slot-panel-actions">
       <button class="slot-panel-btn secondary" id="slot-save-type-btn" onclick="saveSlotType()">
         Save Type
@@ -4543,13 +4556,19 @@ async function generateNow() {
       : null;
     const resolvedType = customType ? 'general' : postType; // workers use built-in types; custom handled via manual_prompt
 
+    // Read logo/color toggles (from slot panel pre-gen — default true for first gen)
+    const includeLogo   = document.getElementById('slot-include-logo')?.checked ?? true;
+    const includeColors = document.getElementById('slot-include-colors')?.checked ?? true;
+
     // Fire caption worker with extra context
     await fetch(`${CAPTION_WORKER}/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        post_id:       postId,
-        post_type:     resolvedType,
+        post_id:        postId,
+        post_type:      resolvedType,
+        include_logo:   includeLogo,
+        include_colors: includeColors,
         manual_prompt: [
           manualPrompt || '',
           customType ? `POST TYPE NAME: ${customType.name}\nINSTRUCTIONS: ${customType.parameters || ''}\nEXAMPLES: ${customType.examples || ''}` : '',
@@ -4798,9 +4817,11 @@ async function regenNow() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          post_id:   activeSlotPostId,
+          post_id:        activeSlotPostId,
           notes,
-          post_type: regenType,
+          post_type:      regenType,
+          include_logo:   includeLogo,
+          include_colors: includeColors,
         }),
       });
 
@@ -4858,7 +4879,7 @@ async function regenNow() {
     await fetch(`${CAPTION_WORKER}/regenerate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ post_id: newPostId, notes, post_type: regenType }),
+      body: JSON.stringify({ post_id: newPostId, notes, post_type: regenType, include_logo: includeLogo, include_colors: includeColors }),
     });
 
     await fetch(`${IMAGE_WORKER}/regenerate`, {
