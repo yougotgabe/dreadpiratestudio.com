@@ -2177,7 +2177,9 @@
           <span class="post-type-chip-name">Joke / Pun</span>
           <span class="post-type-chip-desc">A business-specific joke or pun to boost engagement</span>
         </div>
+        <!-- Custom types injected here by JS -->
       </div>
+      <button class="lib-post-action-btn" style="margin-top:0.5rem" id="manage-custom-types-btn" onclick="openCustomTypesPanel()">+ Manage Custom Types</button>
     </div>
 
     <!-- Manual prompt -->
@@ -2394,6 +2396,71 @@
         <button class="slot-panel-btn success" style="flex:1" id="pep-save-btn" onclick="savePostEdit()">Save Changes</button>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- Subscription Gate Panel -->
+<div class="modal-overlay" id="sub-gate-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Unlock This Month</div>
+    <div class="modal-subtitle" id="sub-gate-msg">Your current subscription covers posts through this month. Purchase another month to schedule and generate posts beyond that.</div>
+    <div class="modal-actions">
+      <button class="modal-btn secondary" onclick="closeModal('sub-gate-modal')">Maybe Later</button>
+      <button class="modal-btn primary" onclick="purchaseAdditionalMonth()">Pay for Next Month</button>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Post Types Panel -->
+<div class="slot-panel-overlay" id="custom-types-panel">
+  <div class="slot-panel-sheet">
+    <div class="modal-handle" style="margin:0.75rem auto 0"></div>
+    <div class="slot-panel-header">
+      <span class="slot-panel-title">Custom Post Types</span>
+      <button class="slot-panel-close" onclick="closeCustomTypesPanel()">✕</button>
+    </div>
+
+    <div style="padding:0 1.25rem 0.5rem">
+      <p style="font-size:0.82rem;color:var(--muted);margin:0 0 1rem">Create up to 3 custom post types. Each type gets its own AI instructions and examples.</p>
+
+      <!-- Existing custom types list -->
+      <div id="custom-types-list"></div>
+
+      <!-- Add new type form (shown when under limit) -->
+      <div id="custom-type-form" style="margin-top:0.75rem">
+        <div style="margin-bottom:0.6rem">
+          <span class="slot-panel-label">Type Name</span>
+          <input class="schedule-time-input" style="width:100%;max-width:none;margin-top:0.25rem" type="text" id="cpt-name" placeholder="e.g. Flash Sale, Team Spotlight…" maxlength="32">
+        </div>
+        <div style="margin-bottom:0.6rem">
+          <span class="slot-panel-label">Description
+            <span class="field-info" tabindex="0">i<span class="field-tooltip"><strong>Description</strong>One sentence describing what this type of post is for. The AI uses this to understand the goal. Example: "Announce a limited-time discount or urgent promotion."</span></span>
+          </span>
+          <input class="schedule-time-input" style="width:100%;max-width:none;margin-top:0.25rem" type="text" id="cpt-desc" placeholder="What is this post type for?">
+        </div>
+        <div style="margin-bottom:0.6rem">
+          <span class="slot-panel-label">AI Instructions
+            <span class="field-info" tabindex="0">i<span class="field-tooltip"><strong>AI Instructions</strong>Tell the AI exactly how to write this type of post. Be specific. Example: "Lead with urgency. Include a specific time limit. End with a clear call to action. Keep it under 3 sentences."</span></span>
+          </span>
+          <textarea class="slot-panel-textarea" id="cpt-params" rows="3" placeholder="How should the AI write this type of post? Be specific about tone, structure, length…"></textarea>
+        </div>
+        <div style="margin-bottom:0.75rem">
+          <span class="slot-panel-label">Example Posts
+            <span class="field-info" tabindex="0">i<span class="field-tooltip"><strong>Example Posts</strong>Paste 1–3 real examples of posts in this style. The AI will study the voice, rhythm, and structure. These are the single most powerful thing you can provide.</span></span>
+          </span>
+          <textarea class="slot-panel-textarea" id="cpt-examples" rows="3" placeholder="Paste 1–3 example posts in this style…"></textarea>
+        </div>
+        <div style="color:var(--error);font-size:0.82rem;min-height:1rem;margin-bottom:0.25rem" id="cpt-error"></div>
+        <button class="schedule-save-btn" id="cpt-save-btn" onclick="saveCustomType()">Add Custom Type</button>
+      </div>
+
+      <div id="custom-type-limit-msg" style="display:none;margin-top:0.75rem;font-size:0.82rem;color:var(--muted);font-style:italic;text-align:center">
+        Maximum of 3 custom types reached. Delete one to add another.
+      </div>
+
+      <div style="height:1.5rem"></div>
     </div>
   </div>
 </div>
@@ -3119,6 +3186,12 @@ function getWeekMonday(date) {
 }
 
 function calDaySlotClick(slotId, slotNumber, dateStr, currentDow, currentTime, postId) {
+  // Check gating for future dates
+  if (isDateGated(dateStr + 'T23:59:59')) {
+    checkGenerationGate(dateStr + 'T23:59:59');
+    return;
+  }
+
   // If there's a post — open slot panel to generate/review
   if (postId) {
     // Find the slot and open its panel
@@ -3535,6 +3608,180 @@ function renderBrandProfile(profile, logo) {
   }
 
   document.getElementById('brand-content').style.display = 'block';
+}
+
+// ── CUSTOM POST TYPES ──────────────────────────────────────────────────────
+let customPostTypes = []; // loaded on init
+
+async function loadCustomPostTypes() {
+  if (!client) return;
+  try {
+    const data = await sbFetch(`custom_post_types?client_id=eq.${client.id}&order=created_at.asc`);
+    customPostTypes = data || [];
+    injectCustomTypeChips();
+  } catch(e) { customPostTypes = []; }
+}
+
+function injectCustomTypeChips() {
+  // Remove any previously injected custom chips
+  document.querySelectorAll('.post-type-chip[data-custom]').forEach(c => c.remove());
+  document.querySelectorAll('#regen-type-grid .post-type-chip[data-custom]').forEach(c => c.remove());
+
+  customPostTypes.forEach(ct => {
+    const makeChip = (gridId, handler) => {
+      const chip = document.createElement('div');
+      chip.className = 'post-type-chip';
+      chip.dataset.type = `custom_${ct.id}`;
+      chip.dataset.custom = '1';
+      chip.innerHTML = `
+        <span class="post-type-chip-name">${escHtml(ct.name)}</span>
+        <span class="post-type-chip-desc">${escHtml(ct.description || '')}</span>`;
+      chip.onclick = () => handler(chip);
+      document.getElementById(gridId).appendChild(chip);
+    };
+    makeChip('post-type-grid', selectPostType);
+    makeChip('regen-type-grid', selectRegenType);
+  });
+}
+
+function openCustomTypesPanel() {
+  renderCustomTypesList();
+  updateCustomTypeFormVisibility();
+  document.getElementById('cpt-name').value = '';
+  document.getElementById('cpt-desc').value = '';
+  document.getElementById('cpt-params').value = '';
+  document.getElementById('cpt-examples').value = '';
+  document.getElementById('cpt-error').textContent = '';
+  document.getElementById('cpt-save-btn').disabled = false;
+  document.getElementById('cpt-save-btn').textContent = 'Add Custom Type';
+  document.getElementById('custom-types-panel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCustomTypesPanel() {
+  document.getElementById('custom-types-panel').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function renderCustomTypesList() {
+  const list = document.getElementById('custom-types-list');
+  if (!customPostTypes.length) {
+    list.innerHTML = `<p style="font-size:0.82rem;color:var(--muted);font-style:italic;margin:0 0 0.75rem">No custom types yet.</p>`;
+    return;
+  }
+  list.innerHTML = customPostTypes.map(ct => `
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0.75rem;margin-bottom:0.5rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.25rem">
+        <span style="font-family:'Cinzel',serif;font-size:0.52rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold)">${escHtml(ct.name)}</span>
+        <button class="lib-post-action-btn" style="color:var(--error);border-color:rgba(192,57,43,0.3)" onclick="deleteCustomType('${ct.id}')">Delete</button>
+      </div>
+      ${ct.description ? `<p style="font-size:0.78rem;color:var(--muted);margin:0">${escHtml(ct.description)}</p>` : ''}
+    </div>`).join('');
+}
+
+function updateCustomTypeFormVisibility() {
+  const atLimit = customPostTypes.length >= 3;
+  document.getElementById('custom-type-form').style.display = atLimit ? 'none' : 'block';
+  document.getElementById('custom-type-limit-msg').style.display = atLimit ? 'block' : 'none';
+}
+
+async function saveCustomType() {
+  const name    = document.getElementById('cpt-name').value.trim();
+  const desc    = document.getElementById('cpt-desc').value.trim();
+  const params  = document.getElementById('cpt-params').value.trim();
+  const examples= document.getElementById('cpt-examples').value.trim();
+  const errEl   = document.getElementById('cpt-error');
+
+  if (!name) { errEl.textContent = 'Name is required.'; return; }
+  if (customPostTypes.length >= 3) { errEl.textContent = 'Limit of 3 custom types reached.'; return; }
+
+  const btn = document.getElementById('cpt-save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  errEl.textContent = '';
+
+  try {
+    const result = await sbFetch('custom_post_types', {
+      method: 'POST',
+      body: JSON.stringify({
+        client_id:   client.id,
+        name,
+        description: desc,
+        parameters:  params,
+        examples,
+      }),
+    });
+    const newType = Array.isArray(result) ? result[0] : result;
+    customPostTypes.push(newType);
+    injectCustomTypeChips();
+    renderCustomTypesList();
+    updateCustomTypeFormVisibility();
+    document.getElementById('cpt-name').value = '';
+    document.getElementById('cpt-desc').value = '';
+    document.getElementById('cpt-params').value = '';
+    document.getElementById('cpt-examples').value = '';
+    showToast('✦ Custom type added', 'success');
+  } catch(e) {
+    errEl.textContent = 'Could not save. Try again.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Add Custom Type';
+  }
+}
+
+async function deleteCustomType(id) {
+  try {
+    await sbFetch(`custom_post_types?id=eq.${id}`, { method: 'DELETE' });
+    customPostTypes = customPostTypes.filter(ct => ct.id !== id);
+    injectCustomTypeChips();
+    renderCustomTypesList();
+    updateCustomTypeFormVisibility();
+    showToast('Custom type removed', 'success');
+  } catch(e) {
+    showToast('Could not delete', 'error');
+  }
+}
+
+document.getElementById('custom-types-panel').addEventListener('click', e => {
+  if (e.target === document.getElementById('custom-types-panel')) closeCustomTypesPanel();
+});
+
+// ── SUBSCRIPTION GATING ────────────────────────────────────────────────────
+// client.subscription_end is the ISO date through which the client is paid
+// If not present we assume they're active (graceful fallback)
+
+function isDateGated(dateStr) {
+  if (!client?.subscription_end) return false; // no gating data, allow
+  const target = new Date(dateStr);
+  const end = new Date(client.subscription_end);
+  return target > end;
+}
+
+function checkGenerationGate(scheduledFor) {
+  if (!isDateGated(scheduledFor)) return true; // allowed
+  const end = new Date(client.subscription_end);
+  const endStr = end.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  document.getElementById('sub-gate-msg').textContent =
+    `Your subscription covers posts through ${endStr}. Purchase another month to generate and schedule posts beyond that.`;
+  openModal('sub-gate-modal');
+  return false;
+}
+
+async function purchaseAdditionalMonth() {
+  closeModal('sub-gate-modal');
+  showToast('Opening checkout…');
+  try {
+    const res = await fetch('https://autopilot-portal.dreadpiratestudio.workers.dev/extend', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: getToken() }),
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+    else showToast('Could not open checkout', 'error');
+  } catch(e) {
+    showToast('Could not open checkout', 'error');
+  }
 }
 
 // ── POST EDIT PANEL (approved/pending posts) ───────────────────────────────
@@ -4200,6 +4447,13 @@ async function generateNow() {
     const [h, m] = activeSlot.post_time.split(':');
     slotDate.setHours(parseInt(h), parseInt(m), 0, 0);
 
+    // Check subscription gating
+    if (!checkGenerationGate(slotDate.toISOString())) {
+      btn.disabled = false;
+      btn.textContent = '✦ Generate Now';
+      return;
+    }
+
     // Create post row
     const maxAttempts = { starter: 3, growth: 4, daily: 5 }[client.plan] || 3;
     const newPost = await sbFetch('posts', {
@@ -4220,14 +4474,23 @@ async function generateNow() {
     activeSlotPostId = postId;
     slotPanelAttempts = 1;
 
+    // Resolve custom type context if selected
+    const customType = postType.startsWith('custom_')
+      ? customPostTypes.find(ct => `custom_${ct.id}` === postType)
+      : null;
+    const resolvedType = customType ? 'general' : postType; // workers use built-in types; custom handled via manual_prompt
+
     // Fire caption worker with extra context
     await fetch(`${CAPTION_WORKER}/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         post_id:       postId,
-        post_type:     postType,
-        manual_prompt: manualPrompt || null,
+        post_type:     resolvedType,
+        manual_prompt: [
+          manualPrompt || '',
+          customType ? `POST TYPE NAME: ${customType.name}\nINSTRUCTIONS: ${customType.parameters || ''}\nEXAMPLES: ${customType.examples || ''}` : '',
+        ].filter(Boolean).join('\n\n') || null,
       }),
     });
 
@@ -4747,7 +5010,7 @@ async function init() {
 
   try {
     await loadClient();
-    await Promise.all([loadSlots(), loadPosts(), loadBrandProfile()]);
+    await Promise.all([loadSlots(), loadPosts(), loadBrandProfile(), loadCustomPostTypes()]);
     checkScheduleSetup();
     // Register service worker for PWA + push
     if ('serviceWorker' in navigator) {
