@@ -4,6 +4,7 @@
  * Routes:
  *   POST /portal    — create a Stripe Customer Portal session → returns { url }
  *   POST /upgrade   — create a Stripe Checkout session for plan upgrade → returns { url }
+ *   POST /extend    — create a Stripe Checkout session for one additional month → returns { url }
  *
  * Env vars:
  *   STRIPE_SECRET_KEY  — sk_...
@@ -37,8 +38,9 @@ export default {
     const path = url.pathname;
 
     try {
-      if (path === '/portal') return handlePortal(request, env);
+      if (path === '/portal')  return handlePortal(request, env);
       if (path === '/upgrade') return handleUpgrade(request, env);
+      if (path === '/extend')  return handleExtend(request, env);
       return json({ error: 'Not found' }, 404);
     } catch (err) {
       console.error('Portal worker error:', err);
@@ -47,7 +49,7 @@ export default {
   },
 };
 
-// ── Stripe Customer Portal ─────────────────────────────────────────────────────
+// ── Stripe Customer Portal ────────────────────────────────────────────────────
 
 async function handlePortal(request, env) {
   const { token } = await request.json();
@@ -76,9 +78,7 @@ async function handlePortal(request, env) {
   return json({ url: data.url });
 }
 
-// ── Upgrade Checkout ───────────────────────────────────────────────────────────
-// Creates a new Stripe Checkout session in subscription_update mode.
-// Used when the client wants to switch plans from the dashboard.
+// ── Upgrade Checkout ──────────────────────────────────────────────────────────
 
 async function handleUpgrade(request, env) {
   const { token, plan } = await request.json();
@@ -94,7 +94,6 @@ async function handleUpgrade(request, env) {
     return json({ error: 'No active subscription found' }, 400);
   }
 
-  // Get current subscription to find the subscription item ID
   const subRes  = await stripe(env, 'GET', `/v1/subscriptions/${client.stripe_subscription_id}`);
   const subData = await subRes.json();
 
@@ -103,7 +102,6 @@ async function handleUpgrade(request, env) {
   const itemId = subData.items?.data?.[0]?.id;
   if (!itemId) return json({ error: 'Could not find subscription item' }, 400);
 
-  // Update the subscription immediately with proration
   const updateParams = new URLSearchParams();
   updateParams.set('items[0][id]', itemId);
   updateParams.set('items[0][price]', priceId);
@@ -118,17 +116,69 @@ async function handleUpgrade(request, env) {
     return json({ error: updateData.error?.message || 'Stripe error' }, 502);
   }
 
-  // Update plan in Supabase immediately
   await sb(env, 'PATCH', `/rest/v1/clients?id=eq.${client.id}`, { plan });
 
   return json({ success: true, plan });
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
+// ── Extend (one additional month) ─────────────────────────────────────────────
+// Creates a one-time Checkout session priced at the client's current monthly rate.
+// On success, Stripe fires checkout.session.completed → webhook sets subscription_end += 1 month.
+
+async function handleExtend(request, env) {
+  const { token } = await request.json();
+  if (!token) return json({ error: 'Missing token' }, 400);
+
+  const client = await getClient(env, token);
+  if (!client) return json({ error: 'Invalid token' }, 401);
+
+  if (!client.stripe_customer_id || !client.stripe_subscription_id) {
+    return json({ error: 'No active subscription found' }, 400);
+  }
+
+  // Get current subscription to determine the price amount
+  const subRes  = await stripe(env, 'GET', `/v1/subscriptions/${client.stripe_subscription_id}`);
+  const subData = await subRes.json();
+  if (!subRes.ok) return json({ error: subData.error?.message || 'Stripe error' }, 502);
+
+  const unitAmount = subData.items?.data?.[0]?.price?.unit_amount;
+  const currency   = subData.items?.data?.[0]?.price?.currency || 'usd';
+  const planLabel  = client.plan || 'Autopilot';
+
+  if (!unitAmount) return json({ error: 'Could not determine subscription price' }, 400);
+
+  // Build a one-time Checkout session
+  const dashboardUrl = env.PORTAL_RETURN_URL || 'https://dreadpiratestudio.com/autopilot/dashboard/dashboard.html';
+
+  const params = new URLSearchParams();
+  params.set('mode', 'payment');
+  params.set('customer', client.stripe_customer_id);
+  params.set('success_url', `${dashboardUrl}?extended=1`);
+  params.set('cancel_url', dashboardUrl);
+  params.set('line_items[0][quantity]', '1');
+  params.set('line_items[0][price_data][currency]', currency);
+  params.set('line_items[0][price_data][unit_amount]', unitAmount.toString());
+  params.set('line_items[0][price_data][product_data][name]', `Autopilot ${planLabel.charAt(0).toUpperCase() + planLabel.slice(1)} — Additional Month`);
+  params.set('line_items[0][price_data][product_data][description]', 'Extends your Autopilot scheduling window by one month.');
+  params.set('metadata[purpose]', 'extend');
+  params.set('metadata[client_id]', client.id);
+
+  const res  = await stripe(env, 'POST', '/v1/checkout/sessions', params);
+  const data = await res.json();
+
+  if (!res.ok) {
+    console.error('Stripe extend checkout error:', data);
+    return json({ error: data.error?.message || 'Stripe error' }, 502);
+  }
+
+  return json({ url: data.url });
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 async function getClient(env, token) {
   const rows = await sb(env, 'GET',
-    `/rest/v1/clients?onboarding_token=eq.${encodeURIComponent(token)}&select=id,stripe_customer_id,stripe_subscription_id,plan,status&limit=1`
+    `/rest/v1/clients?onboarding_token=eq.${encodeURIComponent(token)}&select=id,stripe_customer_id,stripe_subscription_id,plan,status,subscription_end&limit=1`
   );
   return rows?.[0] || null;
 }

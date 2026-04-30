@@ -306,19 +306,18 @@ async function publishPost(post, clientPhotos = [], env) {
   const token = await getFacebookToken(post.client_id, env);
   if (!token) throw new Error(`No Facebook token for client ${post.client_id}`);
 
-  const pageId    = token.fb_page_id;
-  const pageToken = token.page_access_token;
+  const pageId    = token.page_id || token.fb_page_id;
+  const pageToken = token.page_token || token.page_access_token;
+  const igUserId  = token.instagram_user_id || null;
 
-  // Upload all images to Facebook and collect attachment IDs
+  // ── Facebook publish ──────────────────────────────────────────────────────
   const attachments = [];
 
-  // Generated image first
   if (post.image_url) {
     const id = await uploadImageToFacebook(post.image_url, pageToken, pageId);
     if (id) attachments.push({ media_fbid: id });
   }
 
-  // Client-supplied additional photos (base64 strings, max 3)
   const extraPhotos = (clientPhotos || []).slice(0, 3);
   for (const b64 of extraPhotos) {
     try {
@@ -329,22 +328,33 @@ async function publishPost(post, clientPhotos = [], env) {
     }
   }
 
-  const payload = { message: post.caption, access_token: pageToken };
-  if (attachments.length > 0) payload.attached_media = attachments;
+  const fbPayload = { message: post.caption, access_token: pageToken };
+  if (attachments.length > 0) fbPayload.attached_media = attachments;
 
-  const res = await fetch(`https://graph.facebook.com/v19.0/${pageId}/feed`, {
+  const fbRes = await fetch(`https://graph.facebook.com/v19.0/${pageId}/feed`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(fbPayload),
   });
 
-  const data = await res.json();
-  if (!res.ok || data.error) throw new Error(data.error?.message || 'Facebook publish failed');
+  const fbData = await fbRes.json();
+  if (!fbRes.ok || fbData.error) throw new Error(fbData.error?.message || 'Facebook publish failed');
+
+  // ── Instagram publish (if connected) ─────────────────────────────────────
+  let igPostId = null;
+  if (igUserId && post.image_url) {
+    try {
+      igPostId = await publishToInstagram(igUserId, pageToken, post.image_url, post.caption);
+    } catch(e) {
+      console.error('Instagram publish failed (non-fatal):', e.message);
+    }
+  }
 
   await supabase(env, 'PATCH', `/rest/v1/posts?id=eq.${post.id}`, {
     status:       'published',
-    fb_post_id:   data.id,
+    fb_post_id:   fbData.id,
     published_at: new Date().toISOString(),
+    ...(igPostId ? { ig_post_id: igPostId } : {}),
   });
 }
 
@@ -441,6 +451,55 @@ async function getFacebookToken(clientId, env) {
     `/rest/v1/facebook_tokens?client_id=eq.${clientId}&select=*&limit=1`
   );
   return Array.isArray(rows) ? rows[0] : null;
+}
+
+// ─── INSTAGRAM HELPERS ────────────────────────────────────────────────────────
+
+async function publishToInstagram(igUserId, pageToken, imageUrl, caption) {
+  // Step 1: Create media container
+  const containerParams = new URLSearchParams({
+    image_url:    imageUrl,
+    caption:      caption,
+    access_token: pageToken,
+  });
+
+  const containerRes = await fetch(
+    `https://graph.facebook.com/v21.0/${igUserId}/media`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: containerParams,
+    }
+  );
+
+  const containerData = await containerRes.json();
+  if (!containerRes.ok || containerData.error) {
+    throw new Error(containerData.error?.message || 'Instagram container creation failed');
+  }
+
+  const containerId = containerData.id;
+
+  // Step 2: Publish the container
+  const publishParams = new URLSearchParams({
+    creation_id:  containerId,
+    access_token: pageToken,
+  });
+
+  const publishRes = await fetch(
+    `https://graph.facebook.com/v21.0/${igUserId}/media_publish`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: publishParams,
+    }
+  );
+
+  const publishData = await publishRes.json();
+  if (!publishRes.ok || publishData.error) {
+    throw new Error(publishData.error?.message || 'Instagram publish failed');
+  }
+
+  return publishData.id;
 }
 
 // ─── PUSH NOTIFICATIONS ───────────────────────────────────────────────────────

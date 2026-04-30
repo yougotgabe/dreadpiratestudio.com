@@ -81,6 +81,32 @@ export default {
 // ─── Handlers ────────────────────────────────────────────────────────────────
 
 async function handleCheckoutComplete(session, env) {
+  // ── Extension purchase (one additional month) ──────────────────────────────
+  if (session.metadata?.purpose === 'extend') {
+    const clientId = session.metadata?.client_id;
+    if (!clientId) throw new Error('extend session missing client_id in metadata');
+
+    // Get current subscription_end (or now if not set)
+    const rows = await supabaseRequest(env, 'GET',
+      `/rest/v1/clients?id=eq.${clientId}&select=subscription_end&limit=1`
+    );
+    const current = rows?.[0]?.subscription_end;
+    const base = current ? new Date(current) : new Date();
+
+    // Add one calendar month
+    const newEnd = new Date(base);
+    newEnd.setMonth(newEnd.getMonth() + 1);
+
+    await supabaseRequest(env, 'PATCH',
+      `/rest/v1/clients?id=eq.${clientId}`,
+      { subscription_end: newEnd.toISOString() }
+    );
+
+    console.log(`Extended subscription for client ${clientId} → ${newEnd.toISOString()}`);
+    return;
+  }
+
+  // ── New subscription checkout ──────────────────────────────────────────────
   const stripeCustomerId = session.customer;
   const stripeSubscriptionId = session.subscription;
   const email = session.customer_details?.email || session.customer_email;
@@ -99,6 +125,10 @@ async function handleCheckoutComplete(session, env) {
   const plan = sub.metadata?.plan || inferPlanFromAmount(sub.items?.data?.[0]?.price?.unit_amount);
   const stripePriceId = sub.items?.data?.[0]?.price?.id || null;
 
+  // Set subscription_end to one month from now for new signups
+  const subscriptionEnd = new Date();
+  subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1);
+
   // Upsert client row (on_conflict=email handles re-subscriptions gracefully)
   await supabaseRequest(env, "POST", "/rest/v1/clients?on_conflict=email", {
     email,
@@ -109,6 +139,7 @@ async function handleCheckoutComplete(session, env) {
     stripe_subscription_id: stripeSubscriptionId,
     stripe_price_id: stripePriceId,
     onboarding_complete: false,
+    subscription_end: subscriptionEnd.toISOString(),
   });
 
   // Get the new client's ID
@@ -143,9 +174,15 @@ async function handleSubscriptionUpdated(subscription, env) {
   );
   const status = subscription.status === "active" ? "active" : "inactive";
 
+  // On renewal (status active, current_period_end is in the future), update subscription_end
+  const updates = { plan, status };
+  if (subscription.status === 'active' && subscription.current_period_end) {
+    updates.subscription_end = new Date(subscription.current_period_end * 1000).toISOString();
+  }
+
   await supabaseRequest(env, "PATCH",
     `/rest/v1/clients?stripe_subscription_id=eq.${stripeSubscriptionId}`,
-    { plan, status }
+    updates
   );
 
   console.log(`Updated subscription ${stripeSubscriptionId}: plan=${plan}, status=${status}`);

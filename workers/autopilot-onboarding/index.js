@@ -14,7 +14,7 @@
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
@@ -38,6 +38,9 @@ export default {
       }
       if (path === '/save-slots' && request.method === 'POST') {
         return handleSaveSlots(request, env);
+      }
+      if (path === '/events' && request.method === 'GET') {
+        return handleGetEvents(request, env);
       }
       return json({ error: 'Not found' }, 404);
     } catch (err) {
@@ -270,6 +273,56 @@ async function handleSaveSlots(request, env) {
 
   console.log(`Saved ${rows_to_insert.length} slot(s) for client ${clientId}`);
   return json({ success: true, slots_saved: rows_to_insert.length });
+}
+
+// ─── Get Facebook Events ──────────────────────────────────────────────────────
+
+async function handleGetEvents(request, env) {
+  const url = new URL(request.url);
+  const token = url.searchParams.get('token');
+  if (!token) return json({ error: 'Missing token' }, 400);
+
+  // Resolve client
+  const rows = await supabase(env, 'GET',
+    `/rest/v1/clients?onboarding_token=eq.${encodeURIComponent(token)}&select=id&limit=1`
+  );
+  if (!Array.isArray(rows) || rows.length === 0) return json({ error: 'Invalid token' }, 401);
+  const clientId = rows[0].id;
+
+  // Get Facebook page token
+  const tokenRows = await supabase(env, 'GET',
+    `/rest/v1/facebook_tokens?client_id=eq.${clientId}&select=page_id,page_token&limit=1`
+  );
+  if (!Array.isArray(tokenRows) || tokenRows.length === 0) {
+    return json({ error: 'No Facebook page connected' }, 400);
+  }
+
+  const { page_id, page_token } = tokenRows[0];
+
+  // Fetch upcoming events from Facebook Graph API
+  const now = Math.floor(Date.now() / 1000);
+  const fields = 'id,name,description,start_time,end_time,place,cover';
+  const eventsRes = await fetch(
+    `https://graph.facebook.com/v21.0/${page_id}/events?fields=${fields}&since=${now}&limit=20&access_token=${page_token}`
+  );
+  const eventsData = await eventsRes.json();
+
+  if (eventsData.error) {
+    console.error('Facebook events error:', eventsData.error);
+    return json({ error: eventsData.error.message || 'Could not fetch events' }, 502);
+  }
+
+  const events = (eventsData.data || []).map(e => ({
+    id:          e.id,
+    name:        e.name,
+    description: e.description || '',
+    start_time:  e.start_time,
+    end_time:    e.end_time || null,
+    location:    e.place?.name || e.place?.location?.city || null,
+    cover_url:   e.cover?.source || null,
+  }));
+
+  return json({ events });
 }
 
 // ─── Supabase helper ──────────────────────────────────────────────────────────

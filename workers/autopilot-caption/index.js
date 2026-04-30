@@ -37,7 +37,7 @@ export default {
 // ─── Generate ─────────────────────────────────────────────────────────────────
 
 async function handleGenerate(request, env) {
-  const { post_id, post_type, manual_prompt } = await request.json();
+  const { post_id, post_type, manual_prompt, include_logo = true, color_palette = null } = await request.json();
   if (!post_id) return json({ error: 'Missing post_id' }, 400);
 
   const post = await getPost(post_id, env);
@@ -53,13 +53,12 @@ async function handleGenerate(request, env) {
   const recentRejected = await getRecentRejected(post.client_id, env, 10);
   const messages = buildMessages(recentApproved, recentRejected);
 
-  // Stage 1 — generate caption
   const caption = await callClaude(messages, env, systemPrompt);
 
-  // Stage 2 — generate image prompt based on caption
-  const imagePrompt = await buildImagePromptViaClaude(caption, profile, type, env);
+  // Use per-generation color palette if provided, else fall back to brand profile
+  const effectivePalette = color_palette !== null ? color_palette : (profile.color_palette || null);
+  const imagePrompt = await buildImagePromptViaClaude(caption, profile, type, env, [], '', include_logo, effectivePalette);
 
-  // Save both to post row
   await supabase(env, 'PATCH', `/rest/v1/posts?id=eq.${post_id}`, {
     caption,
     image_prompt: imagePrompt,
@@ -73,7 +72,7 @@ async function handleGenerate(request, env) {
 // ─── Regenerate ───────────────────────────────────────────────────────────────
 
 async function handleRegenerate(request, env) {
-  const { post_id, image_feedback, caption_feedback, notes } = await request.json();
+  const { post_id, image_feedback, caption_feedback, notes, post_type, include_logo = true, color_palette = null } = await request.json();
   if (!post_id) return json({ error: 'Missing post_id' }, 400);
 
   const post = await getPost(post_id, env);
@@ -82,7 +81,7 @@ async function handleRegenerate(request, env) {
   const profile = await getBrandProfile(post.client_id, env);
   if (!profile) return json({ error: 'Brand profile not found' }, 404);
 
-  const type = post.post_category || 'general';
+  const type = post_type || post.post_category || 'general';
   const systemPrompt = buildCaptionPrompt(profile, type, null);
 
   const recentApproved = await getRecentApproved(post.client_id, env, 8);
@@ -90,11 +89,10 @@ async function handleRegenerate(request, env) {
   const feedbackNote = buildFeedbackNote(caption_feedback, notes);
   const messages = buildMessages(recentApproved, recentRejected, feedbackNote);
 
-  // Stage 1 — regenerate caption with feedback
   const caption = await callClaude(messages, env, systemPrompt);
 
-  // Stage 2 — regenerate image prompt, passing image feedback as context
-  const imagePrompt = await buildImagePromptViaClaude(caption, profile, type, env, image_feedback, notes);
+  const effectivePalette = color_palette !== null ? color_palette : (profile.color_palette || null);
+  const imagePrompt = await buildImagePromptViaClaude(caption, profile, type, env, image_feedback, notes, include_logo, effectivePalette);
 
   await supabase(env, 'PATCH', `/rest/v1/posts?id=eq.${post_id}`, {
     caption,
@@ -107,9 +105,10 @@ async function handleRegenerate(request, env) {
 
 // ─── Stage 2: Image Prompt Generation ────────────────────────────────────────
 
-async function buildImagePromptViaClaude(caption, profile, postType, env, imageFeedback = [], notes = '') {
-  const colorEntries = profile.color_palette && Object.keys(profile.color_palette).length
-    ? Object.entries(profile.color_palette).map(([k, v]) => `${k}: ${v}`).join(', ')
+async function buildImagePromptViaClaude(caption, profile, postType, env, imageFeedback = [], notes = '', includeLogo = true, colorPalette = null) {
+  // colorPalette is either null (no colors) or { key: hex } object of selected colors
+  const colorEntries = colorPalette && Object.keys(colorPalette).length
+    ? Object.entries(colorPalette).map(([k, v]) => `${k}: ${v}`).join(', ')
     : null;
 
   const feedbackSection = imageFeedback?.length
@@ -120,13 +119,21 @@ async function buildImagePromptViaClaude(caption, profile, postType, env, imageF
     ? `\nCLIENT DIRECTION — incorporate all of the following into the image concept. These are directives, not suggestions:\n${notes}`
     : '';
 
+  const logoInstruction = includeLogo
+    ? `- The business logo must appear EXACTLY ONCE in the image — no more. Place it naturally in the scene (e.g. on signage, embossed on a surface, as a watermark in one corner). Never duplicate or repeat the logo anywhere else in the image.`
+    : `- Do NOT include the business logo anywhere in the image.`;
+
+  const colorInstruction = colorEntries
+    ? `- If brand colors are provided, describe how they should appear dominantly in the scene — not as decoration but as the actual color palette of the environment, objects, and lighting`
+    : `- Use natural, complementary colors appropriate to the scene. Do not force any specific brand palette.`;
+
   const systemPrompt = `You are an expert AI image prompt engineer specializing in social media visuals for local businesses. Your job is to write a single, detailed image generation prompt that will produce a high-quality Facebook post image.
 
 Your prompt must follow these rules:
 - One paragraph, maximum 150 words
 - Describe a specific, concrete visual scene or composition — not vague concepts
-- Specify exactly how the business logo should appear in the image (e.g. embossed on packaging, displayed on a storefront sign, printed on an apron, shown as a watermark in the corner)
-- If brand colors are provided, describe how they should appear dominantly in the scene — not as decoration but as the actual color palette of the environment, objects, and lighting
+${logoInstruction}
+${colorInstruction}
 - The mood, lighting, and energy of the image must match the caption's tone precisely
 - Square 1:1 composition optimized for Facebook
 - Photorealistic or high-quality illustration style unless the brand voice suggests otherwise
@@ -264,7 +271,7 @@ function buildMessages(recentApproved, recentRejected, feedbackNote = '') {
 
 async function callClaude(messages, env, systemPrompt, maxTokens = 300) {
   const body = {
-    model: 'claude-3-5-haiku-20241022',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: maxTokens,
     messages,
   };
