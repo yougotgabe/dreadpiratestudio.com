@@ -1651,7 +1651,6 @@
     .field-info:hover .field-tooltip,
     .field-info:focus .field-tooltip { display: block; }
 
-  </style>
     .regen-scope-btn {
       font-family: 'Cinzel', serif;
       font-size: 0.42rem;
@@ -1672,8 +1671,117 @@
       background: rgba(201,168,76,0.08);
     }
 
+    /* ── CALENDAR ── */
+    .cal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0 0.5rem;
+    }
+    .cal-nav-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--white);
+      border-radius: 6px;
+      width: 32px; height: 32px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      line-height: 1;
+      transition: border-color 0.2s;
+    }
+    .cal-nav-btn:hover { border-color: var(--gold-dim); }
+    .cal-month-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .cal-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      margin-bottom: 0.35rem;
+    }
+    .cal-weekdays span {
+      font-family: 'Cinzel', serif;
+      font-size: 0.38rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted2);
+      padding: 0.25rem 0;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+    .cal-day {
+      min-height: 52px;
+      border-radius: 6px;
+      padding: 3px;
+      background: var(--surface);
+      border: 1px solid transparent;
+      transition: border-color 0.2s;
+      position: relative;
+    }
+    .cal-day.other-month { opacity: 0.3; }
+    .cal-day.today { border-color: var(--gold-dim); }
+    .cal-day-num {
+      font-size: 0.68rem;
+      color: var(--muted);
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+    .cal-day.today .cal-day-num { color: var(--gold); }
+    .cal-slot-pip {
+      display: block;
+      font-size: 0.55rem;
+      border-radius: 3px;
+      padding: 1px 3px;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      font-family: 'Cinzel', serif;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border: 1px solid transparent;
+      transition: border-color 0.15s;
+    }
+    .cal-slot-pip.status-none      { background: var(--surface2); color: var(--muted2); border-color: var(--border2); }
+    .cal-slot-pip.status-pending   { background: rgba(230,126,34,0.15); color: #e67e22; border-color: rgba(230,126,34,0.3); }
+    .cal-slot-pip.status-approved  { background: rgba(39,174,96,0.15); color: #27ae60; border-color: rgba(39,174,96,0.3); }
+    .cal-slot-pip.status-generating{ background: rgba(201,168,76,0.1); color: var(--gold-dim); border-color: var(--gold-dim); }
+    .cal-slot-pip.status-published { background: rgba(100,100,100,0.15); color: var(--muted); border-color: var(--border2); }
+    .cal-slot-pip:hover { border-color: var(--gold-dim) !important; }
+
+    /* Override panel */
+    .cal-override-panel {
+      margin-top: 1rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .cal-override-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border2);
+    }
+    .cal-override-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.55rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .cal-override-body { padding: 0.75rem 1rem 1rem; }
+
   </style>
-</head>
 <body>
 
 <!-- Topbar -->
@@ -1720,10 +1828,57 @@
     <!-- Posts list -->
     <div class="section-header" style="padding-top:0.5rem">
       <span class="section-title" id="posts-list-title">Upcoming Posts</span>
-      <button class="section-action" onclick="openEditSchedule()">Edit Schedule</button>
+      <div style="display:flex;gap:0.5rem;align-items:center">
+        <button class="section-action" id="view-toggle-btn" onclick="togglePostsView()">📅 Calendar</button>
+        <button class="section-action" onclick="openEditSchedule()">Edit Schedule</button>
+      </div>
     </div>
+
+    <!-- Card view -->
     <div id="posts-list">
       <!-- Populated by JS -->
+    </div>
+
+    <!-- Calendar view -->
+    <div id="posts-calendar" style="display:none;padding:0 1.25rem 2rem">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="calPrevMonth()">‹</button>
+        <span class="cal-month-label" id="cal-month-label"></span>
+        <button class="cal-nav-btn" onclick="calNextMonth()">›</button>
+      </div>
+      <div class="cal-weekdays">
+        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+
+      <!-- Slot override panel (slides up below calendar) -->
+      <div class="cal-override-panel" id="cal-override-panel" style="display:none">
+        <div class="cal-override-header">
+          <span class="cal-override-title" id="cal-override-title">Slot 1 — Monday</span>
+          <button class="slot-panel-close" onclick="closeCalOverride()">✕</button>
+        </div>
+        <div class="cal-override-body">
+          <div style="margin-bottom:0.75rem">
+            <span class="slot-panel-label">Day</span>
+            <div style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-top:0.35rem" id="cal-override-days"></div>
+          </div>
+          <div style="margin-bottom:0.75rem">
+            <span class="slot-panel-label">Time</span>
+            <input class="schedule-time-input" type="time" id="cal-override-time" style="margin-top:0.35rem">
+          </div>
+          <div style="margin-bottom:0.75rem">
+            <span class="slot-panel-label">Apply to</span>
+            <div style="display:flex;gap:0.5rem;margin-top:0.35rem">
+              <button class="regen-scope-btn selected" id="cal-apply-this" data-scope="this" onclick="selectCalApplyScope(this)">This occurrence</button>
+              <button class="regen-scope-btn" id="cal-apply-future" data-scope="future" onclick="selectCalApplyScope(this)">All future</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:0.5rem">
+            <button class="slot-panel-btn secondary" style="flex:1" onclick="closeCalOverride()">Cancel</button>
+            <button class="slot-panel-btn success" style="flex:1" id="cal-override-save-btn" onclick="saveCalOverride()">Save</button>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -2828,6 +2983,235 @@ function buildPostCard(post) {
   `;
 
   return card;
+}
+
+// ── CALENDAR VIEW ──────────────────────────────────────────────────────────
+let calViewActive = false;
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth(); // 0-indexed
+let calOverrides = {}; // keyed by "slot_id|YYYY-MM-DD"
+let calActiveOverride = null; // { slotId, slotNumber, occurrenceDate, currentDow, currentTime }
+
+function togglePostsView() {
+  calViewActive = !calViewActive;
+  const btn = document.getElementById('view-toggle-btn');
+  const cardView = document.getElementById('posts-list');
+  const calView = document.getElementById('posts-calendar');
+  const weekStrip = document.getElementById('week-strip');
+  const batchBar = document.getElementById('batch-bar');
+
+  if (calViewActive) {
+    cardView.style.display = 'none';
+    calView.style.display = 'block';
+    weekStrip.style.display = 'none';
+    batchBar.style.display = 'none';
+    btn.textContent = '📋 List';
+    renderCalendar();
+  } else {
+    cardView.style.display = '';
+    calView.style.display = 'none';
+    weekStrip.style.display = '';
+    btn.textContent = '📅 Calendar';
+    renderBatchBar();
+  }
+}
+
+function calPrevMonth() {
+  calMonth--;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function calNextMonth() {
+  calMonth++;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+}
+
+async function renderCalendar() {
+  const label = document.getElementById('cal-month-label');
+  const grid = document.getElementById('cal-grid');
+  label.textContent = new Date(calYear, calMonth, 1)
+    .toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  // Load overrides for this month
+  const monthStart = `${calYear}-${String(calMonth+1).padStart(2,'0')}-01`;
+  const monthEnd   = new Date(calYear, calMonth+1, 0);
+  const monthEndStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(monthEnd.getDate()).padStart(2,'0')}`;
+
+  try {
+    const overrideData = await sbFetch(
+      `slot_overrides?client_id=eq.${client.id}&occurrence_date=gte.${monthStart}&occurrence_date=lte.${monthEndStr}&select=*`
+    );
+    calOverrides = {};
+    (overrideData || []).forEach(o => {
+      calOverrides[`${o.slot_id}|${o.occurrence_date}`] = o;
+    });
+  } catch(e) { calOverrides = {}; }
+
+  // Load posts for this month
+  const postsInMonth = posts.filter(p => {
+    const d = new Date(p.scheduled_for);
+    return d.getFullYear() === calYear && d.getMonth() === calMonth;
+  });
+
+  // Build calendar grid
+  const firstDay = new Date(calYear, calMonth, 1);
+  // Monday-first: 0=Mon...6=Sun
+  let startDow = firstDay.getDay(); // 0=Sun,1=Mon...
+  startDow = startDow === 0 ? 6 : startDow - 1; // convert to Mon=0
+
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const totalCells = Math.ceil((startDow + daysInMonth) / 7) * 7;
+
+  let html = '';
+  for (let i = 0; i < totalCells; i++) {
+    const dayOffset = i - startDow;
+    const date = new Date(calYear, calMonth, dayOffset + 1);
+    const isCurrentMonth = date.getMonth() === calMonth;
+    const isToday = date.toDateString() === new Date().toDateString();
+    const dateStr = date.toISOString().slice(0,10);
+    const dow = date.getDay(); // 0=Sun
+
+    // Find slots that fire on this day (checking overrides too)
+    const slotPips = slots.map(slot => {
+      // Check for override on this occurrence
+      const weekMon = getWeekMonday(date);
+      const override = calOverrides[`${slot.id}|${weekMon}`];
+      const effectiveDow = override?.day_of_week ?? slot.day_of_week;
+      const effectiveTime = override?.post_time ?? slot.post_time;
+
+      if (effectiveDow !== dow) return null;
+      if (override?.is_skipped) return `<span class="cal-slot-pip status-none" title="Slot ${slot.slot_number} — Skipped">S${slot.slot_number} skip</span>`;
+
+      // Find post for this slot on this date
+      const post = postsInMonth.find(p =>
+        p.slot_id === slot.id &&
+        new Date(p.scheduled_for).toDateString() === date.toDateString() &&
+        p.is_latest_attempt
+      );
+
+      const status = post ? post.status : 'none';
+      const timeLabel = effectiveTime ? effectiveTime.slice(0,5) : '';
+      const onclick = isCurrentMonth
+        ? `onclick="calDaySlotClick('${slot.id}',${slot.slot_number},'${dateStr}',${effectiveDow},'${effectiveTime || slot.post_time}','${post?.id||''}')" `
+        : '';
+
+      return `<span class="cal-slot-pip status-${status}" ${onclick}title="Slot ${slot.slot_number} · ${timeLabel}">S${slot.slot_number} ${timeLabel}</span>`;
+    }).filter(Boolean);
+
+    html += `
+      <div class="cal-day ${isCurrentMonth ? '' : 'other-month'} ${isToday ? 'today' : ''}">
+        <div class="cal-day-num">${date.getDate()}</div>
+        ${slotPips.join('')}
+      </div>`;
+  }
+  grid.innerHTML = html;
+  closeCalOverride();
+}
+
+function getWeekMonday(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  return d.toISOString().slice(0,10);
+}
+
+function calDaySlotClick(slotId, slotNumber, dateStr, currentDow, currentTime, postId) {
+  // If there's a post — open slot panel to generate/review
+  if (postId) {
+    // Find the slot and open its panel
+    const slot = slots.find(s => s.id === slotId);
+    if (slot) openSlotPanel(slot.slot_number);
+    return;
+  }
+
+  // No post — open override editor
+  calActiveOverride = { slotId, slotNumber, occurrenceDate: dateStr, currentDow, currentTime };
+
+  const panel = document.getElementById('cal-override-panel');
+  const title = document.getElementById('cal-override-title');
+  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  title.textContent = `Slot ${slotNumber} — ${new Date(dateStr+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})}`;
+
+  // Build day selector
+  const daysEl = document.getElementById('cal-override-days');
+  daysEl.innerHTML = [1,2,3,4,5,6,0].map(d => `
+    <button class="regen-scope-btn ${d === currentDow ? 'selected' : ''}"
+      data-dow="${d}" onclick="selectCalDay(this)" style="flex:0 0 auto;padding:0.4em 0.6em">
+      ${DAYS[d]}
+    </button>`).join('');
+
+  // Set time
+  document.getElementById('cal-override-time').value = currentTime ? currentTime.slice(0,5) : '09:00';
+
+  // Reset scope
+  selectCalApplyScope(document.getElementById('cal-apply-this'));
+
+  panel.style.display = 'block';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function selectCalDay(btn) {
+  document.querySelectorAll('#cal-override-days .regen-scope-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function selectCalApplyScope(btn) {
+  document.querySelectorAll('#cal-override-panel .regen-scope-btn[data-scope]').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function closeCalOverride() {
+  document.getElementById('cal-override-panel').style.display = 'none';
+  calActiveOverride = null;
+}
+
+async function saveCalOverride() {
+  if (!calActiveOverride) return;
+  const btn = document.getElementById('cal-override-save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  const selectedDayBtn = document.querySelector('#cal-override-days .regen-scope-btn.selected');
+  const newDow = selectedDayBtn ? parseInt(selectedDayBtn.dataset.dow) : calActiveOverride.currentDow;
+  const newTime = document.getElementById('cal-override-time').value + ':00';
+  const scope = document.querySelector('#cal-override-panel .regen-scope-btn[data-scope].selected')?.dataset.scope || 'this';
+
+  try {
+    if (scope === 'this') {
+      // Upsert a slot_override for this occurrence (week's Monday)
+      const weekMon = getWeekMonday(new Date(calActiveOverride.occurrenceDate + 'T12:00:00'));
+      await sbFetch('slot_overrides', {
+        method: 'POST',
+        headers: { Prefer: 'resolution=merge-duplicates' },
+        body: JSON.stringify({
+          client_id:       client.id,
+          slot_id:         calActiveOverride.slotId,
+          occurrence_date: weekMon,
+          day_of_week:     newDow,
+          post_time:       newTime,
+        }),
+      });
+    } else {
+      // Update the slot itself (all future)
+      await sbFetch(`scheduled_slots?id=eq.${calActiveOverride.slotId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ day_of_week: newDow, post_time: newTime }),
+      });
+      // Update local slots array
+      const s = slots.find(x => x.id === calActiveOverride.slotId);
+      if (s) { s.day_of_week = newDow; s.post_time = newTime; }
+    }
+    showToast('✦ Schedule updated', 'success');
+    await renderCalendar();
+  } catch(e) {
+    showToast('Could not save', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save';
+  }
 }
 
 // ── BATCH BAR ──────────────────────────────────────────────────────────────
