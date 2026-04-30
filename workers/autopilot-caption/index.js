@@ -124,8 +124,8 @@ async function buildImagePromptViaClaude(caption, profile, postType, env, imageF
     : '';
 
   const logoInstruction = includeLogo
-    ? `- The business logo must appear EXACTLY ONCE in the image — no more. Place it naturally in the scene (e.g. on signage, embossed on a surface, as a watermark in one corner). Never duplicate or repeat the logo anywhere else in the image.`
-    : `- Do NOT include the business logo anywhere in the image.`;
+    ? `- The business logo must appear EXACTLY ONCE in the entire image — one single placement, no more. Choose one natural location (a mug, a notebook, a sign, a corner watermark) and place it there only. Every other surface, object, and element in the scene must be completely free of the logo. Do not repeat, duplicate, echo, or suggest the logo anywhere else.`
+    : `- Do NOT include the business logo anywhere in the image. No logo, no brand marks, no text resembling the brand name.`;
 
   const colorInstruction = colorEntries
     ? `- If brand colors are provided, describe how they should appear dominantly in the scene — not as decoration but as the actual color palette of the environment, objects, and lighting`
