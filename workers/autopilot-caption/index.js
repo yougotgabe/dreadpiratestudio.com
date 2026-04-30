@@ -326,13 +326,15 @@ const SHEET_CONFIGS = {
 async function fetchSheetContext(profile, postType, env) {
   if (!profile.sheet_url) return null;
 
-  // Convert Google Sheets share URL to CSV export URL
   let csvUrl;
   try {
     const match = profile.sheet_url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
     if (!match) return null;
     const sheetId = match[1];
-    csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=0`;
+    // Extract gid if present (identifies which tab)
+    const gidMatch = profile.sheet_url.match(/[#&?]gid=(\d+)/);
+    const gid = gidMatch ? gidMatch[1] : '0';
+    csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
   } catch(e) {
     console.warn('Could not parse sheet URL:', e.message);
     return null;
