@@ -2442,6 +2442,9 @@
     <div class="schedule-day-grid" id="sched-day-grid"></div>
 
     <div class="schedule-step-label">Set posting times</div>
+    <div style="font-size:0.78rem;color:var(--muted);margin-bottom:0.5rem;font-style:italic">
+      Posts generate automatically ~24 hours before the scheduled time. You'll get a notification to review before it publishes.
+    </div>
     <div class="schedule-times-list" id="sched-times-list">
       <div style="color:var(--muted);font-size:0.85rem;font-style:italic">Select days above to set times.</div>
     </div>
@@ -2453,6 +2456,9 @@
 
     <button class="schedule-save-btn" id="sched-save-btn" onclick="saveSlots()" disabled>
       Set Schedule &amp; Enter Dashboard
+    </button>
+    <button id="sched-cancel-btn" onclick="closeScheduleOverlay()" style="display:none;width:100%;margin-top:0.75rem;background:none;border:1px solid var(--border);color:var(--muted);padding:0.85rem;border-radius:10px;font-family:'Cinzel',serif;font-size:0.52rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer">
+      Cancel
     </button>
     <div class="schedule-error" id="sched-error"></div>
   </div>
@@ -4337,13 +4343,25 @@ function renderScheduleSettings() {
 
   slots.forEach(slot => {
     const dayName = DAY_NAMES[slot.day_of_week];
-    const time = slot.post_time.slice(0,5);
+    const [h, m] = slot.post_time.slice(0,5).split(':').map(Number);
+    // Calculate generation time (~24hrs before)
+    const genH = h === 0 ? 23 : h - 1;
+    const genM = m;
+    const genDay = h === 0
+      ? DAY_NAMES[(slot.day_of_week + 6) % 7]
+      : dayName;
+    const postTimeStr = new Date(0,0,0,h,m).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    const genTimeStr  = new Date(0,0,0,genH,genM).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    const genLabel = genDay === dayName
+      ? `Generates ${genTimeStr} same day`
+      : `Generates ${genTimeStr} ${genDay}`;
+
     const row = document.createElement('div');
     row.className = 'settings-row';
     row.innerHTML = `
       <div>
-        <div class="settings-label">${dayName}</div>
-        <div class="settings-sub">${time} · ${slot.timezone}</div>
+        <div class="settings-label">${dayName} · ${postTimeStr}</div>
+        <div class="settings-sub" style="color:var(--muted2)">${genLabel} · ${slot.timezone}</div>
       </div>
       <span style="color:var(--gold);font-size:0.8rem">📌</span>
     `;
@@ -4516,8 +4534,11 @@ function escHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function closeScheduleOverlay() {
+  document.getElementById('schedule-overlay').classList.add('hidden');
+}
+
 function openEditSchedule() {
-  // Reset and re-open the overlay, pre-seeding with existing slots
   schedSelectedDays = [];
   document.querySelectorAll('.sched-day-btn').forEach(b => b.classList.remove('selected'));
 
@@ -4539,8 +4560,9 @@ function openEditSchedule() {
     updateSaveBtn();
   }
 
-  // Change button label for edit mode
+  // Edit mode UI
   document.getElementById('sched-save-btn').textContent = 'Save New Schedule';
+  document.getElementById('sched-cancel-btn').style.display = 'block';
   document.querySelector('.schedule-overlay-eyebrow').textContent = 'Settings — Posting Schedule';
   document.querySelector('.schedule-overlay-title').textContent = 'Edit Your Schedule';
 }
@@ -4562,7 +4584,9 @@ function openSlotPanel(slotNumber) {
 
   // Reset UI
   const dayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][activeSlot.day_of_week];
-  document.getElementById('slot-panel-title').textContent = `Slot ${activeSlot.slot_number} — ${dayName}`;
+  const [h, m] = activeSlot.post_time.slice(0,5).split(':').map(Number);
+  const postTimeStr = new Date(0,0,0,h,m).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  document.getElementById('slot-panel-title').textContent = `Slot ${activeSlot.slot_number} — ${dayName} · ${postTimeStr}`;
   document.getElementById('slot-manual-prompt').value = '';
   document.getElementById('slot-regen-notes').value = '';
   document.getElementById('ref-image-preview').style.display = 'none';
