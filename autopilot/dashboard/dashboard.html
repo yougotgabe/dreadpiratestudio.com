@@ -3302,11 +3302,20 @@ function buildPostCard(post) {
     </div>
   `;
 
+  card.style.cursor = 'pointer';
+  card.addEventListener('click', (e) => {
+    if (e.target.closest('button')) return;
+    if (post.status === 'approved' || post.status === 'scheduled_fb' || post.status === 'pending') {
+      if (post.caption) openPostEditPanel(post.id);
+    }
+  });
+
   return card;
 }
 
 // ── CALENDAR VIEW ──────────────────────────────────────────────────────────
 let calViewActive = false;
+let calTargetDate = null; // set when generating from calendar for a specific date
 let calYear = new Date().getFullYear();
 let calMonth = new Date().getMonth(); // 0-indexed
 let calOverrides = {}; // keyed by "slot_id|YYYY-MM-DD"
@@ -3369,11 +3378,16 @@ async function renderCalendar() {
     });
   } catch(e) { calOverrides = {}; }
 
-  // Load posts for this month
-  const postsInMonth = posts.filter(p => {
-    const d = new Date(p.scheduled_for);
-    return d.getFullYear() === calYear && d.getMonth() === calMonth;
-  });
+  // Load posts for this month from Supabase (not just the cached 14-day window)
+  let postsInMonth = [];
+  try {
+    const monthStartISO = `${calYear}-${String(calMonth+1).padStart(2,'0')}-01T00:00:00.000Z`;
+    const lastDay = new Date(calYear, calMonth+1, 0).getDate();
+    const monthEndISO = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}T23:59:59.999Z`;
+    postsInMonth = await sbFetch(
+      `posts?client_id=eq.${client.id}&scheduled_for=gte.${monthStartISO}&scheduled_for=lte.${monthEndISO}&is_latest_attempt=eq.true&select=id,slot_id,scheduled_for,status,post_category`
+    ) || [];
+  } catch(e) { postsInMonth = []; }
 
   // Build calendar grid
   const firstDay = new Date(calYear, calMonth, 1);
@@ -3445,15 +3459,17 @@ function calDaySlotClick(slotId, slotNumber, dateStr, currentDow, currentTime, p
     return;
   }
 
-  // If there's a post — open slot panel to generate/review
+  // Find the slot
+  const slot = slots.find(s => s.id === slotId);
+  if (!slot) return;
+
   if (postId) {
-    // Find the slot and open its panel
-    const slot = slots.find(s => s.id === slotId);
-    if (slot) openSlotPanel(slot.slot_number);
+    // Has a post — open slot panel which will pre-populate with existing post
+    openSlotPanel(slot.slot_number);
     return;
   }
 
-  // No post — open override editor
+  // No post yet — show override panel with a "Generate Post" button too
   calActiveOverride = { slotId, slotNumber, occurrenceDate: dateStr, currentDow, currentTime };
 
   const panel = document.getElementById('cal-override-panel');
@@ -3474,6 +3490,23 @@ function calDaySlotClick(slotId, slotNumber, dateStr, currentDow, currentTime, p
 
   // Reset scope
   selectCalApplyScope(document.getElementById('cal-apply-this'));
+
+  // Show generate button for this specific date
+  let genBtn = document.getElementById('cal-generate-btn');
+  if (!genBtn) {
+    genBtn = document.createElement('button');
+    genBtn.id = 'cal-generate-btn';
+    genBtn.className = 'slot-panel-btn primary';
+    genBtn.style.cssText = 'width:100%;margin-top:0.5rem';
+    document.querySelector('.cal-override-body').appendChild(genBtn);
+  }
+  genBtn.textContent = `✦ Generate Post for ${new Date(dateStr+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+  genBtn.onclick = () => {
+    closeCalOverride();
+    // Store the target date so generateNow uses it
+    calTargetDate = dateStr;
+    openSlotPanel(slotNumber);
+  };
 
   panel.style.display = 'block';
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -4951,13 +4984,22 @@ async function generateNow() {
       activeSlot.post_type = postType;
     }
 
-    // Create a post row for this slot (or find existing draft)
-    const today = new Date();
-    const diff = (activeSlot.day_of_week - today.getDay() + 7) % 7;
-    const slotDate = new Date(today);
-    slotDate.setDate(today.getDate() + (diff === 0 ? 0 : diff));
-    const [h, m] = activeSlot.post_time.split(':');
-    slotDate.setHours(parseInt(h), parseInt(m), 0, 0);
+    // Create a post row for this slot
+    // If coming from calendar, use the specific date clicked
+    let slotDate;
+    if (calTargetDate) {
+      slotDate = new Date(calTargetDate + 'T12:00:00');
+      const [h, m] = activeSlot.post_time.split(':');
+      slotDate.setHours(parseInt(h), parseInt(m), 0, 0);
+      calTargetDate = null; // clear after use
+    } else {
+      const today = new Date();
+      const diff = (activeSlot.day_of_week - today.getDay() + 7) % 7;
+      slotDate = new Date(today);
+      slotDate.setDate(today.getDate() + (diff === 0 ? 0 : diff));
+      const [h, m] = activeSlot.post_time.split(':');
+      slotDate.setHours(parseInt(h), parseInt(m), 0, 0);
+    }
 
     // Check subscription gating
     if (!checkGenerationGate(slotDate.toISOString())) {
