@@ -1882,7 +1882,11 @@
 
     <!-- Posts list -->
     <div class="section-header" style="padding-top:0.5rem">
-      <span class="section-title" id="posts-list-title">Upcoming Posts</span>
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        <button id="posts-week-prev" class="cal-nav-btn" onclick="postsWeekPrev()" style="width:24px;height:24px;font-size:0.9rem;opacity:0.3;pointer-events:none">‹</button>
+        <span class="section-title" id="posts-week-label">This Week</span>
+        <button id="posts-week-next" class="cal-nav-btn" onclick="postsWeekNext()" style="width:24px;height:24px;font-size:0.9rem">›</button>
+      </div>
       <div style="display:flex;gap:0.5rem;align-items:center">
         <button class="section-action" id="view-toggle-btn" onclick="togglePostsView()">📅 Calendar</button>
         <button class="section-action" onclick="openEditSchedule()">Edit Schedule</button>
@@ -2924,18 +2928,48 @@ function getWeekStart(date) {
   return d;
 }
 
+let postsWeekOffset = 0; // 0 = current week, 1 = next week, etc.
+
 async function loadPosts() {
   if (!client) return;
-  // Load posts for the next 14 days
-  const from = new Date().toISOString();
-  const to = new Date(Date.now() + 14 * 86400000).toISOString();
+  // Load posts for the selected week window (7 days starting from offset)
+  const from = new Date(Date.now() + postsWeekOffset * 7 * 86400000);
+  from.setHours(0, 0, 0, 0);
+  const to = new Date(from.getTime() + 7 * 86400000);
   const data = await sbFetch(
-    `posts?client_id=eq.${client.id}&scheduled_for=gte.${from}&scheduled_for=lte.${to}&is_latest_attempt=eq.true&order=scheduled_for.asc&select=*`
+    `posts?client_id=eq.${client.id}&scheduled_for=gte.${from.toISOString()}&scheduled_for=lte.${to.toISOString()}&is_latest_attempt=eq.true&order=scheduled_for.asc&select=*`
   );
   posts = data || [];
   renderWeekStrip();
   renderPostsList();
   renderBatchBar();
+  updateWeekNavLabel();
+}
+
+function updateWeekNavLabel() {
+  const label = document.getElementById('posts-week-label');
+  if (!label) return;
+  if (postsWeekOffset === 0) {
+    label.textContent = 'This Week';
+  } else if (postsWeekOffset === 1) {
+    label.textContent = 'Next Week';
+  } else {
+    const from = new Date(Date.now() + postsWeekOffset * 7 * 86400000);
+    label.textContent = from.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' week';
+  }
+  document.getElementById('posts-week-prev').style.opacity = postsWeekOffset === 0 ? '0.3' : '1';
+  document.getElementById('posts-week-prev').style.pointerEvents = postsWeekOffset === 0 ? 'none' : 'auto';
+}
+
+function postsWeekPrev() {
+  if (postsWeekOffset === 0) return;
+  postsWeekOffset--;
+  loadPosts();
+}
+
+function postsWeekNext() {
+  postsWeekOffset++;
+  loadPosts();
 }
 
 async function loadImageLibrary() {
@@ -3341,6 +3375,8 @@ function togglePostsView() {
     calView.style.display = 'none';
     weekStrip.style.display = '';
     btn.textContent = '📅 Calendar';
+    postsWeekOffset = 0;
+    loadPosts();
     renderBatchBar();
   }
 }
@@ -3452,7 +3488,7 @@ function getWeekMonday(date) {
   return d.toISOString().slice(0,10);
 }
 
-function calDaySlotClick(slotId, slotNumber, dateStr, currentDow, currentTime, postId) {
+async function calDaySlotClick(slotId, slotNumber, dateStr, currentDow, currentTime, postId) {
   // Check gating for future dates
   if (isDateGated(dateStr + 'T23:59:59')) {
     checkGenerationGate(dateStr + 'T23:59:59');
@@ -3464,7 +3500,13 @@ function calDaySlotClick(slotId, slotNumber, dateStr, currentDow, currentTime, p
   if (!slot) return;
 
   if (postId) {
-    // Has a post — open slot panel which will pre-populate with existing post
+    // Has a post — load that week's posts first, then open slot panel
+    const clickedDate = new Date(dateStr + 'T12:00:00');
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const diffDays = Math.floor((clickedDate - today) / 86400000);
+    postsWeekOffset = Math.max(0, Math.floor(diffDays / 7));
+    await loadPosts();
     openSlotPanel(slot.slot_number);
     return;
   }
